@@ -194,7 +194,7 @@ class ConfigManager(commands.Cog, name=CogNames.ConfigManager.value):
         return await self.role_check(ctx)
 
     async def role_check(self, ctx: commands.Context) -> bool:
-        roles = self.general_cog.get_management_role_ids(ctx.guild)
+        roles = self.general_cog.get_management_role_ids(ctx.guild.id)
 
         if len(roles) <= 0:
             return True
