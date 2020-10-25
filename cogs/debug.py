@@ -62,25 +62,6 @@ class Debug(commands.Cog, name=utils.CogNames.Debug.value):
             embed: discord.Embed = discord.Embed(title="Cogs loaded.", description=cogs)
             await ctx.send(embed=embed)
             return
-        # cogs_loaded = []
-        # if not ctx.invoked_subcommand:
-        #     for f in os.listdir("./cogs"):
-        #         try:
-        #             if f.endswith(".py"):
-        #                 self.client.load_extension(f"cogs.{f[:-3]}")
-        #                 self.client.unload_extension(f"cogs.{f[:-3]}")
-        #         except commands.ExtensionAlreadyLoaded:
-        #             cogs_loaded.append(f[:-3])
-        #
-        #     for f in os.listdir("./cogs/extensions"):
-        #         try:
-        #             if f.endswith(".py"):
-        #                 self.client.load_extension(f"cogs.extensions.{f[:-3]}")
-        #                 self.client.unload_extension(f"cogs.extensions.{f[:-3]}")
-        #         except commands.ExtensionAlreadyLoaded:
-        #             cogs_loaded.append(f[:-3])
-        #
-        #     await ctx.send(embed=discord.Embed(title="Cogs Loaded.", description=f"```{json.dumps(cogs_loaded, indent=4) }```"))
 
         if sub_command not in self.cog_functions.keys():
             await ctx.send(f"{sub_command} is not a subcommand.")
