@@ -133,3 +133,4 @@ dmypy.json
 /config/
 /token
 /.idea/
+/bot_starting_script.sh

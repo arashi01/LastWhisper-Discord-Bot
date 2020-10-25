@@ -1,5 +1,6 @@
-from objects import CustomConfigObject, convert_dict_list
 from time import struct_time
+
+from objects import CustomConfigObject
 
 
 class Event(CustomConfigObject):

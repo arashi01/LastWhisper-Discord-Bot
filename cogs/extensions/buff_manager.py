@@ -11,10 +11,10 @@ from objects import Week, BuffManagerConfig, Buff
 
 
 class BuffManager(CogClass, name=utils.CogNames.BuffManager.value):
-    def __init__(self, client: discord.client):
+    def __init__(self, client: commands.bot):
         super().__init__(client, "./config/week_manager", BuffManagerConfig)
         self.approved_roles_dict = {
-            "today_buff": "todays_buff_approved_roles_ids",
+            "today_buff": "today_buff_approved_roles_ids",
             "tomorrow_buff": "tomorrows_buff_approved_roles_ids",
             "week_buffs": "this_week_buffs_approved_roles_ids",
             "next_week_buffs": "next_week_buffs_approved_roles_ids"
@@ -55,7 +55,7 @@ class BuffManager(CogClass, name=utils.CogNames.BuffManager.value):
 
     @commands.command(aliases=["today'sBuff", "tdb"])
     async def today_buff(self, ctx: commands.Context):
-        guild: WeekManagerConfig = self.guildDict[ctx.guild.id]
+        guild: BuffManagerConfig = self.guildDict[ctx.guild.id]
 
         _, buff = self.get_week_buff(guild, self.today)
 
@@ -67,7 +67,7 @@ class BuffManager(CogClass, name=utils.CogNames.BuffManager.value):
 
     @commands.command(aliases=["tomorrow'sBuff", "trb", "tmb"])
     async def tomorrow_buff(self, ctx: commands.Context):
-        guild: WeekManagerConfig = self.guildDict[ctx.guild.id]
+        guild: BuffManagerConfig = self.guildDict[ctx.guild.id]
 
         tomorrow = self.today + datetime.timedelta(days=1)
         _, buff = self.get_week_buff(guild, tomorrow)
@@ -80,7 +80,7 @@ class BuffManager(CogClass, name=utils.CogNames.BuffManager.value):
 
     @commands.command(aliases=["thisWeek'sBuffs", "wbs", "twb"])
     async def week_buffs(self, ctx: commands.Context):
-        guild: WeekManagerConfig = self.guildDict[ctx.guild.id]
+        guild: BuffManagerConfig = self.guildDict[ctx.guild.id]
 
         week, _ = self.get_week_buff(guild, self.today)
 
@@ -91,7 +91,7 @@ class BuffManager(CogClass, name=utils.CogNames.BuffManager.value):
 
     @commands.command(aliases=["nextWeek'sBuffs", "nwb"])
     async def next_week_buffs(self, ctx: commands.Context):
-        guild: WeekManagerConfig = self.guildDict[ctx.guild.id]
+        guild: BuffManagerConfig = self.guildDict[ctx.guild.id]
 
         week, _ = self.get_week_buff(guild, self.today + datetime.timedelta(days=7))
 
@@ -156,5 +156,5 @@ class BuffManager(CogClass, name=utils.CogNames.BuffManager.value):
     # endregion
 
 
-def setup(client: discord.client):
+def setup(client: commands.bot):
     client.add_cog(BuffManager(client))

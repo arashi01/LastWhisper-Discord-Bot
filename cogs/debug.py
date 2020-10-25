@@ -4,12 +4,11 @@ import discord
 from discord.ext import commands
 
 import utils
-import json
 
 
 class Debug(commands.Cog, name=utils.CogNames.Debug.value):
-    def __init__(self, client: discord.client):
-        self.client: discord.client = client
+    def __init__(self, client: commands.bot):
+        self.client: commands.bot = client
         self.cog_functions: dict = {
             "load": lambda cog_name: self.client.load_extension(cog_name),
             "unload": lambda cog_name: self.client.unload_extension(cog_name),
@@ -30,8 +29,8 @@ class Debug(commands.Cog, name=utils.CogNames.Debug.value):
 
     @commands.is_owner()
     @commands.command()
-    async def print(self, _, message):
-        print(message)
+    async def print(self, ctx: commands.Context, message):
+        print(ctx.guild.members)
 
     @commands.is_owner()
     @commands.command(aliases=["FIT"])
@@ -138,5 +137,5 @@ class Debug(commands.Cog, name=utils.CogNames.Debug.value):
         return result
 
 
-def setup(client: discord.client):
+def setup(client: commands.bot):
     client.add_cog(Debug(client))

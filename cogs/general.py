@@ -1,4 +1,3 @@
-import discord
 from discord.ext import commands
 
 import utils
@@ -7,7 +6,7 @@ from utils.cog_class import CogClass
 
 
 class General(CogClass, name=utils.CogNames.General.value):
-    def __init__(self, client: discord.client):
+    def __init__(self, client: commands.bot):
         super().__init__(client, "./config/general", GeneralConfig)
         self.general_cog: General = self
         self.approved_roles_dict = {
@@ -16,7 +15,7 @@ class General(CogClass, name=utils.CogNames.General.value):
         }
 
     @staticmethod
-    def get_prefix(client: discord.client, message):
+    def get_prefix(client: commands.bot, message):
         try:
             return client.get_cog(utils.CogNames.General.value).guildDict[message.guild.id].prefix
         except KeyError:
@@ -40,5 +39,5 @@ class General(CogClass, name=utils.CogNames.General.value):
         return self.guildDict[guild_id].management_role_ids
 
 
-def setup(client: discord.client):
+def setup(client: commands.bot):
     client.add_cog(General(client))

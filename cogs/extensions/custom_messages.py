@@ -9,7 +9,7 @@ from objects import CustomMessagesConfig, Message
 
 
 class CustomMessages(CogClass, name=utils.CogNames.CustomMessages.value):
-    def __init__(self, client: discord.client):
+    def __init__(self, client: commands.bot):
         super().__init__(client, "./config/custom_message", CustomMessagesConfig)
         self.approved_roles_dict = {
             "CustomMessage": None,
@@ -92,5 +92,5 @@ class CustomMessages(CogClass, name=utils.CogNames.CustomMessages.value):
                             self.save_configs(guild_id)
 
 
-def setup(client: discord.client):
+def setup(client: commands.bot):
     client.add_cog(CustomMessages(client))

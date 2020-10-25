@@ -1,5 +1,4 @@
 from enum import Enum
-from discord.utils import get
 
 
 class CogNames(Enum):

@@ -10,8 +10,8 @@ from objects import CustomConfigObject
 
 class CogClass(commands.Cog):
 
-    def __init__(self, client: discord.client, config_dir: str, config_object: CustomConfigObject.__class__):
-        self.client: discord.client = client
+    def __init__(self, client: commands.bot, config_dir: str, config_object: CustomConfigObject.__class__):
+        self.client: commands.bot = client
         self.guildDict: dict = {}
         self.config_dir: str = config_dir
         self.general_cog = client.get_cog(utils.CogNames.General.value)
@@ -33,6 +33,7 @@ class CogClass(commands.Cog):
             config_entry_name: str = self.approved_roles_dict[command]
         except KeyError:
             await ctx.send("Role Entry Not Set.")
+            # noinspection PyTypeChecker
             config_entry_name: str = None
 
         roles = self.guildDict[ctx.guild.id].__dict__[config_entry_name] if config_entry_name else self.general_cog.get_management_role_ids(ctx.guild.id)

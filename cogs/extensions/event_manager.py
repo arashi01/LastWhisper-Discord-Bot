@@ -19,7 +19,7 @@ class States(Enum):
 
 class EventManager(CogClass, name=utils.CogNames.EventManager.value):
 
-    def __init__(self, client: discord.client):
+    def __init__(self, client: commands.bot):
         super().__init__(client, "./config/event_manager", EventConfig)
         self.loop.start()
         self.approved_roles_dict = {
@@ -125,5 +125,5 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
         self.save_configs(message.guild.id)
 
 
-def setup(client: discord.client):
+def setup(client: commands.bot):
     client.add_cog(EventManager(client))

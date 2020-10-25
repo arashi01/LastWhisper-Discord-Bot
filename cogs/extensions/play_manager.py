@@ -1,20 +1,12 @@
-import asyncio
-
-# import youtube_dl
-
-import discord
 from discord.ext import commands
 
-# from googleapiclient.discover import build
-
 import utils
+from objects import PlayConfig
 from utils.cog_class import CogClass
-
-from objects._play_objects import PlayConfig
 
 
 class PlayManager(CogClass, name=utils.CogNames.PlayManager.value):
-    def __init__(self, client: discord.client):
+    def __init__(self, client: commands.bot):
         super().__init__(client, "./config/play_manager", PlayConfig)
 
         self.approved_roles_dict: dict = {
@@ -47,6 +39,6 @@ class PlayManager(CogClass, name=utils.CogNames.PlayManager.value):
         return await ctx.voice_client.disconnect()
 
 
-def setup(client: discord.client):
+def setup(client: commands.bot):
     pass
     client.add_cog(PlayManager(client))

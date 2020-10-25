@@ -1,12 +1,14 @@
-import os
 import discord
 from discord.ext import commands
 
 from cogs import general
 import utils
 from utils import logger
+import shutil
 
 intents = discord.Intents.default()
+intents.members = True
+intents.messages = True
 
 client = commands.Bot(command_prefix=general.General.get_prefix, intents=intents)
 
@@ -20,10 +22,11 @@ if __name__ == "__main__":
     client.load_extension(f"cogs.general")
     client.load_extension(f"cogs.debug")
     client.load_extension(f"cogs.config_manager")
-    for f in os.listdir("./cogs/extensions"):
+    for f in utils.os.listdir("./cogs/extensions"):
         if f.endswith(".py"):
             client.load_extension(f"cogs.extensions.{f[:-3]}")
 
     client.run(utils.load_as_string("./token"))
+    shutil.rmtree("./.temp")
     print("Good Bye!")
 

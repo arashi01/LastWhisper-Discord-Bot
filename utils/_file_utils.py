@@ -1,6 +1,6 @@
-import json
-import pathlib
 import os
+import pathlib
+from json import dump
 
 from objects import CustomConfigObject
 
@@ -21,9 +21,9 @@ def save_as_json(path: str, obj: object):
 
         with open(path, "w") as f:
             if isinstance(obj, CustomConfigObject):
-                json.dump(obj.__dict__, f, indent=4, default=obj.converter)
+                dump(obj.__dict__, f, indent=4, default=obj.converter)
             else:
-                json.dump(obj, f, indent=4, default=lambda o: o.__dict__)
+                dump(obj, f, indent=4, default=lambda o: o.__dict__)
     except Exception as e:
         print(e)
 

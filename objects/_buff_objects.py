@@ -41,7 +41,7 @@ class BuffManagerConfig(CustomConfigObject):
     def __init__(self,
                  morning_message_channel_id: int = 0,
                  morning_message_hour: int = 0,
-                 todays_buff_approved_roles_ids: [int] = None,
+                 today_buff_approved_roles_ids: [int] = None,
                  tomorrows_buff_approved_roles_ids: [int] = None,
                  this_week_buffs_approved_roles_ids: [int] = None,
                  next_week_buffs_approved_roles_ids: [int] = None,
@@ -49,14 +49,14 @@ class BuffManagerConfig(CustomConfigObject):
         self.morning_message_channel_id: int = morning_message_channel_id
         self.morning_message_hour: int = morning_message_hour
 
-        self.todays_buff_approved_roles_ids: [
-            int] = [] if not todays_buff_approved_roles_ids else todays_buff_approved_roles_ids
+        self.today_buff_approved_roles_ids: [
+            int] = [] if not today_buff_approved_roles_ids else today_buff_approved_roles_ids
         self.tomorrows_buff_approved_roles_ids: [
-            int] = [] if not todays_buff_approved_roles_ids else tomorrows_buff_approved_roles_ids
+            int] = [] if not today_buff_approved_roles_ids else tomorrows_buff_approved_roles_ids
         self.this_week_buffs_approved_roles_ids: [
-            int] = [] if not todays_buff_approved_roles_ids else this_week_buffs_approved_roles_ids
+            int] = [] if not today_buff_approved_roles_ids else this_week_buffs_approved_roles_ids
         self.next_week_buffs_approved_roles_ids: [
-            int] = [] if not todays_buff_approved_roles_ids else next_week_buffs_approved_roles_ids
+            int] = [] if not today_buff_approved_roles_ids else next_week_buffs_approved_roles_ids
 
         self.buff_list: dict = {} if buff_list is None else buff_list
         self.weeks: dict = {} if weeks is None else weeks

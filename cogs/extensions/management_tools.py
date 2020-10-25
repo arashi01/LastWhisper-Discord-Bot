@@ -1,14 +1,12 @@
-import discord
 from discord.ext import commands
 
+import utils
 from objects import ManagementToolsConfig
 from utils.cog_class import CogClass
 
-import utils
-
 
 class ManagementTools(CogClass, name=utils.CogNames.ManagementTools.value):
-    def __init__(self, client: discord.client):
+    def __init__(self, client: commands.bot):
         super().__init__(client, "./config/management_tools", ManagementToolsConfig)
         self.approved_roles_dict = {
             "clear": None
@@ -35,5 +33,5 @@ class ManagementTools(CogClass, name=utils.CogNames.ManagementTools.value):
         await ctx.send("Finished clearing.", delete_after=5)
 
 
-def setup(client: discord.client):
+def setup(client: commands.bot):
     client.add_cog(ManagementTools(client))

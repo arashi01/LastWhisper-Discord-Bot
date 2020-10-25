@@ -1,16 +1,13 @@
-import discord
 from discord.ext import commands
 
-import json
-
+from cogs.general import General
 from utils import TypeCondition, CogNames
 from utils.cog_class import CogClass
-from cogs.general import General
 
 
 class ConfigManager(commands.Cog, name=CogNames.ConfigManager.value):
-    def __init__(self, client: discord.client):
-        self.client: discord.client = client
+    def __init__(self, client: commands.bot):
+        self.client: commands.bot = client
         self.general_cog: General = client.get_cog("General_Manager")
 
     async def cog_before_invoke(self, ctx: commands.Context):
@@ -40,7 +37,7 @@ class ConfigManager(commands.Cog, name=CogNames.ConfigManager.value):
                 else:
                     raise commands.BadArgument(f"Sub command **{sub_command}** is not valid.")
 
-            elif variable_to_be_changed in ("todays_buff_approved_roles_ids", "tomorrows_buff_approved_roles_ids", "this_week_buffs_approved_roles_ids", "next_week_buffs_approved_roles_ids", "buff_list", "weeks"):
+            elif variable_to_be_changed in ("today_buff_approved_roles_ids", "tomorrows_buff_approved_roles_ids", "this_week_buffs_approved_roles_ids", "next_week_buffs_approved_roles_ids", "buff_list", "weeks"):
 
                 if sub_command.lower() == "add":
                     await cog.add(ctx, variable_to_be_changed, value, set_type=TypeCondition.ROLE if not ("weeks", "buff_list").__contains__(variable_to_be_changed) else TypeCondition.NONE)
@@ -175,5 +172,5 @@ class ConfigManager(commands.Cog, name=CogNames.ConfigManager.value):
             await ctx.send(f"Extension **{extension}** does not exist.")
 
 
-def setup(client: discord.client):
+def setup(client: commands.bot):
     client.add_cog(ConfigManager(client))
