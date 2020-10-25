@@ -15,22 +15,10 @@ class Debug(commands.Cog, name=utils.CogNames.Debug.value):
             "reload": lambda cog_name: self.client.reload_extension(cog_name)
         }
 
-    @commands.Cog.listener()
-    async def on_message(self, discord_message: discord.Message):
-        if discord_message.author == self.client.user and discord_message.channel.id == 692081300860960779:
-            return
-
     @commands.is_owner()
     @commands.command()
-    async def get_role(self, ctx: commands.Context):
-        role: discord.Role
-        for role in ctx.author.roles:
-            print(role.id)
-
-    @commands.is_owner()
-    @commands.command()
-    async def print(self, ctx: commands.Context, message):
-        print(ctx.guild.members)
+    async def print(self, ctx: commands.Context):
+        print(self.client.cogs)
 
     @commands.is_owner()
     @commands.command(aliases=["FIT"])

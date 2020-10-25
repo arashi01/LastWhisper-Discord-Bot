@@ -1,4 +1,5 @@
 from discord.ext import commands
+from discord import Embed
 
 from cogs.general import General
 from utils import TypeCondition, CogNames
@@ -8,19 +9,19 @@ from utils.cog_class import CogClass
 class ConfigManager(commands.Cog, name=CogNames.ConfigManager.value):
     def __init__(self, client: commands.bot):
         self.client: commands.bot = client
-        self.general_cog: General = client.get_cog("General_Manager")
+        self.general_cog: General = client.cogs[CogNames.General.value]
 
     async def cog_before_invoke(self, ctx: commands.Context):
         pass
-        # if not await self.general_cog.is_role_approved(ctx, None):
-        #     raise commands.CheckFailure("Bad Roles")
-        # await self.general_cog.should_remove_message(ctx)
 
-    @commands.group()
+    @commands.group(invoke_without_command=True)
     async def config(self, ctx: commands.Context):
-        if not await self.client.get_cog(ctx.invoked_subcommand.name).is_enabled(ctx):
-            await ctx.send(f"Warning. The extension {ctx.invoked_subcommand.name} is not currently enabled. "
-                           f"Configs will still be altered if successful.")
+        embed: Embed = Embed(title="Available Extensions Configs")
+        for cog in self.client.cogs.values():
+            if isinstance(cog, CogClass):
+                embed.add_field(name=cog.qualified_name, value="___")
+
+        await ctx.send(embed=embed)
 
     @config.command(name=CogNames.BuffManager.value)
     async def week_manager(self, ctx: commands.Context, variable_to_be_changed: str, sub_command: str, value: str):
@@ -128,47 +129,65 @@ class ConfigManager(commands.Cog, name=CogNames.ConfigManager.value):
         finally:
             await ctx.send("Done.")
 
-    @commands.command()
+    @config.command()
     async def reload(self, ctx: commands.Context, extension: str):
-        try:
-            if extension in self.extensions_list:
-                cog: CogClass = self.client.get_cog(extension)
+        if extension in self.client.cogs:
+            cog = self.client.cogs[extension]
+            if isinstance(cog, CogClass):
+                if not cog.is_enabled(ctx):
+                    await ctx.send(f"Extension **{extension}** is **Not** enabled on your server. Nothing to do.")
+                    return
+
                 cog.load_configs(ctx.guild.id)
             else:
-                raise commands.BadArgument(f"No extension with name **{extension}**")
+                await ctx.send(f"**{extension}** is not a valid extension.")
 
-        except commands.BadArgument as e:
-            await ctx.send(str(e))
-        finally:
-            await ctx.send("Done.")
+        else:
+            await ctx.send(f"**{extension}** is not a valid extension.")
+        await ctx.send("Done.")
 
-    @commands.group()
+    @commands.group(invoke_without_command=True)
     async def extension(self, ctx: commands.Context):
-        pass
+        embed: Embed = Embed(title="Extensions Status")
+        for cog in self.client.cogs.values():
+            if isinstance(cog, CogClass):
+                embed.add_field(name=cog.qualified_name, value=":white_check_mark:" if cog.is_enabled(ctx) else ":x:")
+
+        await ctx.send(embed=embed)
 
     @extension.command()
     async def is_enabled(self, ctx: commands.Context, extension: str):
-        cog: CogClass = self.client.get_cog(extension)
-        try:
-            flag = cog.is_enabled(ctx)
-            await ctx.send(f"The extension {extension} is **{'Enabled' if flag else 'Disabled'}** on your server.")
-        except AttributeError as e:
+        if extension in self.client.cogs:
+            cog = self.client.cogs[extension]
+            if isinstance(cog, CogClass):
+                embed = Embed(title=cog.qualified_name,
+                              description=':white_check_mark:' if cog.is_enabled(ctx) else ':x:')
+                await ctx.send(embed=embed)
+            else:
+                await ctx.send(f"Extension **{extension}** does not exist.")
+        else:
             await ctx.send(f"Extension **{extension}** does not exist.")
 
     @extension.command()
     async def enable(self, ctx: commands.Context, extension: str):
-        cog: CogClass = self.client.get_cog(extension)
-        try:
-            await cog.enable(ctx)
-        except AttributeError as e:
+        if extension in self.client.cogs:
+            cog = self.client.cogs[extension]
+            if isinstance(cog, CogClass):
+                await cog.enable(ctx)
+            else:
+                await ctx.send(f"Extension **{extension}** does not exist.")
+        else:
             await ctx.send(f"Extension **{extension}** does not exist.")
 
     @extension.command()
     async def disable(self, ctx: commands.Context, extension: str):
-        cog: CogClass = self.client.get_cog(extension)
-        try:
-            await cog.disable(ctx)
-        except AttributeError as e:
+        if extension in self.client.cogs:
+            cog = self.client.cogs[extension]
+            if isinstance(cog, CogClass):
+                await cog.disable(ctx)
+            else:
+                await ctx.send(f"Extension **{extension}** does not exist.")
+        else:
             await ctx.send(f"Extension **{extension}** does not exist.")
 
 
