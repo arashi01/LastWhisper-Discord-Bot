@@ -7,7 +7,7 @@ from datetime import datetime
 import utils
 from utils.cog_class import CogClass
 
-from objects import EventConfig, Event
+from objects import EventConfig, Event, EventReminderTrigger
 
 
 class States(Enum):
@@ -45,37 +45,54 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
 
             for event in guild.events:
                 if event.datetime.tm_mday == now.tm_mday and event.datetime.tm_mon == now.tm_mon:
+                    channel = self.client.get_guild(guild_id).get_channel(guild.reminder_channel_id)
+
+                    reminder: EventReminderTrigger
                     for reminder in guild.event_reminder_triggers:
-                        if (event.datetime.tm_hour - reminder[0], event.datetime.tm_min - reminder[1]) == (now.tm_hour, now.tm_min):
-                            ...
-            # dif = len(guild.events)
-            # guild.events = [x for x in guild.events if not (datetime.fromtimestamp(mktime(x.datetime)) < datetime.fromtimestamp(mktime(now)))]
-            # if dif > len(guild.events):
-            #     self.save_configs(guild_id)
+                        if (
+                                event.datetime.tm_hour - reminder.hour_diff,
+                                event.datetime.tm_min - reminder.minute_diff) == (
+                                now.tm_hour, now.tm_min):
+                            event_dict = {
+                                "event_name": event.name,
+                                "time_remaining": (f"{reminder.hour_diff} hour{'s' if reminder.hour_diff > 1 else ''}" if reminder.hour_diff > 1 else '') +
+                                                  (" and " if reminder.hour_diff > 0 and reminder.minute_diff > 0 else "") +
+                                                  (f"{reminder.minute_diff} minute{'s' if reminder.minute_diff > 1 else ''}" if reminder.minute_diff > 1 else '')
+                            }
+
+                            await channel.send(reminder.message % event_dict)
+
+            dif = len(guild.events)
+            guild.events = [x for x in guild.events if
+                            not (datetime.fromtimestamp(mktime(x.datetime)) < datetime.fromtimestamp(mktime(now)))]
+            if dif > len(guild.events):
+                self.save_configs(guild_id)
 
     @commands.command()
-    async def get_event_details(self, ctx: commands.Context, index: int = None):
+    async def get_event_details(self, ctx: commands.Context, index: int = -1):
         guild: EventConfig = self.guildDict[ctx.guild.id]
 
-        if not index:
+        if index <= -1:
             embed: Embed = Embed(title="List of Upcoming Events.")
             for i in range(len(guild.events)):
                 embed.add_field(name=f"Index {i}:", value=guild.events[i].name, inline=False)
             await ctx.send(embed=embed)
-
         else:
+            if index > len(guild.events):
+                await ctx.send("Index is outside the range of events.")
+                return
+
             event: Event = guild.events[index]
             embed = Embed(title=event.name, description=f"{event.description}")
 
-            embed.add_field(name="Date:", value=f"{strftime('%A %b %d' , event.datetime)}", inline=False)
-            embed.add_field(name="Time:", value=f"{strftime('%H:%M' , event.datetime)}", inline=False)
+            embed.add_field(name="Date:", value=f"{strftime('%A %b %d', event.datetime)}", inline=False)
+            embed.add_field(name="Time:", value=f"{strftime('%H:%M', event.datetime)}", inline=False)
 
             await ctx.send(embed=embed)
 
     @commands.command()
-    async def add_trigger(self, ctx: commands.Context, hour_dif: int, minute_dif: int):
-        guild = self.guildDict[ctx.guild.id]
-        guild.event_reminder_triggers.append([hour_dif, minute_dif])
+    async def add_trigger(self, ctx: commands.Context, hour_dif: int, minute_dif: int, message: str):
+        self.guildDict[ctx.guild.id].event_reminder_triggers.append(EventReminderTrigger(hour_dif, minute_dif, message))
         self.save_configs(ctx.guild.id)
 
     @commands.Cog.listener()
@@ -85,7 +102,7 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
 
         if not self.guildDict.__contains__(message.guild.id):
             return
-        
+
         guild: EventConfig = self.guildDict[message.guild.id]
         if not guild.channel_id == message.channel.id:
             return
@@ -97,11 +114,13 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
         state: States = States.NONE
         for line in content:
             if (hold := line.replace(" ", "")).startswith("[") and hold.endswith("]"):
-                if (guild.name_tag.replace(" ", ""), guild.description_tag.replace(" ", ""), guild.datetime_tag.replace(" ", "")).__contains__(hold[1:-1]):
+                if (guild.name_tag.replace(" ", ""), guild.description_tag.replace(" ", ""),
+                        guild.datetime_tag.replace(" ", "")).__contains__(hold[1:-1]):
+
                     state = {
-                              guild.name_tag.replace(" ", ""): States.NAME,
-                              guild.description_tag.replace(" ", ""): States.DESCRIPTION,
-                              guild.datetime_tag.replace(" ", ""): States.TIME
+                        guild.name_tag.replace(" ", ""): States.NAME,
+                        guild.description_tag.replace(" ", ""): States.DESCRIPTION,
+                        guild.datetime_tag.replace(" ", ""): States.TIME
                     }[hold[1:-1]]
                 else:
                     state = States.NONE
