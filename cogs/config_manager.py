@@ -190,6 +190,22 @@ class ConfigManager(commands.Cog, name=CogNames.ConfigManager.value):
         else:
             await ctx.send(f"Extension **{extension}** does not exist.")
 
+    async def cog_check(self, ctx: commands.Context):
+        return await self.role_check(ctx)
+
+    async def role_check(self, ctx: commands.Context) -> bool:
+        roles = self.general_cog.get_management_role_ids(ctx.guild)
+
+        if len(roles) <= 0:
+            return True
+
+        for role in ctx.author.roles:
+            if roles.__contains__(role.id):
+                return True
+
+        await ctx.send("Sorry you do not have the correct permissions to invoke this command.")
+        return False
+
 
 def setup(client: commands.bot):
     client.add_cog(ConfigManager(client))
