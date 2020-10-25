@@ -1,5 +1,5 @@
-import discord
 from discord.ext import commands, tasks
+from discord import Embed, Message
 from enum import Enum
 from time import strptime, localtime, struct_time, mktime, strftime
 from datetime import datetime
@@ -47,27 +47,30 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
                 if event.datetime.tm_mday == now.tm_mday and event.datetime.tm_mon == now.tm_mon:
                     for reminder in guild.event_reminder_triggers:
                         if (event.datetime.tm_hour - reminder[0], event.datetime.tm_min - reminder[1]) == (now.tm_hour, now.tm_min):
-                            await self.client.get_channel(guild.reminder_channel_id).send(f"@ everyone\nThe event {event.name}\nWill being in" + (f" {reminder[0]} hour{'s' if reminder[0] > 1 else ''}" if reminder[0] > 0 else "") + (' and' if reminder[0] > 0 and reminder[1] > 0 else '') + (f" {reminder[1]} minutes{'s' if reminder[1] > 1 else ''}" if reminder[1] > 0 else ""))
-
-            dif = len(guild.events)
-            guild.events = [x for x in guild.events if not (datetime.fromtimestamp(mktime(x.datetime)) < datetime.fromtimestamp(mktime(now)))]
-            if dif > len(guild.events):
-                self.save_configs(guild_id)
+                            ...
+            # dif = len(guild.events)
+            # guild.events = [x for x in guild.events if not (datetime.fromtimestamp(mktime(x.datetime)) < datetime.fromtimestamp(mktime(now)))]
+            # if dif > len(guild.events):
+            #     self.save_configs(guild_id)
 
     @commands.command()
     async def get_event_details(self, ctx: commands.Context, index: int = None):
         guild: EventConfig = self.guildDict[ctx.guild.id]
 
         if not index:
-            await ctx.send(str(len(guild.events)))
+            embed: Embed = Embed(title="List of Upcoming Events.")
+            for i in range(len(guild.events)):
+                embed.add_field(name=f"Index {i}:", value=guild.events[i].name, inline=False)
+            await ctx.send(embed=embed)
 
-        event: Event = guild.events[index]
-        embed = discord.Embed(title=event.name, description=f"{event.description}")
+        else:
+            event: Event = guild.events[index]
+            embed = Embed(title=event.name, description=f"{event.description}")
 
-        embed.add_field(name="Date:", value=f"{strftime('%A %b %d' , event.datetime)}", inline=False)
-        embed.add_field(name="Time:", value=f"{strftime('%H:%M' , event.datetime)}", inline=False)
+            embed.add_field(name="Date:", value=f"{strftime('%A %b %d' , event.datetime)}", inline=False)
+            embed.add_field(name="Time:", value=f"{strftime('%H:%M' , event.datetime)}", inline=False)
 
-        await ctx.send(embed=embed)
+            await ctx.send(embed=embed)
 
     @commands.command()
     async def add_trigger(self, ctx: commands.Context, hour_dif: int, minute_dif: int):
@@ -76,7 +79,7 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
         self.save_configs(ctx.guild.id)
 
     @commands.Cog.listener()
-    async def on_message(self, message: discord.Message):
+    async def on_message(self, message: Message):
         if message.author == self.client.user:
             return
 
