@@ -1,11 +1,11 @@
-from objects import CustomConfigObject, convert_dict_list
+from objects import CustomConfigObject, convert_dict_list, TypeObjects
 from datetime import datetime
 
 
 class Message(CustomConfigObject):
-    def __init__(self, message: str = None, channel_id: int = None, date: datetime = None, should_repeat: bool = False):
+    def __init__(self, message: str = None, channel_id: TypeObjects.Channel = None, date: datetime = None, should_repeat: bool = False):
         self.message: str = message
-        self.channel_id: int = channel_id
+        self.channel_id: TypeObjects.Channel = channel_id
         self.date: datetime = date if date else datetime.now()
         self.should_repeat: bool = should_repeat
 

@@ -6,6 +6,7 @@ from json import loads
 
 import utils
 from objects import MemberManagerConfig
+from objects.configuration import ConfigurationDictionary, Configuration
 from utils.cog_class import CogClass
 
 
@@ -89,6 +90,17 @@ class MemberManager(CogClass, name=utils.CogNames.MemberManager.value):
         embed.add_field(name="Nickname was:", value=member.nick)
         embed.set_thumbnail(url=member.avatar_url)
         await get(member.guild.channels, id=guild.on_member_leave_logging_channel).send(embed=embed)
+
+    @property
+    def get_configs(self) -> ConfigurationDictionary:
+        config: ConfigurationDictionary = ConfigurationDictionary()
+
+        config.add_configuration(Configuration("member_role_id", "member_role_id", set=self.set))
+        config.add_configuration(Configuration("new_member_role_id", "new_member_role_id", set=self.set))
+        config.add_configuration(Configuration("welcome_channel_id", "welcome_channel_id", set=self.set))
+        config.add_configuration(Configuration("on_member_leave_logging_channel", "on_member_leave_logging_channel", set=self.set))
+
+        return config
 
 
 def setup(client: commands.bot):

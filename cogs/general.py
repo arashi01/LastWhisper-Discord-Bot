@@ -2,6 +2,7 @@ from discord.ext import commands
 
 import utils
 from objects import GeneralConfig
+from objects.configuration import ConfigurationDictionary, Configuration
 from utils.cog_class import CogClass
 
 
@@ -37,6 +38,16 @@ class General(CogClass, name=utils.CogNames.General.value):
 
     def get_management_role_ids(self, guild_id: int):
         return self.guildDict[guild_id].management_role_ids
+
+    @property
+    def get_configs(self) -> ConfigurationDictionary:
+        config: ConfigurationDictionary = ConfigurationDictionary()
+
+        config.add_configuration(Configuration("should_clear_commands", "should_clear_command", set=self.set))
+        config.add_configuration(Configuration("clear_command_exception_list", "clear_command_exception_list", add=self.add, remove=self.remove))
+        config.add_configuration(Configuration("management_role_ids", "management_role_ids", add=self.add, remove=self.remove))
+
+        return config
 
 
 def setup(client: commands.bot):

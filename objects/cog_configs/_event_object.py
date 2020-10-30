@@ -1,6 +1,6 @@
 from time import struct_time
 
-from objects import CustomConfigObject
+from objects import CustomConfigObject, TypeList, TypeObjects
 
 
 class Event(CustomConfigObject):
@@ -28,7 +28,7 @@ class EventReminderTrigger(CustomConfigObject):
 
 
 class EventConfig(CustomConfigObject):
-    def __init__(self, channel_id: int = None, reminder_channel_id: int = None, name_tag: str = None,
+    def __init__(self, channel_id: TypeObjects.Channel = None, reminder_channel_id: TypeObjects.Channel = None, name_tag: str = None,
                  description_tag: str = None, datetime_tag: str = None, event_reminder_triggers: [EventReminderTrigger] = None,
                  events: [Event] = None):
         self.channel_id: int = channel_id
@@ -46,14 +46,7 @@ class EventConfig(CustomConfigObject):
         obj = cls()
         obj.__dict__ = data
 
-        copy = obj.events.copy()
-        obj.events.clear()
-        for item in copy:
-            obj.events.append(Event.from_json(item))
-
-        copy = obj.event_reminder_triggers.copy()
-        obj.event_reminder_triggers.clear()
-        for item in copy:
-            obj.event_reminder_triggers.append(EventReminderTrigger.from_json(item))
+        obj.events = list(map(Event.from_json, obj.events))
+        obj.event_reminder_triggers = list(map(EventReminderTrigger.from_json, obj.event_reminder_triggers))
 
         return obj

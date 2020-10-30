@@ -59,12 +59,6 @@ class BuffManagerConfig(CustomConfigObject):
     @classmethod
     def from_json(cls, data):
         obj: BuffManagerConfig = super().from_json(data)
-        list(map(TypeObjects.Role, obj.tdb_ids))
-
-        obj.tdb_ids = TypeList(t=TypeObjects.Role, pre_existing_list=list(map(TypeObjects.Role, obj.tdb_ids)))
-        obj.tmb_ids = TypeList(t=TypeObjects.Role, pre_existing_list=list(map(TypeObjects.Role, obj.tdb_ids)))
-        obj.twb_ids = TypeList(t=TypeObjects.Role, pre_existing_list=list(map(TypeObjects.Role, obj.tdb_ids)))
-        obj.nwb_ids = TypeList(t=TypeObjects.Role, pre_existing_list=list(map(TypeObjects.Role, obj.tdb_ids)))
 
         convert_dict_list(obj.buff_list, Buff)
         convert_dict_list(obj.weeks, Week)

@@ -13,6 +13,8 @@ class CustomConfigObject(object):
                 obj.__dict__[key] = TypeObjects.Member(data[key])
             elif isinstance(value, TypeObjects.Role):
                 obj.__dict__[key] = TypeObjects.Role(data[key])
+            elif isinstance(value, TypeList):
+                obj.__dict__[key] = TypeList(value.T, list(map(value.T, data[key])))
             else:
                 obj.__dict__[key] = data[key]
 

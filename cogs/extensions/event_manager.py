@@ -5,6 +5,7 @@ from time import strptime, localtime, struct_time, mktime, strftime
 from datetime import datetime
 
 import utils
+from objects.configuration import ConfigurationDictionary, Configuration
 from utils.cog_class import CogClass
 
 from objects import EventConfig, Event, EventReminderTrigger
@@ -145,6 +146,18 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
 
         guild.events.append(event)
         self.save_configs(message.guild.id)
+
+    @property
+    def get_configs(self) -> ConfigurationDictionary:
+        config: ConfigurationDictionary = ConfigurationDictionary()
+
+        config.add_configuration(Configuration("channel_id", "channel_id", set=self.set))
+        config.add_configuration(Configuration("reminder_channel_id", "reminder_channel_id", set=self.set))
+        config.add_configuration(Configuration("name_tag", "name_tag", set=self.set))
+        config.add_configuration(Configuration("description_tag", "description_tag", set=self.set))
+        config.add_configuration(Configuration("datetime_tag", "datetime_tag", set=self.set))
+
+        return config
 
 
 def setup(client: commands.bot):

@@ -2,6 +2,7 @@ from discord.ext import commands
 
 import utils
 from objects import ManagementToolsConfig
+from objects.configuration import ConfigurationDictionary, Configuration
 from utils.cog_class import CogClass
 
 
@@ -32,6 +33,14 @@ class ManagementTools(CogClass, name=utils.CogNames.ManagementTools.value):
 
         await ctx.send("Finished clearing.", delete_after=5)
 
+    @property
+    def get_configs(self) -> ConfigurationDictionary:
+        config: ConfigurationDictionary = ConfigurationDictionary()
+
+        config.add_configuration(Configuration("clear_allowed_role_ids", "clear_allowed_role_ids", add=self.add, remove=self.remove))
+        config.add_configuration(Configuration("clear_channel_id_blacklist", "clear_channel_id_blacklist", add=self.add, remove=self.remove))
+
+        return config
 
 def setup(client: commands.bot):
     client.add_cog(ManagementTools(client))
