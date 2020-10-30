@@ -1,13 +1,15 @@
 import datetime
 import json
 
-import discord
+from discord import TextChannel, Member, Role
 from discord.ext import commands, tasks
 from discord.utils import get
+from typing import Union
 
 import utils
 from utils.cog_class import CogClass
 from objects import Week, BuffManagerConfig, Buff
+from objects.configuration import Configuration, ConfigurationDictionary
 
 
 class BuffManager(CogClass, name=utils.CogNames.BuffManager.value):
@@ -18,31 +20,6 @@ class BuffManager(CogClass, name=utils.CogNames.BuffManager.value):
             "tomorrow_buff": "tomorrows_buff_approved_roles_ids",
             "week_buffs": "this_week_buffs_approved_roles_ids",
             "next_week_buffs": "next_week_buffs_approved_roles_ids"
-        }
-        self.config = {
-            "mm_channel_id": {
-                "set": self.set
-            },
-            "mm_hour": {
-                "set": self.set
-            },
-            "tdb_ids": {
-                "add": self.add,
-                "remove": self.remove
-            },
-            "tmb_ids": {
-                "add": self.add,
-                "remove": self.remove
-            },
-            "twb_ids": {
-                "add": self.add,
-                "remove": self.remove
-            },
-            "nwb_ids": {
-                "add": self.add,
-                "remove": self.remove
-            },
-            "": "Working..."
         }
         self.today = datetime.datetime.now()
 
@@ -60,7 +37,7 @@ class BuffManager(CogClass, name=utils.CogNames.BuffManager.value):
 
             if self.today.hour == guild.mm_hour and self.today.minute == 0:
                 week, buff = self.get_week_buff(guild, self.today)
-                morning_message_channel: discord.TextChannel = self.client.get_channel(guild.mm_channel_id)
+                morning_message_channel: TextChannel = self.client.get_channel(guild.mm_channel_id)
 
                 # Posts the daily buff message.
                 await morning_message_channel.send("Good morning Everyone!",
@@ -133,7 +110,7 @@ class BuffManager(CogClass, name=utils.CogNames.BuffManager.value):
         return week, buff
 
     # region Config
-    async def add(self, ctx: commands.Context, variable: str, value):
+    def add(self, ctx: commands.Context, variable: str, value: Union[TextChannel, Role, Member, str, int, bool]):
         if isinstance(actual_variable := self.guildDict[ctx.guild.id][variable], dict):
             obj: dict = {
                 "weeks": lambda x: Week.from_json(x),
@@ -150,9 +127,9 @@ class BuffManager(CogClass, name=utils.CogNames.BuffManager.value):
             actual_variable[str(index)] = obj
             self.save_configs(ctx.guild.id)
         else:
-            await super(BuffManager, self).add(ctx, variable, value)
+            super(BuffManager, self).add(ctx, variable, value)
 
-    async def remove(self, ctx: commands.Context, variable: str, value):
+    def remove(self, ctx: commands.Context, variable: str, value: Union[TextChannel, Role, Member, str, int, bool]):
         if isinstance(actual_variable := self.guildDict[ctx.guild.id][variable], dict):
             if type(value) == str and not value.isnumeric():
                 raise commands.BadArgument(f"value **{value}** is not a number.")
@@ -171,8 +148,24 @@ class BuffManager(CogClass, name=utils.CogNames.BuffManager.value):
 
             self.save_configs(ctx.guild.id)
         else:
-            await super(BuffManager, self).remove(ctx, variable, value)
+            super(BuffManager, self).remove(ctx, variable, value)
 
+    @property
+    def get_configs(self) -> ConfigurationDictionary:
+        config: ConfigurationDictionary = ConfigurationDictionary()
+
+        config.add_configuration(Configuration("mm_channel_id", "mm_channel_id", set=self.set))
+        config.add_configuration(Configuration("mm_hour", "mm_hour", set=self.set))
+
+        config.add_configuration(Configuration("tdb_ids", "tdb_ids", add=self.add, remove=self.remove))
+        config.add_configuration(Configuration("tmb_ids", "tmb_ids", add=self.add, remove=self.remove))
+        config.add_configuration(Configuration("twb_ids", "twb_ids", add=self.add, remove=self.remove))
+        config.add_configuration(Configuration("nwb_ids", "nwb_ids", add=self.add, remove=self.remove))
+
+        config.add_configuration(Configuration("buffs", "buff_list", add=self.add, remove=self.remove))
+        config.add_configuration(Configuration("weeks", "weeks", add=self.add, remove=self.remove))
+
+        return config
     # endregion
 
 
