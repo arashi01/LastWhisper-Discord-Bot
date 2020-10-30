@@ -2,6 +2,8 @@ import discord
 from discord.ext import commands
 from discord.utils import get
 
+from json import loads
+
 import utils
 from objects import MemberManagerConfig
 from utils.cog_class import CogClass
@@ -14,7 +16,7 @@ class MemberManager(CogClass, name=utils.CogNames.MemberManager.value):
         self.welcome_channel_message_ids = {}
         try:
             hold = utils.load_as_string("./.temp/member_manager")
-            hold = utils.loads(hold)
+            hold = loads(hold)
             for key, value in hold.items():
                 self.welcome_channel_message_ids[int(key)] = value
             utils.os.remove("./.temp/member_manager")

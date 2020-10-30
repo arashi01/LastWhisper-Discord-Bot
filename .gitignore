@@ -134,3 +134,4 @@ dmypy.json
 /token
 /.idea/
 /bot_starting_script.sh
+/.temp
