@@ -5,7 +5,7 @@ import discord
 from discord.ext import commands
 
 import utils
-from objects import CustomConfigObject
+from objects import CustomConfigObject, TypeObjects, TypeList
 
 
 class CogClass(commands.Cog):
@@ -16,6 +16,7 @@ class CogClass(commands.Cog):
         self.config_dir: str = config_dir
         self.general_cog = client.get_cog(utils.CogNames.General.value)
         self.approved_roles_dict: dict = {}
+        self.config: dict = {}
 
         self.config_object: CustomConfigObject.__class__ = config_object
 
@@ -130,55 +131,62 @@ class CogClass(commands.Cog):
     def is_enabled(self, ctx: commands.Context) -> bool:
         return self.guildDict.__contains__(ctx.guild.id)
 
-    async def set(self, ctx: commands.Context, variable_to_be_changed: str, value, set_type: utils.TypeCondition = None,
-                  condition=None, condition_message: str = "Condition has not been met."):
+    _TypeConditionCheck = {
+        TypeObjects.Channel: lambda ctx, x: x in [channel.id for channel in ctx.guild.channels],
+        TypeObjects.Member: lambda ctx, x: x in [member.id for member in ctx.guild.members],
+        TypeObjects.Role: lambda ctx, x: x in [role.id for role in ctx.guild.roles],
+        bool: lambda _, _v: True,
+        int: lambda _, _v: True
+    }
+
+    async def set(self, ctx: commands.Context, variable: str, value):
         guild = self.guildDict[ctx.guild.id]
+        variable_type = guild[variable].__class__
 
-        if not set_type:
-            guild[variable_to_be_changed] = value
+        if isinstance(variable_type, str):
+            guild[variable] = value
+        else:
+            if isinstance(value, str) and not value.isnumeric():
+                raise commands.BadArgument(f"value **{value}** is not a number.")
+
+            value = variable_type(value)
+            if not self._TypeConditionCheck[variable_type](ctx, value):
+                raise commands.BadArgument(f"value {value} is not a valid **{variable_type.__name__}** that is in your server.")
+
+            guild[variable] = bool(value) if isinstance(variable_type, bool) else value
+        self.save_configs(ctx.guild.id)
+
+    async def add(self, ctx: commands.Context, variable: str, value):
+        guild = self.guildDict[ctx.guild.id]
+        variable_type: TypeList = guild[variable]
+
+        if isinstance(variable_type, str):
+            guild[variable].append(value)
         else:
             if type(value) == str and not value.isnumeric():
                 raise commands.BadArgument(f"value **{value}** is not a number.")
 
-            value = int(value)
-            if not utils.TypeConditionCheck[set_type](ctx, value):
-                raise commands.BadArgument(f"value {value} is not a valid **{set_type.name}** that is in your server.")
+            value = variable_type.T(value)
 
-            if callable(condition):
-                if not condition(value):
-                    raise commands.BadArgument(condition_message)
+            if not self._TypeConditionCheck[variable_type.T](ctx, value):
+                raise commands.BadArgument(f"value {value} is not a valid **{variable_type.T.__name__}** that is in your server.")
 
-            guild[variable_to_be_changed] = bool(value) if set_type == utils.TypeCondition.BOOL else value
+            self.guildDict[ctx.guild.id][variable].append(bool(value) if isinstance(value, bool) else value)
         self.save_configs(ctx.guild.id)
 
-    async def add(self, ctx: commands.Context, variable_to_be_changed: str, value, set_type: utils.TypeCondition = None,
-                  condition=None, condition_message: str = "Condition has not been met."):
-        actual_variable: list = self.guildDict[ctx.guild.id][variable_to_be_changed]
-        if not set_type:
-            actual_variable.append(value)
-        else:
-            if type(value) == str and not value.isnumeric():
-                raise commands.BadArgument(f"value **{value}** is not a number.")
-
-            value = int(value)
-
-            if not utils.TypeConditionCheck[set_type](ctx, value):
-                raise commands.BadArgument(f"value {value} is not a valid **{set_type.name}** that is in your server.")
-
-            self.guildDict[ctx.guild.id][variable_to_be_changed].append(bool(value) if set_type == utils.TypeCondition.BOOL else value)
-        self.save_configs(ctx.guild.id)
-
-    async def remove(self, ctx: commands.Context, variable_to_be_changed: str, value,
-                     set_type: utils.TypeCondition = None):
-
-        actual_variable: list = self.guildDict[ctx.guild.id][variable_to_be_changed]
+    async def remove(self, ctx: commands.Context, variable: str, value):
+        guild = self.guildDict[ctx.guild.id]
+        variable_type: TypeList = guild[variable]
+        actual_variable: list = guild[variable]
 
         if not len(actual_variable) > 0:
-            raise commands.BadArgument(f"List **{variable_to_be_changed}** is empty.")
+            raise commands.BadArgument(f"List **{variable}** is empty.")
 
-        if not actual_variable.__contains__(bool(value) if set_type == utils.TypeCondition.BOOL else int(value) if set_type else value):
-            raise commands.BadArgument(f"value {value} is not a valid **{set_type.name}** that is in your server.")
+        value = variable_type.T(value)
 
-        actual_variable.remove(bool(value) if set_type == utils.TypeCondition.BOOL else int(value) if set_type else value)
+        if value not in actual_variable:
+            raise commands.BadArgument(f"value {value} is not a valid **{variable_type.__name__}** that is in your server.")
+
+        actual_variable.remove(value)
         self.save_configs(ctx.guild.id)
     # endregion
