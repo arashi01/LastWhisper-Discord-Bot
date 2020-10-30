@@ -156,7 +156,7 @@ class CogClass(commands.Cog):
             if not self._TypeConditionCheck[variable_type](ctx, value):
                 raise commands.BadArgument(f"value {value} is not a valid **{variable_type.__name__}** that is in your server.")
 
-            guild[variable] = value.id if isinstance(variable_type(value), (TextChannel, Role, Member)) else value
+            guild[variable] = value.id if isinstance(value, (TextChannel, Role, Member)) else value
 
         self.save_configs(ctx.guild.id)
 
