@@ -1,5 +1,7 @@
 from discord.ext import commands
-from discord import Embed
+from discord import Embed, TextChannel, Role, Member
+
+import typing
 
 from cogs.general import General
 from utils import TypeCondition, CogNames
@@ -15,119 +17,24 @@ class ConfigManager(commands.Cog, name=CogNames.ConfigManager.value):
         pass
 
     @commands.group(invoke_without_command=True)
-    async def config(self, ctx: commands.Context):
+    async def config(self, ctx: commands.Context, extension: str = None, variable: str = "", action: str = "", value: typing.Union[TextChannel, Role, Member, str, int] = None):
         embed: Embed = Embed(title="Available Extensions Configs")
-        for cog in self.client.cogs.values():
-            if isinstance(cog, CogClass):
-                embed.add_field(name=cog.qualified_name, value="___")
+        if not extension:
+            for cog in self.client.cogs.values():
+                if isinstance(cog, CogClass):
+                    embed.add_field(name=cog.qualified_name, value="___")
 
-        await ctx.send(embed=embed)
-
-    @config.command(name=CogNames.BuffManager.value)
-    async def week_manager(self, ctx: commands.Context, variable_to_be_changed: str, sub_command: str, value: str):
-        variable_to_be_changed = variable_to_be_changed.lower()
-        cog: CogClass = self.client.get_cog(CogNames.BuffManager.value)
-
-        try:
-            if variable_to_be_changed in ("morning_message_channel_id", "morning_message_hour"):
-
-                flag = variable_to_be_changed == "morning_message_hour"
-
-                if sub_command.lower() == "set":
-                    await cog.set(ctx, variable_to_be_changed, value, set_type=TypeCondition.NONE if flag else TypeCondition.CHANNEL, condition=(lambda x: 0 <= x <= 23) if flag else None, condition_message=f"Value **{value}** must be between 0 and 23 hours.")
-                else:
-                    raise commands.BadArgument(f"Sub command **{sub_command}** is not valid.")
-
-            elif variable_to_be_changed in ("today_buff_approved_roles_ids", "tomorrows_buff_approved_roles_ids", "this_week_buffs_approved_roles_ids", "next_week_buffs_approved_roles_ids", "buff_list", "weeks"):
-
-                if sub_command.lower() == "add":
-                    await cog.add(ctx, variable_to_be_changed, value, set_type=TypeCondition.ROLE if not ("weeks", "buff_list").__contains__(variable_to_be_changed) else TypeCondition.NONE)
-
-                elif sub_command.lower() == "remove":
-                    await cog.remove(ctx, variable_to_be_changed, value, set_type=TypeCondition.ROLE if not ("weeks", "buff_list").__contains__(variable_to_be_changed) else TypeCondition.NONE)
-
-                else:
-                    raise commands.BadArgument(f"Sub command **{sub_command}** is not valid.")
-
-            else:
-                raise commands.BadArgument(f"No such variable with name **{variable_to_be_changed}**.")
-
-        except commands.BadArgument as e:
-            await ctx.send(str(e))
-        finally:
-            await ctx.send("Done.")
-
-    @config.command(name=CogNames.MemberManager.value)
-    async def member_manager(self, ctx: commands.Context, variable_to_be_changed: str, sub_command: str, value: str):
-        variable_to_be_changed = variable_to_be_changed.lower()
-        cog: CogClass = self.client.get_cog(CogNames.MemberManager.value)
-
-        try:
-            if variable_to_be_changed in ("member_role_id", "new_member_role_id", "welcome_channel_id", "on_member_leave_logging_channel"):
-
-                if sub_command.lower() == "set":
-                    await cog.set(ctx, variable_to_be_changed, value, TypeCondition.CHANNEL if variable_to_be_changed in ("welcome_channel_id", "on_member_leave_logging_channel") else TypeCondition.ROLE)
-                else:
-                    raise commands.BadArgument(f"Sub command **{sub_command}** is not valid.")
-
-            else:
-                raise commands.BadArgument(f"No such variable with name **{variable_to_be_changed}**.")
-
-        except commands.BadArgument as e:
-            await ctx.send(str(e))
-        finally:
-            await ctx.send("Done.")
-
-    @config.command(name=CogNames.ManagementTools.value)
-    async def management_tools(self, ctx: commands.Context, variable_to_be_changed: str, sub_command: str, value: str):
-        variable_to_be_changed = variable_to_be_changed.lower()
-        cog: CogClass = self.client.get_cog(CogNames.ManagementTools.value)
-
-        try:
-            if variable_to_be_changed in ("clear_allowed_role_ids", "clear_channel_id_blacklist"):
-
-                if sub_command.lower() == "add":
-                    await cog.add(ctx, variable_to_be_changed, value, set_type=TypeCondition.ROLE if variable_to_be_changed == "clear_allowed_role_ids" else TypeCondition.CHANNEL)
-
-                elif sub_command.lower() == "remove":
-                    await cog.remove(ctx, variable_to_be_changed, value, set_type=TypeCondition.ROLE if variable_to_be_changed == "clear_allowed_role_ids" else TypeCondition.CHANNEL)
-
-                else:
-                    raise commands.BadArgument(f"Sub command **{sub_command}** is not valid.")
-
-            else:
-                raise commands.BadArgument(f"No such variable with name **{variable_to_be_changed}**.")
-
-        except commands.BadArgument as e:
-            await ctx.send(str(e))
-        finally:
-            await ctx.send("Done.")
-
-    @config.command(name=CogNames.General.value)
-    async def general_manager(self, ctx: commands.Context, variable_to_be_changed: str, sub_command: str, value: str):
-        variable_to_be_changed = variable_to_be_changed.lower()
-        cog: CogClass = self.client.get_cog(CogNames.General.value)
-
-        try:
-            if variable_to_be_changed == "should_clear_command":
-                if sub_command.lower() == "set":
-                    if value.isnumeric() and int(value) > 1:
-                        await ctx.send(f"While technically value **{value}** will give a **True** in a bool statement it would be much preferred if you just stayed to 0 and 1.")
-                    await cog.set(ctx, variable_to_be_changed, value, TypeCondition.BOOL)
-            elif variable_to_be_changed in ("clear_command_exception_list", "management_role_ids"):
-                print([m for m in ctx.guild.members])
-                if sub_command.lower() == "add":
-                    await cog.add(ctx, variable_to_be_changed, value, TypeCondition.USER if variable_to_be_changed == "clear_command_exception_list" else TypeCondition.ROLE)
-                elif sub_command.lower() == "remove":
-                    await cog.remove(ctx, variable_to_be_changed, value, TypeCondition.USER if variable_to_be_changed == "clear_command_exception_list" else TypeCondition.ROLE)
-                else:
-                    raise commands.BadArgument(f"Sub command **{sub_command}** is not valid.")
-            else:
-                raise commands.BadArgument(f"No such variable with name **{variable_to_be_changed}**.")
-        except commands.BadArgument as e:
-            await ctx.send(str(e))
-        finally:
-            await ctx.send("Done.")
+            await ctx.send(embed=embed)
+        else:
+            if extension in self.client.cogs.keys():
+                if isinstance(cog := self.client.cogs[extension], CogClass):
+                    if isinstance(variable_result := cog.config[variable], dict):
+                        if callable(action_result := variable_result[action]):
+                            await action_result(ctx, variable, value)
+                        else:
+                            await ctx.send(action_result)
+                    else:
+                        await ctx.send(variable_result)
 
     @config.command()
     async def reload(self, ctx: commands.Context, extension: str):
