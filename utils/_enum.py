@@ -14,19 +14,10 @@ class CogNames(Enum):
     MemberManager = "MemberManager"
     BuffManager = "BuffManager"
 
-
+# Deprecated Will be removed
 class TypeCondition(Enum):
     NONE = 0
     CHANNEL = 1
     USER = 2
     ROLE = 3
     BOOL = 4
-
-
-TypeConditionCheck = {
-            TypeCondition.NONE: lambda _, _v: True,
-            TypeCondition.CHANNEL: lambda ctx, x: x in ctx.guild.channels,
-            TypeCondition.USER: lambda ctx, x: x in ctx.guild.members,
-            TypeCondition.ROLE: lambda ctx, x: x in ctx.guild.roles,
-            TypeCondition.BOOL: lambda _, _v: True
-        }
