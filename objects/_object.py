@@ -1,19 +1,43 @@
+from typing import TypeVar, Generic
+
+
 class CustomConfigObject(object):
     @classmethod
     def from_json(cls, data):
         obj = cls()
-        obj.__dict__ = data
+
+        for key, value in obj.__dict__.items():
+            if isinstance(value, TypeObjects.Channel):
+                obj.__dict__[key] = TypeObjects.Channel(data[key])
+            elif isinstance(value, TypeObjects.Member):
+                obj.__dict__[key] = TypeObjects.Member(data[key])
+            elif isinstance(value, TypeObjects.Role):
+                obj.__dict__[key] = TypeObjects.Role(data[key])
+            else:
+                obj.__dict__[key] = data[key]
+
         return obj
 
     @staticmethod
-    def converter(obj):
+    def converter(obj) -> dict:
         return obj.__dict__
 
-    def __getitem__(self, item):
+    def __getitem__(self, item) -> any:
         return self.__dict__[item]
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key, value) -> None:
         self.__dict__[key] = value
+
+
+class TypeObjects(object):
+    class Channel(int):
+        pass
+
+    class Member(int):
+        pass
+
+    class Role(int):
+        pass
 
 
 def convert_dict_list(dictionary: dict, class_object: CustomConfigObject.__class__):
@@ -22,3 +46,22 @@ def convert_dict_list(dictionary: dict, class_object: CustomConfigObject.__class
 
     for key, value in sorted(copy.items()):
         dictionary[key]: class_object = class_object.from_json(value)
+
+
+T = TypeVar('T')
+
+
+class TypeList(list, Generic[T]):
+    def __init__(self, t: T, l: list=[]) -> None:
+        super().__init__(l)
+        self._T = t
+
+    def append(self, __object: T) -> None:
+        if type(__object) == self._T:
+            super(TypeList, self).append(__object)
+        else:
+            raise TypeError(f"Object is not of type {self._T}")
+
+    @property
+    def T(self):
+        return self._T

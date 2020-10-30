@@ -1,4 +1,4 @@
-from objects import CustomConfigObject, convert_dict_list
+from objects import CustomConfigObject, convert_dict_list, TypeObjects, TypeList
 
 
 class Buff(CustomConfigObject):
@@ -39,32 +39,31 @@ class Week(CustomConfigObject):
 
 class BuffManagerConfig(CustomConfigObject):
     def __init__(self,
-                 morning_message_channel_id: int = 0,
-                 morning_message_hour: int = 0,
-                 today_buff_approved_roles_ids: [int] = None,
-                 tomorrows_buff_approved_roles_ids: [int] = None,
-                 this_week_buffs_approved_roles_ids: [int] = None,
-                 next_week_buffs_approved_roles_ids: [int] = None,
+                 mm_channel_id: TypeObjects.Channel = None, mm_hour: int = None,
+                 tdb_ids: [TypeObjects.Role] = None, tmb_ids: [TypeObjects.Role] = None,
+                 twb_ids: [TypeObjects.Role] = None, nwb_id: [TypeObjects.Role] = None,
                  buff_list: dict = None, weeks: dict = None):
-        self.morning_message_channel_id: int = morning_message_channel_id
-        self.morning_message_hour: int = morning_message_hour
 
-        self.today_buff_approved_roles_ids: [
-            int] = [] if not today_buff_approved_roles_ids else today_buff_approved_roles_ids
-        self.tomorrows_buff_approved_roles_ids: [
-            int] = [] if not today_buff_approved_roles_ids else tomorrows_buff_approved_roles_ids
-        self.this_week_buffs_approved_roles_ids: [
-            int] = [] if not today_buff_approved_roles_ids else this_week_buffs_approved_roles_ids
-        self.next_week_buffs_approved_roles_ids: [
-            int] = [] if not today_buff_approved_roles_ids else next_week_buffs_approved_roles_ids
+        self.mm_channel_id: TypeObjects.Channel = mm_channel_id if mm_channel_id else TypeObjects.Channel()
+        self.mm_hour: int = mm_hour if mm_hour else 0
+
+        self.tdb_ids: TypeList = TypeList(t=TypeObjects.Role) if not tdb_ids else tdb_ids
+        self.tmb_ids: TypeList = TypeList(t=TypeObjects.Role) if not tdb_ids else tmb_ids
+        self.twb_ids: TypeList = TypeList(t=TypeObjects.Role) if not tdb_ids else twb_ids
+        self.nwb_ids: TypeList = TypeList(t=TypeObjects.Role) if not tdb_ids else nwb_id
 
         self.buff_list: dict = {} if buff_list is None else buff_list
         self.weeks: dict = {} if weeks is None else weeks
 
     @classmethod
     def from_json(cls, data):
-        obj = cls()
-        obj.__dict__ = data
+        obj: BuffManagerConfig = super().from_json(data)
+        list(map(TypeObjects.Role, obj.tdb_ids))
+
+        obj.tdb_ids = TypeList(t=TypeObjects.Role, l=list(map(TypeObjects.Role, obj.tdb_ids)))
+        obj.tmb_ids = TypeList(t=TypeObjects.Role, l=list(map(TypeObjects.Role, obj.tdb_ids)))
+        obj.twb_ids = TypeList(t=TypeObjects.Role, l=list(map(TypeObjects.Role, obj.tdb_ids)))
+        obj.nwb_ids = TypeList(t=TypeObjects.Role, l=list(map(TypeObjects.Role, obj.tdb_ids)))
 
         convert_dict_list(obj.buff_list, Buff)
         convert_dict_list(obj.weeks, Week)
