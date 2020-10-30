@@ -12,12 +12,37 @@ from objects import Week, BuffManagerConfig, Buff
 
 class BuffManager(CogClass, name=utils.CogNames.BuffManager.value):
     def __init__(self, client: commands.bot):
-        super().__init__(client, "./config/week_manager", BuffManagerConfig)
+        super().__init__(client, "./config/buff_manager", BuffManagerConfig)
         self.approved_roles_dict = {
             "today_buff": "today_buff_approved_roles_ids",
             "tomorrow_buff": "tomorrows_buff_approved_roles_ids",
             "week_buffs": "this_week_buffs_approved_roles_ids",
             "next_week_buffs": "next_week_buffs_approved_roles_ids"
+        }
+        self.config = {
+            "mm_channel_id": {
+                "set": self.set
+            },
+            "mm_hour": {
+                "set": self.set
+            },
+            "tdb_ids": {
+                "add": self.add,
+                "remove": self.remove
+            },
+            "tmb_ids": {
+                "add": self.add,
+                "remove": self.remove
+            },
+            "twb_ids": {
+                "add": self.add,
+                "remove": self.remove
+            },
+            "nwb_ids": {
+                "add": self.add,
+                "remove": self.remove
+            },
+            "": "Working..."
         }
         self.today = datetime.datetime.now()
 
@@ -33,9 +58,9 @@ class BuffManager(CogClass, name=utils.CogNames.BuffManager.value):
 
         for key, guild in self.guildDict.items():
 
-            if self.today.hour == guild.morning_message_hour and self.today.minute == 0:
+            if self.today.hour == guild.mm_hour and self.today.minute == 0:
                 week, buff = self.get_week_buff(guild, self.today)
-                morning_message_channel: discord.TextChannel = self.client.get_channel(guild.morning_message_channel_id)
+                morning_message_channel: discord.TextChannel = self.client.get_channel(guild.mm_channel_id)
 
                 # Posts the daily buff message.
                 await morning_message_channel.send("Good morning Everyone!",
@@ -108,15 +133,12 @@ class BuffManager(CogClass, name=utils.CogNames.BuffManager.value):
         return week, buff
 
     # region Config
-    async def add(self, ctx: commands.Context, variable_to_be_changed: str, value, set_type: utils.TypeCondition = None,
-                  condition=None, condition_message: str = "Condition has not been met."):
-        if set_type == utils.TypeCondition.NONE:
-            actual_variable: dict = self.guildDict[ctx.guild.id][variable_to_be_changed]
-
+    async def add(self, ctx: commands.Context, variable: str, value):
+        if isinstance(actual_variable := self.guildDict[ctx.guild.id][variable], dict):
             obj: dict = {
                 "weeks": lambda x: Week.from_json(x),
                 "buff_list": lambda x: Buff.from_json(x)
-            }[variable_to_be_changed](json.loads(value))
+            }[variable](json.loads(value))
 
             index: int = 0
             for key in sorted(obj.keys()):
@@ -128,18 +150,15 @@ class BuffManager(CogClass, name=utils.CogNames.BuffManager.value):
             actual_variable[str(index)] = obj
             self.save_configs(ctx.guild.id)
         else:
-            await super(BuffManager, self).add(ctx, variable_to_be_changed, value, set_type, condition, condition_message)
+            await super(BuffManager, self).add(ctx, variable, value)
 
-    async def remove(self, ctx: commands.Context, variable_to_be_changed: str, value,
-                     set_type: utils.TypeCondition = None):
-        if set_type == utils.TypeCondition.NONE:
-            actual_variable: list = self.guildDict[ctx.guild.id][variable_to_be_changed]
-
+    async def remove(self, ctx: commands.Context, variable: str, value):
+        if isinstance(actual_variable := self.guildDict[ctx.guild.id][variable], dict):
             if type(value) == str and not value.isnumeric():
                 raise commands.BadArgument(f"value **{value}** is not a number.")
 
             if not len(actual_variable) > 0:
-                raise commands.BadArgument(f"List **{variable_to_be_changed}** is empty.")
+                raise commands.BadArgument(f"List **{variable}** is empty.")
 
             value = int(value)
 
@@ -147,11 +166,12 @@ class BuffManager(CogClass, name=utils.CogNames.BuffManager.value):
             if obj:
                 actual_variable.remove(obj)
             else:
-                raise commands.BadArgument(f"there is no {'Week' if variable_to_be_changed.lower() == 'weeks' else 'Buff'} with the index of **{value}**")
+                raise commands.BadArgument(
+                    f"there is no {'Week' if variable.lower() == 'weeks' else 'Buff'} with the index of **{value}**")
 
             self.save_configs(ctx.guild.id)
         else:
-            await super(BuffManager, self).remove(ctx, variable_to_be_changed, value, set_type)
+            await super(BuffManager, self).remove(ctx, variable, value)
 
     # endregion
 
