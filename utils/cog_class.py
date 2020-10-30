@@ -1,26 +1,33 @@
 import json
 import os
 
-import discord
+from discord import TextChannel, Member, Role, Guild
 from discord.ext import commands
+from typing import Union
 
 import utils
 from objects import CustomConfigObject, TypeObjects, TypeList
 
+from objects.configuration import ConfigurationDictionary, Configuration
+
 
 class CogClass(commands.Cog):
 
-    def __init__(self, client: commands.bot, config_dir: str, config_object: CustomConfigObject.__class__):
+    def __init__(self, client: commands.bot, config_dir: str, config_object: CustomConfigObject.__class__) -> None:
         self.client: commands.bot = client
         self.guildDict: dict = {}
         self.config_dir: str = config_dir
         self.general_cog = client.get_cog(utils.CogNames.General.value)
         self.approved_roles_dict: dict = {}
-        self.config: dict = {}
+        self.config: ConfigurationDictionary = self.get_configs
 
         self.config_object: CustomConfigObject.__class__ = config_object
 
         self.load_configs()
+
+    @property
+    def get_configs(self) -> ConfigurationDictionary:
+        return ConfigurationDictionary()
 
     async def cog_check(self, ctx: commands.Context):
         if not self.is_enabled(ctx):
@@ -54,7 +61,7 @@ class CogClass(commands.Cog):
 
     # region Join and Leave Listeners
     @commands.Cog.listener()
-    async def on_guild_join(self, guild: discord.Guild):
+    async def on_guild_join(self, guild: Guild):
         if not self.config_object:
             return
 
@@ -62,7 +69,7 @@ class CogClass(commands.Cog):
         self.guildDict[guild.id] = self.config_object()
 
     @commands.Cog.listener()
-    async def on_guild_remove(self, guild: discord.Guild):
+    async def on_guild_remove(self, guild: Guild):
         if not self.config_object:
             return
 
@@ -132,60 +139,55 @@ class CogClass(commands.Cog):
         return self.guildDict.__contains__(ctx.guild.id)
 
     _TypeConditionCheck = {
-        TypeObjects.Channel: lambda ctx, x: x in [channel.id for channel in ctx.guild.channels],
-        TypeObjects.Member: lambda ctx, x: x in [member.id for member in ctx.guild.members],
-        TypeObjects.Role: lambda ctx, x: x in [role.id for role in ctx.guild.roles],
+        TypeObjects.Channel: lambda ctx, x: x in ctx.guild.channels,
+        TypeObjects.Member: lambda ctx, x: x in ctx.guild.members,
+        TypeObjects.Role: lambda ctx, x: x in ctx.guild.roles,
         bool: lambda _, _v: True,
         int: lambda _, _v: True
     }
 
-    async def set(self, ctx: commands.Context, variable: str, value):
+    def set(self, ctx: commands.Context, variable: str, value: Union[TextChannel, Role, Member, str, int, bool]):
         guild = self.guildDict[ctx.guild.id]
         variable_type = guild[variable].__class__
 
         if isinstance(variable_type, str):
             guild[variable] = value
         else:
-            if isinstance(value, str) and not value.isnumeric():
-                raise commands.BadArgument(f"value **{value}** is not a number.")
-
-            value = variable_type(value)
             if not self._TypeConditionCheck[variable_type](ctx, value):
                 raise commands.BadArgument(f"value {value} is not a valid **{variable_type.__name__}** that is in your server.")
 
-            guild[variable] = bool(value) if isinstance(variable_type, bool) else value
+            guild[variable] = value.id if isinstance(variable_type(value), (TextChannel, Role, Member)) else value
+
         self.save_configs(ctx.guild.id)
 
-    async def add(self, ctx: commands.Context, variable: str, value):
+    def add(self, ctx: commands.Context, variable: str, value: Union[TextChannel, Role, Member, str, int, bool]):
         guild = self.guildDict[ctx.guild.id]
-        variable_type: TypeList = guild[variable]
+        variable_type = guild[variable].T
 
         if isinstance(variable_type, str):
             guild[variable].append(value)
         else:
-            if type(value) == str and not value.isnumeric():
-                raise commands.BadArgument(f"value **{value}** is not a number.")
+            if not self._TypeConditionCheck[variable_type](ctx, value):
+                raise commands.BadArgument(f"value {value} is not a valid **{variable_type.__name__}** that is in your server.")
 
-            value = variable_type.T(value)
+            if (variable_type(value.id) if isinstance(value, (TextChannel, Role, Member)) else value) in guild[variable]:
+                raise commands.BadArgument(f"value {value} is already in the list {variable}.")
 
-            if not self._TypeConditionCheck[variable_type.T](ctx, value):
-                raise commands.BadArgument(f"value {value} is not a valid **{variable_type.T.__name__}** that is in your server.")
-
-            self.guildDict[ctx.guild.id][variable].append(bool(value) if isinstance(value, bool) else value)
+            self.guildDict[ctx.guild.id][variable].append(variable_type(value.id) if isinstance(value, (TextChannel, Role, Member)) else value)
         self.save_configs(ctx.guild.id)
 
-    async def remove(self, ctx: commands.Context, variable: str, value):
+    def remove(self, ctx: commands.Context, variable: str, value: Union[TextChannel, Role, Member, str, int, bool]):
         guild = self.guildDict[ctx.guild.id]
-        variable_type: TypeList = guild[variable]
+        variable_type = guild[variable].T
         actual_variable: list = guild[variable]
 
         if not len(actual_variable) > 0:
             raise commands.BadArgument(f"List **{variable}** is empty.")
 
-        value = variable_type.T(value)
+        value = variable_type(value.id) if isinstance(value, (TextChannel, Role, Member)) else value
 
         if value not in actual_variable:
-            raise commands.BadArgument(f"value {value} is not a valid **{variable_type.__name__}** that is in your server.")
+            raise commands.BadArgument(f"value {value} is not in the list.")
 
         actual_variable.remove(value)
         self.save_configs(ctx.guild.id)
