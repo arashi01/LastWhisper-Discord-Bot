@@ -17,7 +17,7 @@ class ConfigManager(commands.Cog, name=CogNames.ConfigManager.value):
         pass
 
     @commands.group(invoke_without_command=True)
-    async def config(self, ctx: commands.Context, extension: str = None, variable: str = "", action: str = "", value: typing.Union[TextChannel, Role, Member, str, int] = None):
+    async def config(self, ctx: commands.Context, extension: str = None, variable: str = "", action: str = "", value: typing.Union[TextChannel, Role, Member, str, int, bool] = None):
         embed: Embed = Embed(title="Available Extensions Configs")
         if not extension:
             for cog in self.client.cogs.values():
@@ -25,14 +25,13 @@ class ConfigManager(commands.Cog, name=CogNames.ConfigManager.value):
                     embed.add_field(name=cog.qualified_name, value="___")
 
             await ctx.send(embed=embed)
+
         else:
             if extension in self.client.cogs.keys():
                 if isinstance(cog := self.client.cogs[extension], CogClass):
-                    if isinstance(variable_result := cog.config[variable], dict):
-                        if callable(action_result := variable_result[action]):
-                            await action_result(ctx, variable, value)
-                        else:
-                            await ctx.send(action_result)
+                    if isinstance(variable_result := cog.config.get_configurations_dict[variable], dict):
+                        if action in ("set", "add", "remove"):
+                            variable_result[action](ctx, variable_result["config_name"], value)
                     else:
                         await ctx.send(variable_result)
 
