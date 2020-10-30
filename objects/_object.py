@@ -52,8 +52,8 @@ T = TypeVar('T')
 
 
 class TypeList(list, Generic[T]):
-    def __init__(self, t: T, l: list=[]) -> None:
-        super().__init__(l)
+    def __init__(self, t: T, pre_existing_list: list = []) -> None:
+        super().__init__(pre_existing_list)
         self._T = t
 
     def append(self, __object: T) -> None:
