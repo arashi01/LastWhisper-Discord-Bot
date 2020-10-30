@@ -17,8 +17,8 @@ class Debug(commands.Cog, name=utils.CogNames.Debug.value):
 
     @commands.is_owner()
     @commands.command()
-    async def print(self, ctx: commands.Context):
-        print(self.client.cogs)
+    async def print(self, ctx: commands.Context, text):
+        print(text)
 
     @commands.is_owner()
     @commands.command(aliases=["FIT"])
