@@ -1,4 +1,4 @@
-from abc import abstractmethod
+from abc import abstractmethod, ABCMeta
 import json
 import os
 
@@ -56,13 +56,13 @@ class CogClass(commands.Cog):
         await self.general_cog.remove_message(ctx)
 
     # region Getters
-    @abstractmethod
     @property
+    @abstractmethod
     def get_configs(self) -> ConfigurationDictionary:
         pass
 
-    @abstractmethod
     @property
+    @abstractmethod
     def get_function_roles_reference(self) -> dict:
         pass
     # endregion
