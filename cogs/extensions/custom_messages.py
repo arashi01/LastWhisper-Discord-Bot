@@ -1,6 +1,6 @@
 from datetime import datetime
 
-import discord
+from discord import TextChannel, Embed
 from discord.ext import tasks, commands
 
 import utils
@@ -32,7 +32,7 @@ class CustomMessages(CogClass, name=utils.CogNames.CustomMessages.value):
 
         message: Message = guild.messages[message_id]
 
-        embed: discord.Embed = discord.Embed(title="Custom Message", description=f"Index No. {message_id}")
+        embed: Embed = Embed(title="Custom Message", description=f"Index No. {message_id}")
         embed.add_field(name="Message:", value=f"```{message.message}```", inline=False)
         embed.add_field(name="Date & Time:",
                         value=f"```Date: {message.date.date().__str__()}\nTime: {message.date.time().__str__()[:-3]}```",
@@ -44,7 +44,7 @@ class CustomMessages(CogClass, name=utils.CogNames.CustomMessages.value):
     @custom_message.command()
     async def create_message(self, ctx: commands.Context,
                              message: str,
-                             channel_id: int,
+                             channel_id: TextChannel,
                              day: int, month: int, year: int,
                              hour: int, minute: int,
                              should_repeat: bool = False):
@@ -52,7 +52,7 @@ class CustomMessages(CogClass, name=utils.CogNames.CustomMessages.value):
         if channel_id not in [channel.id for channel in ctx.guild.channels]:
             raise commands.BadArgument(f"There is not channel with the ID **{channel_id}** on your server.")
 
-        message = Message(message, TypeObjects.Channel(channel_id), datetime(year, month, day, hour, minute), should_repeat)
+        message = Message(message, TypeObjects.Channel(channel_id.id), datetime(year, month, day, hour, minute), should_repeat)
 
         index = 0
         for key in sorted(guild.messages.keys()):
