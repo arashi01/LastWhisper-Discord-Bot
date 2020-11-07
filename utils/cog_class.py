@@ -73,7 +73,7 @@ class CogClass(commands.Cog):
 
     # region Join and Leave Listeners
     @commands.Cog.listener()
-    async def on_guild_join(self, guild: Guild):
+    async def on_guild_join(self, guild: Guild) -> None:
         if not self.config_object:
             return
 
@@ -81,7 +81,7 @@ class CogClass(commands.Cog):
         self.guildDict[guild.id] = self.config_object()
 
     @commands.Cog.listener()
-    async def on_guild_remove(self, guild: Guild):
+    async def on_guild_remove(self, guild: Guild) -> None:
         if not self.config_object:
             return
 
@@ -90,7 +90,7 @@ class CogClass(commands.Cog):
     # endregion
 
     # region Config
-    def load_configs(self, guild_id: int = None):
+    def load_configs(self, guild_id: int = None) -> None:
         if not guild_id:
             self.guildDict.clear()
             for filename in os.listdir(self.config_dir):
@@ -114,7 +114,7 @@ class CogClass(commands.Cog):
 
             self.guildDict[guild_id] = obj
 
-    def save_configs(self, guild_id: int = None):
+    def save_configs(self, guild_id: int = None) -> None:
         if not self.config_object:
             return
 
@@ -129,7 +129,7 @@ class CogClass(commands.Cog):
 
             utils.save_as_json(file_dir, self.guildDict[guild_id])
 
-    async def enable(self, ctx: commands.Context):
+    async def enable(self, ctx: commands.Context) -> None:
         if self.is_enabled(ctx):
             await ctx.send("Already Enabled.")
             return
@@ -137,7 +137,7 @@ class CogClass(commands.Cog):
         self.load_configs(guild_id=ctx.guild.id)
         await ctx.send("Done.")
 
-    async def disable(self, ctx: commands.Context):
+    async def disable(self, ctx: commands.Context) -> None:
         if not self.is_enabled(ctx):
             await ctx.send("Already Disabled.")
             return
@@ -158,7 +158,7 @@ class CogClass(commands.Cog):
         int: lambda _, _v: True
     }
 
-    def set(self, ctx: commands.Context, variable: str, value: Union[TextChannel, Role, Member, str, int, bool]):
+    def set(self, ctx: commands.Context, variable: str, value: Union[TextChannel, Role, Member, str, int, bool]) -> None:
         guild = self.guildDict[ctx.guild.id]
         variable_type = guild[variable].__class__
 
@@ -172,7 +172,7 @@ class CogClass(commands.Cog):
 
         self.save_configs(ctx.guild.id)
 
-    def add(self, ctx: commands.Context, variable: str, value: Union[TextChannel, Role, Member, str, int, bool]):
+    def add(self, ctx: commands.Context, variable: str, value: Union[TextChannel, Role, Member, str, int, bool]) -> None:
         guild = self.guildDict[ctx.guild.id]
         variable_type = guild[variable].T
 
@@ -188,7 +188,7 @@ class CogClass(commands.Cog):
             self.guildDict[ctx.guild.id][variable].append(variable_type(value.id) if isinstance(value, (TextChannel, Role, Member)) else value)
         self.save_configs(ctx.guild.id)
 
-    def remove(self, ctx: commands.Context, variable: str, value: Union[TextChannel, Role, Member, str, int, bool]):
+    def remove(self, ctx: commands.Context, variable: str, value: Union[TextChannel, Role, Member, str, int, bool]) -> None:
         guild = self.guildDict[ctx.guild.id]
         variable_type = guild[variable].T
         actual_variable: list = guild[variable]
