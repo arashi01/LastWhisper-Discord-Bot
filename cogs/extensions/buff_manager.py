@@ -13,7 +13,7 @@ from objects.configuration import Configuration, ConfigurationDictionary
 
 
 class BuffManager(CogClass, name=utils.CogNames.BuffManager.value):
-    def __init__(self, client: commands.bot):
+    def __init__(self, client: commands.bot) -> None:
         super().__init__(client, "./config/buff_manager", BuffManagerConfig)
         self.approved_roles_dict = {
             "today_buff": "today_buff_approved_roles_ids",
@@ -25,11 +25,11 @@ class BuffManager(CogClass, name=utils.CogNames.BuffManager.value):
 
         self.loop.start()
 
-    def cog_unload(self):
+    def cog_unload(self) -> None:
         self.loop.cancel()
 
     @tasks.loop(minutes=1)
-    async def loop(self):
+    async def loop(self) -> None:
         await self.client.wait_until_ready()
         self.today = datetime.datetime.now()
 
@@ -56,7 +56,7 @@ class BuffManager(CogClass, name=utils.CogNames.BuffManager.value):
                         ))
 
     @commands.command(aliases=["today'sBuff", "tdb"])
-    async def today_buff(self, ctx: commands.Context):
+    async def today_buff(self, ctx: commands.Context) -> None:
         guild: BuffManagerConfig = self.guildDict[ctx.guild.id]
 
         _, buff = self.get_week_buff(guild, self.today)
@@ -68,7 +68,7 @@ class BuffManager(CogClass, name=utils.CogNames.BuffManager.value):
         ))
 
     @commands.command(aliases=["tomorrow'sBuff", "trb", "tmb"])
-    async def tomorrow_buff(self, ctx: commands.Context):
+    async def tomorrow_buff(self, ctx: commands.Context) -> None:
         guild: BuffManagerConfig = self.guildDict[ctx.guild.id]
 
         tomorrow = self.today + datetime.timedelta(days=1)
@@ -81,7 +81,7 @@ class BuffManager(CogClass, name=utils.CogNames.BuffManager.value):
         ))
 
     @commands.command(aliases=["thisWeek'sBuffs", "wbs", "twb"])
-    async def week_buffs(self, ctx: commands.Context):
+    async def week_buffs(self, ctx: commands.Context) -> None:
         guild: BuffManagerConfig = self.guildDict[ctx.guild.id]
 
         week, _ = self.get_week_buff(guild, self.today)
@@ -92,7 +92,7 @@ class BuffManager(CogClass, name=utils.CogNames.BuffManager.value):
         ))
 
     @commands.command(aliases=["nextWeek'sBuffs", "nwb"])
-    async def next_week_buffs(self, ctx: commands.Context):
+    async def next_week_buffs(self, ctx: commands.Context) -> None:
         guild: BuffManagerConfig = self.guildDict[ctx.guild.id]
 
         week, _ = self.get_week_buff(guild, self.today + datetime.timedelta(days=7))
@@ -103,7 +103,7 @@ class BuffManager(CogClass, name=utils.CogNames.BuffManager.value):
         ))
 
     @staticmethod
-    def get_week_buff(config: BuffManagerConfig, date: datetime):
+    def get_week_buff(config: BuffManagerConfig, date: datetime) -> (int, int):
         (row, col) = utils.get_index(date, len(config.weeks))
         week: Week = config.weeks[list(config.weeks.keys())[row]]
         buff: Buff = config.buff_list[list(config.buff_list.keys())[week.get_value(col)]]
