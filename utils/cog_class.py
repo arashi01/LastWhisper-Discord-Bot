@@ -56,7 +56,7 @@ class CogClass(commands.Cog):
         await ctx.send("Sorry you do not have the correct permissions to invoke this command.")
         return False
 
-    async def cog_before_invoke(self, ctx):
+    async def cog_after_invoke(self, ctx) -> None:
         await self.general_cog.remove_message(ctx)
 
     # region Getters
