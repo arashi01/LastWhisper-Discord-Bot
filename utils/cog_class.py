@@ -35,6 +35,7 @@ class CogClass(commands.Cog):
         return await self.role_check(ctx)
 
     async def role_check(self, ctx: commands.Context) -> bool:
+        # todo: FIX THIS.
         command = str(ctx.invoked_subcommand).split(" ").pop() if ctx.invoked_subcommand else str(ctx.command)
 
         try:
@@ -44,7 +45,11 @@ class CogClass(commands.Cog):
             # noinspection PyTypeChecker
             config_entry_name: str = None
 
-        roles = self.guildDict[ctx.guild.id].__dict__[config_entry_name] if config_entry_name else self.general_cog.get_management_role_ids(ctx.guild.id)
+        # Key error cause by missing entry.
+        try:
+            roles = self.guildDict[ctx.guild.id].__dict__[config_entry_name] if config_entry_name else self.general_cog.get_management_role_ids(ctx.guild.id)
+        except KeyError:
+            roles = [0]
 
         if len(roles) <= 0:
             return True
