@@ -109,47 +109,45 @@ class BuffManager(CogClass, name=utils.CogNames.BuffManager.value):
         buff: Buff = config.buff_list[list(config.buff_list.keys())[week.get_value(col)]]
         return week, buff
 
-    # region Config
-    def add(self, ctx: commands.Context, variable: str, value: Union[TextChannel, Role, Member, str, int, bool]):
-        if isinstance(actual_variable := self.guildDict[ctx.guild.id][variable], dict):
-            obj: dict = {
-                "weeks": lambda x: Week.from_json(x),
-                "buff_list": lambda x: Buff.from_json(x)
-            }[variable](json.loads(value))
+    @commands.command(name="BuffManager")
+    async def buff_manager(self, ctx: commands.Context, obj_type: str, action: str = None, *args) -> None:
+        if obj_type in ("week", "buff"):
+            if action == "add":
+                if len(args) != (len_hold := (8 if obj_type == "week" else 2)):
+                    raise commands.BadArgument(f"Must be {len_hold} arguments.")
+                del len_hold
+                # I cannot tell if this is a good idea in any way, shape or form,
+                # but i will leave it here unless it starts giving issues. Trying to save memory.
 
-            index: int = 0
-            for key in sorted(obj.keys()):
-                if int(key) > index:
-                    break
-                else:
-                    index += 1
+                obj: Union[Week, Buff] = Week(*args) if obj_type == "week" else Buff(*args)
+                config: BuffManagerConfig = self.guildDict[ctx.guild.id]
 
-            actual_variable[str(index)] = obj
-            self.save_configs(ctx.guild.id)
-        else:
-            super(BuffManager, self).add(ctx, variable, value)
+                index: int = 0
+                for key in sorted(config["buff_list" if obj_type == "buff" else "weeks"].keys()):
+                    if int(key) > index:
+                        break
+                    else:
+                        index += 1
 
-    def remove(self, ctx: commands.Context, variable: str, value: Union[TextChannel, Role, Member, str, int, bool]):
-        if isinstance(actual_variable := self.guildDict[ctx.guild.id][variable], dict):
-            if type(value) == str and not value.isnumeric():
-                raise commands.BadArgument(f"value **{value}** is not a number.")
+                config["buff_list" if obj_type == "buff" else "weeks"][str(index)] = obj
+                self.save_configs(guild_id=ctx.guild.id)
+            elif action == "remove":
+                try:
+                    if len(args) != 1:
+                        raise commands.BadArgument("Arguments must be 1.")
 
-            if not len(actual_variable) > 0:
-                raise commands.BadArgument(f"List **{variable}** is empty.")
-
-            value = int(value)
-
-            obj = get(actual_variable, identifier=value)
-            if obj:
-                actual_variable.remove(obj)
+                    self.guildDict[ctx.guild.id]["buff_list" if obj_type == "buff" else "weeks"].pop(*args)
+                    self.save_configs(ctx.guild.id)
+                except KeyError:
+                    await ctx.send("Sorry the index is not valid!")
+            elif action == "":
+                await ctx.send(f"This is an example preview cause the dev got lazy.")
             else:
-                raise commands.BadArgument(
-                    f"there is no {'Week' if variable.lower() == 'weeks' else 'Buff'} with the index of **{value}**")
-
-            self.save_configs(ctx.guild.id)
+                await ctx.send(f"There is no action with the name {action}.")
         else:
-            super(BuffManager, self).remove(ctx, variable, value)
+            await ctx.send(f"Sorry I do not know about object {obj_type}.")
 
+    # region Config
     @property
     def get_configs(self) -> ConfigurationDictionary:
         config: ConfigurationDictionary = ConfigurationDictionary()
