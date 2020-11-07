@@ -1,15 +1,13 @@
 import datetime
-import json
-
-from discord import TextChannel, Member, Role
-from discord.ext import commands, tasks
-from discord.utils import get
 from typing import Union
 
+from discord import TextChannel
+from discord.ext import commands, tasks
+
 import utils
-from utils.cog_class import CogClass
 from objects import Week, BuffManagerConfig, Buff
 from objects.configuration import Configuration, ConfigurationDictionary
+from utils.cog_class import CogClass
 
 
 class BuffManager(CogClass, name=utils.CogNames.BuffManager.value):
