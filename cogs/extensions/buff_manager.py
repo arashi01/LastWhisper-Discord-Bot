@@ -161,10 +161,6 @@ class BuffManager(CogClass, name=utils.CogNames.BuffManager.value):
         config.add_configuration(Configuration("tmb_ids", "tmb_ids", add=self.add, remove=self.remove))
         config.add_configuration(Configuration("twb_ids", "twb_ids", add=self.add, remove=self.remove))
         config.add_configuration(Configuration("nwb_ids", "nwb_ids", add=self.add, remove=self.remove))
-
-        config.add_configuration(Configuration("buffs", "buff_list", add=self.add, remove=self.remove))
-        config.add_configuration(Configuration("weeks", "weeks", add=self.add, remove=self.remove))
-
         return config
     # endregion
 
