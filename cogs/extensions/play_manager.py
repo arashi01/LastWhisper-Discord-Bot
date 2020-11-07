@@ -2,19 +2,13 @@ from discord.ext import commands
 
 import utils
 from objects import PlayConfig
+from objects.configuration import ConfigurationDictionary
 from utils.cog_class import CogClass
 
 
 class PlayManager(CogClass, name=utils.CogNames.PlayManager.value):
     def __init__(self, client: commands.bot):
         super().__init__(client, "./config/play_manager", PlayConfig)
-
-        self.approved_roles_dict: dict = {
-            "join": None,
-            "play": None,
-            "stop": None,
-            "leave": None
-        }
 
         self.player: dict = {}
 
@@ -37,6 +31,19 @@ class PlayManager(CogClass, name=utils.CogNames.PlayManager.value):
     @commands.command()
     async def leave(self, ctx: commands.Context):
         return await ctx.voice_client.disconnect()
+
+    @property
+    def get_configs(self) -> ConfigurationDictionary:
+        return ConfigurationDictionary()
+
+    @property
+    def get_function_roles_reference(self) -> dict:
+        return {
+            self.join.name: None,
+            self.play.name: None,
+            self.stop.name: None,
+            self.leave.name: None
+        }
 
 
 def setup(client: commands.bot):

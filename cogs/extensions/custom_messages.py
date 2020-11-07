@@ -4,6 +4,7 @@ import discord
 from discord.ext import tasks, commands
 
 import utils
+from objects.configuration import ConfigurationDictionary
 from utils.cog_class import CogClass
 from objects import CustomMessagesConfig, Message
 
@@ -11,11 +12,6 @@ from objects import CustomMessagesConfig, Message
 class CustomMessages(CogClass, name=utils.CogNames.CustomMessages.value):
     def __init__(self, client: commands.bot):
         super().__init__(client, "./config/custom_message", CustomMessagesConfig)
-        self.approved_roles_dict = {
-            "CustomMessage": None,
-            "create_message": None,
-            "remove_message": None
-        }
         self.loop.start()
 
     def cog_unload(self):
@@ -90,6 +86,18 @@ class CustomMessages(CogClass, name=utils.CogNames.CustomMessages.value):
                         if not message.should_repeat:
                             guild.messages.pop(index)
                             self.save_configs(guild_id)
+
+    @property
+    def get_configs(self) -> ConfigurationDictionary:
+        return ConfigurationDictionary()
+
+    @property
+    def get_function_roles_reference(self) -> dict:
+        return {
+            self.custom_message.name: None,
+            self.create_message.name: None,
+            self.remove_message.name: None
+        }
 
 
 def setup(client: commands.bot):

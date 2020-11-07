@@ -9,9 +9,6 @@ from utils.cog_class import CogClass
 class ManagementTools(CogClass, name=utils.CogNames.ManagementTools.value):
     def __init__(self, client: commands.bot):
         super().__init__(client, "./config/management_tools", ManagementToolsConfig)
-        self.approved_roles_dict = {
-            "clear": None
-        }
 
     @commands.command()
     async def clear(self, ctx: commands.Context, number: str = "3"):
@@ -41,6 +38,13 @@ class ManagementTools(CogClass, name=utils.CogNames.ManagementTools.value):
         config.add_configuration(Configuration("clear_channel_id_blacklist", "clear_channel_id_blacklist", add=self.add, remove=self.remove))
 
         return config
+
+    @property
+    def get_function_roles_reference(self) -> dict:
+        return {
+            self.clear.name: None
+        }
+
 
 def setup(client: commands.bot):
     client.add_cog(ManagementTools(client))

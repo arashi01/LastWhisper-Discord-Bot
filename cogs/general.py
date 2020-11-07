@@ -10,10 +10,6 @@ class General(CogClass, name=utils.CogNames.General.value):
     def __init__(self, client: commands.bot):
         super().__init__(client, "./config/general", GeneralConfig)
         self.general_cog: General = self
-        self.approved_roles_dict = {
-            "get_prefix": None,
-            "change_prefix": None,
-        }
 
     @staticmethod
     def get_prefix(client: commands.bot, message):
@@ -48,6 +44,12 @@ class General(CogClass, name=utils.CogNames.General.value):
         config.add_configuration(Configuration("management_role_ids", "management_role_ids", add=self.add, remove=self.remove))
 
         return config
+
+    @property
+    def get_function_roles_reference(self) -> dict:
+        return {
+            self.change_prefix.name: None,
+        }
 
 
 def setup(client: commands.bot):

@@ -13,12 +13,6 @@ from utils.cog_class import CogClass
 class BuffManager(CogClass, name=utils.CogNames.BuffManager.value):
     def __init__(self, client: commands.bot) -> None:
         super().__init__(client, "./config/buff_manager", BuffManagerConfig)
-        self.approved_roles_dict = {
-            "today_buff": "today_buff_approved_roles_ids",
-            "tomorrow_buff": "tomorrows_buff_approved_roles_ids",
-            "week_buffs": "this_week_buffs_approved_roles_ids",
-            "next_week_buffs": "next_week_buffs_approved_roles_ids"
-        }
         self.today = datetime.datetime.now()
 
         self.loop.start()
@@ -158,6 +152,15 @@ class BuffManager(CogClass, name=utils.CogNames.BuffManager.value):
         config.add_configuration(Configuration("twb_ids", "twb_ids", add=self.add, remove=self.remove))
         config.add_configuration(Configuration("nwb_ids", "nwb_ids", add=self.add, remove=self.remove))
         return config
+
+    @property
+    def get_function_roles_reference(self) -> dict:
+        return {
+            self.today_buff.name: "today_buff_approved_roles_ids",
+            self.tomorrow_buff.name: "tomorrows_buff_approved_roles_ids",
+            self.week_buffs.name: "this_week_buffs_approved_roles_ids",
+            self.next_week_buffs.name: "next_week_buffs_approved_roles_ids"
+        }
     # endregion
 
 

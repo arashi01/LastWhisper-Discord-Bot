@@ -23,10 +23,6 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
     def __init__(self, client: commands.bot):
         super().__init__(client, "./config/event_manager", EventConfig)
         self.loop.start()
-        self.approved_roles_dict = {
-            "add_trigger": None,
-            "get_event_details": None
-        }
 
     def cog_unload(self):
         self.loop.cancel()
@@ -158,6 +154,13 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
         config.add_configuration(Configuration("datetime_tag", "datetime_tag", set=self.set))
 
         return config
+
+    @property
+    def get_function_roles_reference(self) -> dict:
+        return {
+            self.add_trigger.name: None,
+            self.get_event_details.name: None
+        }
 
 
 def setup(client: commands.bot):

@@ -102,6 +102,10 @@ class MemberManager(CogClass, name=utils.CogNames.MemberManager.value):
 
         return config
 
+    @property
+    def get_function_roles_reference(self) -> dict:
+        return {}
+
 
 def setup(client: commands.bot):
     client.add_cog(MemberManager(client))
