@@ -49,10 +49,6 @@ class CogClass(commands.Cog):
             if role_id in approved_roles:
                 return True
 
-        for role in ctx.author.roles:
-            if roles.__contains__(role.id):
-                return True
-
         await ctx.send("Sorry you do not have the correct permissions to invoke this command.")
         return False
 
