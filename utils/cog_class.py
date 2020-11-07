@@ -18,18 +18,13 @@ class CogClass(commands.Cog):
         self.guildDict: dict = {}
         self.config_dir: str = config_dir
         self.general_cog = client.get_cog(utils.CogNames.General.value)
-        self.approved_roles_dict: dict = {}
         self.config: ConfigurationDictionary = self.get_configs
 
         self.config_object: CustomConfigObject.__class__ = config_object
 
         self.load_configs()
 
-    @property
-    def get_configs(self) -> ConfigurationDictionary:
-        return ConfigurationDictionary()
-
-    async def cog_check(self, ctx: commands.Context):
+    async def cog_check(self, ctx: commands.Context) -> bool:
         if not self.is_enabled(ctx):
             return False
         return await self.role_check(ctx)
@@ -62,6 +57,18 @@ class CogClass(commands.Cog):
 
     async def cog_before_invoke(self, ctx):
         await self.general_cog.remove_message(ctx)
+
+    # region Getters
+    @abstractmethod
+    @property
+    def get_configs(self) -> ConfigurationDictionary:
+        pass
+
+    @abstractmethod
+    @property
+    def get_function_roles_reference(self) -> dict:
+        pass
+    # endregion
 
     # region Join and Leave Listeners
     @commands.Cog.listener()
