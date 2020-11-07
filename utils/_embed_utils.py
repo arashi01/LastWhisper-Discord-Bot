@@ -21,7 +21,7 @@ def get_date_buff_embed(title: str, date: date_object, buff: Buff) -> Embed:
     )
 
     embed.set_thumbnail(url=buff.image_url)
-    embed.add_field(name="Buff", value=f"```ini\n{buff.title}```", inline=True)
+    embed.add_field(name="Buff", value=f"```ini\n{buff.name}```", inline=True)
     return embed
 
 
@@ -35,7 +35,7 @@ def get_weeks_buff_embed(week: Week, buffs: dict) -> Embed:
     )
 
     for i in range(0, 7):
-        embed.add_field(name=days[i], value=f"```\n{buffs[list(buffs.keys())[week.get_value(i)]].title}```")
+        embed.add_field(name=days[i], value=f"```\n{buffs[list(buffs.keys())[week.get_value(i)]].name}```")
 
     return embed
 

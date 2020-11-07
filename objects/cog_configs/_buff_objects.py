@@ -3,8 +3,8 @@ from objects import CustomConfigObject, convert_dict_list, TypeObjects, TypeList
 
 class Buff(CustomConfigObject):
 
-    def __init__(self, title: str = None, image_url: str = None):
-        self.title = title
+    def __init__(self, name: str = None, image_url: str = None):
+        self.name = name
         self.image_url = image_url
 
 
