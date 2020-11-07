@@ -1,7 +1,7 @@
 import datetime
 from typing import Union
 
-from discord import TextChannel
+from discord import TextChannel, Embed
 from discord.ext import commands, tasks
 
 import utils
@@ -109,7 +109,7 @@ class BuffManager(CogClass, name=utils.CogNames.BuffManager.value):
                     raise commands.BadArgument(f"Must be {len_hold} arguments.")
                 del len_hold
                 # I cannot tell if this is a good idea in any way, shape or form,
-                # but i will leave it here unless it starts giving issues. Trying to save memory.
+                # but index will leave it here unless it starts giving issues. Trying to save memory.
 
                 obj: Union[Week, Buff] = Week(*args) if obj_type == "week" else Buff(*args)
                 config: BuffManagerConfig = self.guildDict[ctx.guild.id]
@@ -132,8 +132,37 @@ class BuffManager(CogClass, name=utils.CogNames.BuffManager.value):
                     self.save_configs(ctx.guild.id)
                 except KeyError:
                     await ctx.send("Sorry the index is not valid!")
-            elif action == "":
-                await ctx.send(f"This is an example preview cause the dev got lazy.")
+            elif action == "view":
+                def get_embed() -> Embed:
+                    result: Embed = Embed(title=f"Indexes of object **{obj_type}**", description="These are the indexes and the names of the objects registered.")
+
+                    # noinspection PyShadowingNames
+                    for index, value in self.guildDict[ctx.guild.id]["buff_list" if obj_type == "buff" else "weeks"].items():
+                        result.add_field(name=f"Index {index}", value=f"```\n{value.name}\n```", inline=False)
+
+                    return result
+
+                if len(args) == 0:
+                    await ctx.send(embed=get_embed())
+                    return
+
+                if len(args) > 1:
+                    raise commands.TooManyArguments()
+
+                try:
+                    obj: Union[Week, Buff] = self.guildDict[ctx.guild.id]["buff_list" if obj_type == "buff" else "weeks"][str(args[0])]
+                except KeyError:
+                    await ctx.send(f"Sorry the index {args[0]} is not valid. Please give a correct index.", embed=get_embed())
+                    return
+
+                embed = Embed(title=f"**{obj_type}** in Index {args[0]}", description=f"Name of object {obj_type}\n```\n{obj.name}\n```")
+                if isinstance(obj, Week):
+                    for i in range(0, 6):
+                        embed.add_field(name=f"Buff index for {utils.days[i]}", value=obj.get_value(i))
+                else:
+                    embed.set_thumbnail(url=obj.image_url)
+
+                await ctx.send(embed=embed)
             else:
                 await ctx.send(f"There is no action with the name {action}.")
         else:
