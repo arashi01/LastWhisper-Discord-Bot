@@ -1,15 +1,14 @@
-from abc import abstractmethod, ABCMeta
 import json
 import os
+from abc import abstractmethod
+from typing import Union
 
 from discord import TextChannel, Member, Role, Guild
 from discord.ext import commands
-from typing import Union
 
 import utils
-from objects import CustomConfigObject, TypeObjects, TypeList
-
-from objects.configuration import ConfigurationDictionary, Configuration
+from objects import CustomConfigObject, TypeObjects
+from objects.configuration import ConfigurationDictionary
 
 
 class CogClass(commands.Cog):
@@ -170,7 +169,7 @@ class CogClass(commands.Cog):
 
     def add(self, ctx: commands.Context, variable: str, value: Union[TextChannel, Role, Member, str, int, bool]) -> None:
         guild = self.guildDict[ctx.guild.id]
-        variable_type = guild[variable].T
+        variable_type = guild[variable].t
 
         if isinstance(variable_type, str):
             guild[variable].append(value)
@@ -186,7 +185,7 @@ class CogClass(commands.Cog):
 
     def remove(self, ctx: commands.Context, variable: str, value: Union[TextChannel, Role, Member, str, int, bool]) -> None:
         guild = self.guildDict[ctx.guild.id]
-        variable_type = guild[variable].T
+        variable_type = guild[variable].t
         actual_variable: list = guild[variable]
 
         if not len(actual_variable) > 0:

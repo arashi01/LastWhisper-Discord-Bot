@@ -1,10 +1,8 @@
-from collections import Callable
-from discord.ext.commands import Context
-from discord import Embed
 from types import CoroutineType
 
 
 class Configuration(object):
+    # noinspection PyShadowingBuiltins
     def __init__(self, name: str, config_name: str, set=None, add=None, remove=None) -> None:
         self.name: str = name
         self.config_name: str = config_name

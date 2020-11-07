@@ -3,7 +3,8 @@ from datetime import datetime
 
 
 class Message(CustomConfigObject):
-    def __init__(self, message: str = None, channel_id: TypeObjects.Channel = None, date: datetime = None, should_repeat: bool = False):
+    def __init__(self, message: str = None, channel_id: TypeObjects.Channel = None, date: datetime = None,
+                 should_repeat: bool = False):
         self.message: str = message
         self.channel_id: TypeObjects.Channel = channel_id
         self.date: datetime = date if date else datetime.now()

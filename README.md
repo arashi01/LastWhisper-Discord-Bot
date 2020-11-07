@@ -10,7 +10,7 @@ Features of the Discord bot:
   - The ability to create cogs and extensions and have the bot load, unload and reload them (Bot admin specific).
   
 Features the Discord bot does not have:
-  - Log spefic server information except for config information.
+  - Log specific server information except for config information.
   - Music bot (Yes it is there but I am not gonna finish it due to complexity)
   - Web based dash board (I do plan on creating one in the future but have no idea where to start. Any information would be appriciated.)
   - Console dash board (Still working on plans.)

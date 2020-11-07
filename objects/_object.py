@@ -14,7 +14,7 @@ class CustomConfigObject(object):
             elif isinstance(value, TypeObjects.Role):
                 obj.__dict__[key] = TypeObjects.Role(data[key])
             elif isinstance(value, TypeList):
-                obj.__dict__[key] = TypeList(value.T, list(map(value.T, data[key])))
+                obj.__dict__[key] = TypeList(value.t, list(map(value.t, data[key])))
             else:
                 obj.__dict__[key] = data[key]
 
@@ -42,7 +42,7 @@ class TypeObjects(object):
         pass
 
 
-def convert_dict_list(dictionary: dict, class_object: CustomConfigObject.__class__):
+def convert_dict_list(dictionary: dict, class_object: CustomConfigObject.__class__) -> None:
     copy: dict = dictionary.copy()
     dictionary.clear()
 
@@ -54,7 +54,9 @@ T = TypeVar('T')
 
 
 class TypeList(list, Generic[T]):
-    def __init__(self, t: T, pre_existing_list: list = []) -> None:
+    def __init__(self, t: T, pre_existing_list=None) -> None:
+        if pre_existing_list is None:
+            pre_existing_list = []
         super().__init__(pre_existing_list)
         self._T = t
 
@@ -65,5 +67,5 @@ class TypeList(list, Generic[T]):
             raise TypeError(f"Object is not of type {self._T}")
 
     @property
-    def T(self):
+    def t(self):
         return self._T

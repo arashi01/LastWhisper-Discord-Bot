@@ -4,7 +4,7 @@ from discord import Embed, TextChannel, Role, Member
 import typing
 
 from cogs.general import General
-from utils import TypeCondition, CogNames
+from utils import CogNames
 from utils.cog_class import CogClass
 
 

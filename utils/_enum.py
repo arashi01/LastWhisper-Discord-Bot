@@ -13,11 +13,3 @@ class CogNames(Enum):
     PlayManager = "PlayManager"
     MemberManager = "MemberManager"
     BuffManager = "BuffManager"
-
-# Deprecated Will be removed
-class TypeCondition(Enum):
-    NONE = 0
-    CHANNEL = 1
-    USER = 2
-    ROLE = 3
-    BOOL = 4

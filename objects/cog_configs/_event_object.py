@@ -1,6 +1,6 @@
 from time import struct_time
 
-from objects import CustomConfigObject, TypeList, TypeObjects
+from objects import CustomConfigObject, TypeObjects
 
 
 class Event(CustomConfigObject):
@@ -28,8 +28,10 @@ class EventReminderTrigger(CustomConfigObject):
 
 
 class EventConfig(CustomConfigObject):
-    def __init__(self, channel_id: TypeObjects.Channel = None, reminder_channel_id: TypeObjects.Channel = None, name_tag: str = None,
-                 description_tag: str = None, datetime_tag: str = None, event_reminder_triggers: [EventReminderTrigger] = None,
+    def __init__(self, channel_id: TypeObjects.Channel = None, reminder_channel_id: TypeObjects.Channel = None,
+                 name_tag: str = None,
+                 description_tag: str = None, datetime_tag: str = None,
+                 event_reminder_triggers: [EventReminderTrigger] = None,
                  events: [Event] = None):
         self.channel_id: int = channel_id
         self.reminder_channel_id: int = reminder_channel_id
@@ -38,7 +40,8 @@ class EventConfig(CustomConfigObject):
         self.description_tag: str = description_tag
         self.datetime_tag: str = datetime_tag
 
-        self.event_reminder_triggers: [EventReminderTrigger] = [] if not event_reminder_triggers else event_reminder_triggers
+        self.event_reminder_triggers: [EventReminderTrigger] =\
+            event_reminder_triggers if event_reminder_triggers else []
         self.events: [Event] = [] if not events else events
 
     @classmethod

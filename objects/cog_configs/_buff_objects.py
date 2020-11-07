@@ -1,5 +1,4 @@
 from objects import CustomConfigObject, convert_dict_list, TypeObjects, TypeList
-from enum import Enum, auto
 
 
 class Buff(CustomConfigObject):

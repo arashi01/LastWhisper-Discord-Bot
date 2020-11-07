@@ -1,9 +1,9 @@
 import os
 import pathlib
 from json import dump
-os.chdir(pathlib.Path(__file__).parent.parent)
-
 from objects import CustomConfigObject
+
+os.chdir(pathlib.Path(__file__).parent.parent)
 
 
 def load_as_string(path):

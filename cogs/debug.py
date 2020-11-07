@@ -19,7 +19,7 @@ class Debug(commands.Cog, name=utils.CogNames.Debug.value):
         return await ctx.bot.is_owner(ctx.author)
 
     @commands.command()
-    async def print(self, ctx: commands.Context, text):
+    async def print(self, _: commands.Context, text):
         print(text)
 
     @commands.command(aliases=["FIT"])
@@ -33,7 +33,7 @@ class Debug(commands.Cog, name=utils.CogNames.Debug.value):
         await ctx.send(embed=embed)
 
     @commands.command(name="kill")
-    async def kill(self, ctx, reason):
+    async def kill(self, ctx, _):
         await ctx.send("Kill command activated.")
         await self.client.logout()
 
