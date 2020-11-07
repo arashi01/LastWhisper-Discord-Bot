@@ -15,12 +15,13 @@ class Debug(commands.Cog, name=utils.CogNames.Debug.value):
             "reload": lambda cog_name: self.client.reload_extension(cog_name)
         }
 
-    @commands.is_owner()
+    async def cog_check(self, ctx: commands.Context):
+        return await ctx.bot.is_owner(ctx.author)
+
     @commands.command()
     async def print(self, ctx: commands.Context, text):
         print(text)
 
-    @commands.is_owner()
     @commands.command(aliases=["FIT"])
     async def fit(self, ctx: commands.Context):
         embed = discord.Embed(
@@ -31,13 +32,11 @@ class Debug(commands.Cog, name=utils.CogNames.Debug.value):
         await ctx.message.delete()
         await ctx.send(embed=embed)
 
-    @commands.is_owner()
     @commands.command(name="kill")
     async def kill(self, ctx, reason):
         await ctx.send("Kill command activated.")
         await self.client.logout()
 
-    @commands.is_owner()
     @commands.command()
     async def cog(self, ctx: commands.Context, sub_command: str = None, *cog_names):
         extension_list = self.client.extensions.keys()
