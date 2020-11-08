@@ -17,7 +17,7 @@ class CustomMessages(CogClass, name=utils.CogNames.CustomMessages.value):
     def cog_unload(self):
         self.loop.cancel()
 
-    @commands.group(name="CustomMessage")
+    @commands.group(name="CustomMessage", invoke_without_command=True)
     async def custom_message(self, ctx: commands.Context, message_id: str = None):
         guild: CustomMessagesConfig = self.guildDict[ctx.guild.id]
         if not message_id:
