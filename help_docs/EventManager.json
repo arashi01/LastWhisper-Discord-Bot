@@ -1,0 +1,10 @@
+{
+  "add_trigger": {
+    "brief": "Added an Event Reminder.",
+    "help": "This command adds a Event Reminder that will fire when the an event has x hours and y minutes before it beings.\nThe message provided is what will be posted when the trigger fires."
+  },
+  "get_event_details": {
+    "brief": "Gets Details About Events",
+    "help": "This command will show a list of Events that are gonna happen or given an index show more details about the event such as its description and time."
+  }
+}

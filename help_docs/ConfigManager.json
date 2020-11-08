@@ -1,0 +1,30 @@
+{
+  "config": {
+    "brief": "Manages Server Extension Configs.",
+    "help": "This command is used to manage the configs of the extensions of your Discord server. By itself however it will show a preview of the running configurations.",
+    "commands": {
+      "reload": {
+        "brief": "Reloads Running Configs.",
+        "help": "While normally not needed this command allows you to reload the running configs of your server if the extension in case you feel the extension running configs have not been refreshed."
+      }
+    }
+  },
+  "extension": {
+    "brief": "Manages Server Extensions.",
+    "help": "This command allows you to manage your Discord server extensions. Enabling, disabling and checking its status.\nBy itself the command shows the status of all the extensions.",
+    "commands": {
+      "is_enabled": {
+        "brief": "Is Extension Enabled?",
+        "help": "Returns whether or not the extension is enabled on your Discord server."
+      },
+      "enable": {
+        "brief": "Enables Extension.",
+        "help": "Enables the extension on your Discord server. Will inform you if the extension is already enabled and will create a config file if missing."
+      },
+      "disable": {
+        "brief": "Disables Extension.",
+        "help": "Disables the extension on your Discord server. Will inform you if the extension is already disabled."
+      }
+    }
+  }
+}

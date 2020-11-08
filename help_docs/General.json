@@ -1,0 +1,6 @@
+{
+  "changePrefix": {
+    "brief": "Changes Prefix Used in Server",
+    "help": "This command changes the prefix used by the server to the one provided (This can be anything. Even multiple characters).\nNote: Giving it no prefix will make the prefix be set to default."
+  }
+}

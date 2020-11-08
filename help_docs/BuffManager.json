@@ -1,0 +1,22 @@
+{
+  "today_buff": {
+    "brief": "Shows today's buff.",
+    "help": "This command makes the bot show the buff that is to be used today."
+  },
+  "tomorrow_buff": {
+    "brief": "Shows tomorrow's buff.",
+    "help": "This command makes the bot show the buff that is to be used tomorrow."
+  },
+  "week_buffs": {
+    "brief": "Shows the buffs of this week.",
+    "help": "This command will display the lineup of buffs to be used throughout the week."
+  },
+  "next_week_buffs": {
+    "brief": "Shows the buffs of next week.",
+    "help": "This command will display the lineup of buffs to be used throughout next week."
+  },
+  "BuffManager": {
+    "brief": "Manages the buffs.",
+    "help": "This command is used to manage the buff objects that are used in BuffManager extension of your server."
+  }
+}

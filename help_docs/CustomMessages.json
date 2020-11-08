@@ -1,0 +1,16 @@
+{
+  "CustomMessage": {
+    "brief": "Manages Custom Messages",
+    "help": "This command is used to manage your custom messages.\nBy itself it will display a list of messages and with a index number will show the message details.",
+    "commands": {
+      "create_message": {
+        "brief": "Creates a custom message.",
+        "help": "Create a new custom message.\nNote: hours must be in 24 hour format."
+      },
+      "remove_message": {
+        "brief": "Removes a custom message.",
+        "help": "This command will remove the custom message of with the provided index."
+      }
+    }
+  }
+}
