@@ -17,7 +17,7 @@ class CogClass(commands.Cog):
         self.guildDict: dict = {}
         self.config_dir: str = config_dir
         self.config: ConfigurationDictionary = self.get_configs
-        self._general_cog = None
+        self._general_cog = self.client.get_cog(utils.CogNames.General.value)
 
         self.config_object: CustomConfigObject.__class__ = config_object
 
