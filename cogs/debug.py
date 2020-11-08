@@ -40,12 +40,13 @@ class Debug(commands.Cog, name=utils.CogNames.Debug.value):
     @commands.command()
     async def cog(self, ctx: commands.Context, sub_command: str = None, *cog_names):
         extension_list = self.client.extensions.keys()
-        cog_list = self.get_cog_list("./cogs")
+        cog_list = get_cog_list("./cogs")
 
         if not sub_command:
             cogs = ""
             for cog in cog_list:
-                cogs += (":x:" if cog not in extension_list else ":white_check_mark:") + " " + str(cog).split(".").pop() + "\n"
+                cogs += (":x:" if cog not in extension_list else ":white_check_mark:") + " " + str(cog).split(
+                    ".").pop() + "\n"
             embed: discord.Embed = discord.Embed(title="Cogs loaded.", description=cogs)
             await ctx.send(embed=embed)
             return
@@ -93,16 +94,17 @@ class Debug(commands.Cog, name=utils.CogNames.Debug.value):
 
         await ctx.send(embed=embed)
 
-    def get_cog_list(self, path: str):
-        result = []
-        for f in os.listdir(path):
-            if os.path.isdir(f"{path}/{f}"):
-                result.extend(self.get_cog_list(f"{path}/{f}"))
-            else:
-                if f.endswith(".py"):
-                    result.append(f"{path[2:]}/{f[:-3]}".replace("/", "."))
 
-        return result
+def get_cog_list(path: str):
+    result = []
+    for f in os.listdir(path):
+        if os.path.isdir(f"{path}/{f}"):
+            result.extend(get_cog_list(f"{path}/{f}"))
+        else:
+            if f.endswith(".py"):
+                result.append(f"{path[2:]}/{f[:-3]}".replace("/", "."))
+
+    return result
 
 
 def setup(client: commands.bot):

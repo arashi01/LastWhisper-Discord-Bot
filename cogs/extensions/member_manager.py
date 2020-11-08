@@ -29,6 +29,7 @@ class MemberManager(CogClass, name=utils.CogNames.MemberManager.value):
 
     @commands.Cog.listener()
     async def on_ready(self):
+        await super().on_ready()
         for guild_id, guild_config in self.guildDict.items():
             messages: [discord.message] = await self.client.get_channel(guild_config.welcome_channel_id).history(limit=None).flatten()
             message_ids: [int] = [message.id for message in messages]

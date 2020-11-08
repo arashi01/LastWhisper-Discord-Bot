@@ -11,7 +11,11 @@ from utils.cog_class import CogClass
 class ConfigManager(commands.Cog, name=CogNames.ConfigManager.value):
     def __init__(self, client: commands.bot):
         self.client: commands.bot = client
-        self.general_cog: General = client.cogs[CogNames.General.value]
+        self.general_cog = None
+
+    @commands.Cog.listener()
+    async def on_ready(self):
+        self.general_cog: General = self.client.cogs[CogNames.General.value]
 
     async def cog_before_invoke(self, ctx: commands.Context):
         pass

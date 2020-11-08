@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 
 from cogs import general
+from cogs.debug import get_cog_list
 import utils
 from utils import logger
 import shutil
@@ -19,12 +20,8 @@ async def on_ready():
 
 
 if __name__ == "__main__":
-    client.load_extension(f"cogs.general")
-    client.load_extension(f"cogs.debug")
-    client.load_extension(f"cogs.config_manager")
-    for f in utils.os.listdir("./cogs/extensions"):
-        if f.endswith(".py"):
-            client.load_extension(f"cogs.extensions.{f[:-3]}")
+    for extension in get_cog_list("./cogs"):
+        client.load_extension(extension)
 
     client.run(utils.load_as_string("./token"))
     shutil.rmtree("./.temp")

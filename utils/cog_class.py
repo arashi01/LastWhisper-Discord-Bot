@@ -12,17 +12,20 @@ from objects.configuration import ConfigurationDictionary
 
 
 class CogClass(commands.Cog):
-
     def __init__(self, client: commands.bot, config_dir: str, config_object: CustomConfigObject.__class__) -> None:
         self.client: commands.bot = client
         self.guildDict: dict = {}
         self.config_dir: str = config_dir
-        self.general_cog = client.get_cog(utils.CogNames.General.value)
         self.config: ConfigurationDictionary = self.get_configs
+        self._general_cog = None
 
         self.config_object: CustomConfigObject.__class__ = config_object
 
         self.load_configs()
+
+    @commands.Cog.listener()
+    async def on_ready(self):
+        self._general_cog = self.client.get_cog(utils.CogNames.General.value)
 
     async def cog_check(self, ctx: commands.Context) -> bool:
         if not self.is_enabled(ctx):
@@ -42,7 +45,7 @@ class CogClass(commands.Cog):
                   "Roles will default to management.")
             approved_roles = None
         finally:
-            approved_roles = approved_roles if approved_roles else self.general_cog.get_management_role_ids(ctx.guild.id)
+            approved_roles = approved_roles if approved_roles else self._general_cog.get_management_role_ids(ctx.guild.id)
 
         for role_id in [role.id for role in ctx.author.roles]:
             if role_id in approved_roles:
@@ -52,7 +55,7 @@ class CogClass(commands.Cog):
         return False
 
     async def cog_after_invoke(self, ctx) -> None:
-        await self.general_cog.remove_message(ctx)
+        await self._general_cog.remove_message(ctx)
 
     # region Getters
     @property
