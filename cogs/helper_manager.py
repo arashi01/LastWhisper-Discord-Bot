@@ -31,12 +31,23 @@ class HelperManager(commands.Cog):
                 with open(f"./help_docs/{cog.qualified_name}.json") as f:
                     help_doc = json.load(f)
 
+                def set_commands_help(_command, _docs: {}):
+                    if _command.name not in _docs:
+                        return
+
+                    set_help(_command, _docs[_command.name])
+                    if isinstance(_command, commands.Group) and "commands" in _docs[_command.name]:
+                        for _sub_command in _command.commands:
+                            set_commands_help(_sub_command, _docs[_command.name]["commands"])
+
+                def set_help(_command: commands.Command, _doc: dict):
+                    if "help" in _doc:
+                        _command.help = _doc["help"]
+                    if "brief" in _doc:
+                        _command.brief = _doc["brief"]
+
                 for command in cog.get_commands():
-                    if command.name in help_doc:
-                        if "help" in (doc := help_doc[command.name]):
-                            command.help = doc["help"]
-                        if "brief" in (doc := help_doc[command.name]):
-                            command.brief = doc["brief"]
+                    set_commands_help(command, help_doc)
 
             except json.JSONDecodeError:
                 print(f"There is an issue with helper doc {cog.qualified_name}. Please Fix.")
