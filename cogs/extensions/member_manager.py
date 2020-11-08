@@ -82,7 +82,6 @@ class MemberManager(CogClass, name=utils.CogNames.MemberManager.value):
         role: discord.Role = get(member.guild.roles, id=guild.new_member_role_id)
         await member.add_roles(role)
 
-    @commands.command()
     @commands.Cog.listener()
     async def on_member_remove(self, member: discord.Member):
         guild = self.guildDict[member.guild.id]
