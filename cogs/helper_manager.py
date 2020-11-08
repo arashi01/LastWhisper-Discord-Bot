@@ -9,6 +9,9 @@ class HelperManager(commands.Cog):
         if not os.path.isdir("./help_docs"):
             os.mkdir("./help_docs")
 
+    def cog_check(self, ctx):
+        return self.client.is_owner(ctx.author)
+
     @commands.Cog.listener()
     async def on_ready(self):
         self._load_help_docs()
