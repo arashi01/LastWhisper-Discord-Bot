@@ -49,7 +49,7 @@ class CustomMessages(CogClass, name=utils.CogNames.CustomMessages.value):
                              hour: int, minute: int,
                              should_repeat: bool = False):
         guild: CustomMessagesConfig = self.guildDict[ctx.guild.id]
-        if channel_id not in [channel.id for channel in ctx.guild.channels]:
+        if channel_id not in ctx.guild.channels:
             raise commands.BadArgument(f"There is not channel with the ID **{channel_id}** on your server.")
 
         message = Message(message, TypeObjects.Channel(channel_id.id), datetime(year, month, day, hour, minute), should_repeat)
@@ -101,4 +101,5 @@ class CustomMessages(CogClass, name=utils.CogNames.CustomMessages.value):
 
 
 def setup(client: commands.bot):
-    client.add_cog(CustomMessages(client))
+    # client.add_cog(CustomMessages(client))
+    ...
