@@ -17,8 +17,9 @@ class HelperManager(commands.Cog):
         self._load_help_docs()
 
     @commands.Command
-    async def reload_help_docs(self, _):
+    async def reload_help_docs(self, ctx):
         self._load_help_docs()
+        await ctx.send("done.")
 
     def _load_help_docs(self):
         cog: commands.Cog
