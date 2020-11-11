@@ -9,6 +9,7 @@ from utils.cog_class import CogClass
 
 
 class ConfigManager(commands.Cog, name=CogNames.ConfigManager.value):
+
     def __init__(self, client: commands.bot):
         self.client: commands.bot = client
         self.general_cog = self.client.get_cog(CogNames.General.value)
@@ -61,7 +62,7 @@ class ConfigManager(commands.Cog, name=CogNames.ConfigManager.value):
         embed: Embed = Embed(title="Extensions Status")
         for cog in self.client.cogs.values():
             if isinstance(cog, CogClass):
-                embed.add_field(name=cog.qualified_name, value=":white_check_mark:" if cog.is_enabled(ctx) else ":x:")
+                embed.add_field(name=cog.qualified_name, value=':white_check_mark: Enabled' if cog.is_enabled(ctx) else ':x: Disabled')
 
         await ctx.send(embed=embed)
 
@@ -71,7 +72,7 @@ class ConfigManager(commands.Cog, name=CogNames.ConfigManager.value):
             cog = self.client.cogs[extension]
             if isinstance(cog, CogClass):
                 embed = Embed(title=cog.qualified_name,
-                              description=':white_check_mark:' if cog.is_enabled(ctx) else ':x:')
+                              description=':white_check_mark: Enabled' if cog.is_enabled(ctx) else ':x: Disabled')
                 await ctx.send(embed=embed)
             else:
                 await ctx.send(f"Extension **{extension}** does not exist.")
