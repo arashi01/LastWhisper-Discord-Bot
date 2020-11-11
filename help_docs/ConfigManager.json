@@ -11,18 +11,18 @@
   },
   "extension": {
     "brief": "Manages Server Extensions.",
-    "help": "This command allows you to manage your Discord server extensions. Enabling, disabling and checking its status.\nBy itself the command shows the status of all the extensions.",
+    "help": "This command allows you to manage your Discord server extensions, enabling, disabling and checking its status.\nBy itself the command shows the status of all the extensions.",
     "commands": {
       "is_enabled": {
         "brief": "Is Extension Enabled?",
         "help": "Returns whether or not the extension is enabled on your Discord server."
       },
       "enable": {
-        "brief": "Enables Extension.",
+        "brief": "Enables Extension",
         "help": "Enables the extension on your Discord server. Will inform you if the extension is already enabled and will create a config file if missing."
       },
       "disable": {
-        "brief": "Disables Extension.",
+        "brief": "Disables Extension",
         "help": "Disables the extension on your Discord server. Will inform you if the extension is already disabled."
       }
     }

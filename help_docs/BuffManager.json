@@ -1,4 +1,5 @@
 {
+  "description": "An extension to assist with your Free Company buff rotation.",
   "today_buff": {
     "brief": "Shows today's buff.",
     "help": "This command makes the bot show the buff that is to be used today."
