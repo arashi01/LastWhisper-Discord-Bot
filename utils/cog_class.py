@@ -33,11 +33,10 @@ class CogClass(commands.Cog):
         return await self.role_check(ctx)
 
     async def role_check(self, ctx: commands.Context) -> bool:
-        command = str(ctx.command).split(" ").pop()
         approved_roles: [] = []
 
         try:
-            approved_roles = self.guildDict[ctx.guild.id][self.get_function_roles_reference[command]]
+            approved_roles = self.guildDict[ctx.guild.id][self.get_function_roles_reference[ctx.command.name]]
         except KeyError:
             approved_roles = None
         except NotImplementedError:
@@ -45,13 +44,19 @@ class CogClass(commands.Cog):
                   "Roles will default to management.")
             approved_roles = None
         finally:
-            approved_roles = approved_roles if approved_roles else self._general_cog.get_management_role_ids(ctx.guild.id)
+            approved_roles = approved_roles if approved_roles is not None else self._general_cog.get_management_role_ids(ctx.guild.id)
 
-        for role_id in [role.id for role in ctx.author.roles]:
-            if role_id in approved_roles:
+        if len(approved_roles) == 0:
+            return True
+
+        member_roles = [role.id for role in ctx.author.roles]
+        for role in approved_roles:
+            if role in member_roles:
                 return True
 
-        await ctx.send("Sorry you do not have the correct permissions to invoke this command.")
+        if ctx.invoked_with != "help":
+            await ctx.send("Sorry you do not have the correct permissions to invoke this command.")
+
         return False
 
     async def cog_after_invoke(self, ctx) -> None:
