@@ -113,8 +113,9 @@ class ConfigManager(commands.Cog, name=CogNames.ConfigManager.value):
         for role in ctx.author.roles:
             if roles.__contains__(role.id):
                 return True
+        if ctx.invoked_with != "help":
+            await ctx.send("Sorry you do not have the correct permissions to invoke this command.")
 
-        await ctx.send("Sorry you do not have the correct permissions to invoke this command.")
         return False
 
 
