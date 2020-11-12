@@ -216,7 +216,7 @@ class HelperManager(commands.Cog):
 
             # noinspection PyShadowingNames
             def add_sub_commands(self, commands: [commands.Command], category: str = "Commands:") -> None:
-                self._embed.add_field(name=f"Category {category}:" if category != "Commands:" else category,
+                self._embed.add_field(name=f"Category *{category}:*" if category != "Commands:" else category,
                                       value="> " + "\n> ".join(
                                           [f"***{command.name}:*** {command.short_doc}" for command in commands]),
                                       inline=False)
