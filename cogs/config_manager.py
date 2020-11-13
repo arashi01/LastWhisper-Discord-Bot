@@ -37,8 +37,17 @@ class ConfigManager(commands.Cog, name=CogNames.ConfigManager.value):
                     if isinstance(variable_result := cog.config.get_configurations_dict[variable], dict):
                         if action in ("set", "add", "remove"):
                             variable_result[action](ctx, variable_result["config_name"], value)
+                        elif action == "":
+                            embed: Embed = variable_result["long preview"](Embed(), ctx, variable_result["config_name"])
+                            await ctx.send(embed=embed)
+                        else:
+                            raise commands.BadArgument(f"Action **{action}** is not valid.")
                     else:
-                        await ctx.send(variable_result)
+                        raise commands.BadArgument(f"**{variable}** is not valid configuration name for Extension **{extension}**.")
+                else:
+                    raise commands.BadArgument(f"**{extension}** is not Extension.")
+            else:
+                raise commands.BadArgument(f"**{extension}** does not exist.")
 
     @config.command()
     async def reload(self, ctx: commands.Context, extension: str):
