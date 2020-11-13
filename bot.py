@@ -5,7 +5,6 @@ from cogs import general, helper_manager
 from cogs.debug import get_cog_list
 import utils
 from utils import logger
-import shutil
 
 intents = discord.Intents.default()
 intents.members = True
@@ -24,6 +23,5 @@ if __name__ == "__main__":
         client.load_extension(extension)
 
     client.run(utils.load_as_string("./token"))
-    shutil.rmtree("./.temp")
     print("Good Bye!")
 
