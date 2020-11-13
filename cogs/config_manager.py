@@ -25,6 +25,7 @@ class ConfigManager(commands.Cog, name=CogNames.ConfigManager.value):
     async def config(self, ctx: commands.Context, extension: str = None, variable: str = "", action: str = "", value: typing.Union[TextChannel, Role, Member, str, int, bool] = None):
         embed: Embed = Embed(title="Available Extensions Configs")
         if not extension:
+            embed: Embed = Embed(title="Available Extensions Configs")
             for cog in self.client.cogs.values():
                 if isinstance(cog, CogClass):
                     embed.add_field(name=cog.qualified_name, value="___")
