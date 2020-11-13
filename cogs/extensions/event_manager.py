@@ -33,39 +33,37 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
     @tasks.loop(minutes=1)
     async def loop(self):
         await self.client.wait_until_ready()
-        now: struct_time = struct_time(localtime())
+        now = datetime.now()
 
-        guild: EventConfig
-        for guild_id, guild in self.guildDict.items():
-            if not len(guild.events) >= 1:
+        for guild_id, config in self.guildDict.items():
+            if not len(config.events) or not len(config.event_reminder_triggers):
                 continue
 
-            if not len(guild.event_reminder_triggers) >= 1:
-                continue
+            for event in config.events:
+                event_datetime = datetime.fromtimestamp(mktime(event.datetime))
 
-            for event in guild.events:
-                if event.datetime.tm_mday == now.tm_mday and event.datetime.tm_mon == now.tm_mon:
-                    channel = self.client.get_guild(guild_id).get_channel(guild.reminder_channel_id)
+                if event_datetime.date() == now.date():
+                    channel = self.client.get_guild(guild_id).get_channel(config.reminder_channel_id)
 
-                    reminder: EventReminderTrigger
-                    for reminder in guild.event_reminder_triggers:
-                        if (
-                                event.datetime.tm_hour - reminder.hour_diff,
-                                event.datetime.tm_min - reminder.minute_diff) == (
-                                now.tm_hour, now.tm_min):
+                    for reminder in config.event_reminder_triggers:
+                        if (now + timedelta(hours=reminder.hour_diff, minutes=reminder.minute_diff)).time().replace(
+                                second=0, microsecond=0) == event_datetime.time():
+                            def _add_s(number: int) -> str:
+                                return "s" if number > 1 else ""
+
                             event_dict = {
                                 "event_name": event.name,
-                                "time_remaining": (f"{reminder.hour_diff} hour{'s' if reminder.hour_diff > 1 else ''}" if reminder.hour_diff > 1 else '') +
-                                                  (" and " if reminder.hour_diff > 0 and reminder.minute_diff > 0 else "") +
-                                                  (f"{reminder.minute_diff} minute{'s' if reminder.minute_diff > 1 else ''}" if reminder.minute_diff > 1 else '')
+                                "hours_remaining": f"{reminder.hour_diff} hour{_add_s(reminder.hour_diff)} remaining" if reminder.hour_diff > 0 else "",
+                                "minutes_remaining": f"{reminder.minute_diff} minute{_add_s(reminder.minute_diff)} remaining" if reminder.minute_diff > 0 else "",
+                                "and": " and " if (reminder.hour_diff * 60) + reminder.minute_diff > 60 else ""
                             }
 
                             await channel.send(reminder.message % event_dict)
 
-            dif = len(guild.events)
-            guild.events = [x for x in guild.events if
-                            not (datetime.fromtimestamp(mktime(x.datetime)) < datetime.fromtimestamp(mktime(now)))]
-            if dif > len(guild.events):
+            dif = len(config.events)
+            config.events = [_event for _event in config.events if
+                             datetime.fromtimestamp(mktime(_event.datetime)) > now]
+            if dif > len(config.events):
                 self.save_configs(guild_id)
 
     # region Events
