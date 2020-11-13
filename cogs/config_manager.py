@@ -49,6 +49,8 @@ class ConfigManager(commands.Cog, name=CogNames.ConfigManager.value):
             else:
                 raise commands.BadArgument(f"**{extension}** does not exist.")
 
+        await ctx.send("Done.")
+
     @config.command()
     async def reload(self, ctx: commands.Context, extension: str):
         if extension in self.client.cogs:
