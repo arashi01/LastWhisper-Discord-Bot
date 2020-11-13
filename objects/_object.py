@@ -7,16 +7,19 @@ class CustomConfigObject(object):
         obj = cls()
 
         for key, value in obj.__dict__.items():
-            if isinstance(value, TypeObjects.Channel):
-                obj.__dict__[key] = TypeObjects.Channel(data[key])
-            elif isinstance(value, TypeObjects.Member):
-                obj.__dict__[key] = TypeObjects.Member(data[key])
-            elif isinstance(value, TypeObjects.Role):
-                obj.__dict__[key] = TypeObjects.Role(data[key])
-            elif isinstance(value, TypeList):
-                obj.__dict__[key] = TypeList(value.t, list(map(value.t, data[key])))
-            else:
-                obj.__dict__[key] = data[key]
+            try:
+                if isinstance(value, TypeObjects.Channel):
+                    obj.__dict__[key] = TypeObjects.Channel(data[key])
+                elif isinstance(value, TypeObjects.Member):
+                    obj.__dict__[key] = TypeObjects.Member(data[key])
+                elif isinstance(value, TypeObjects.Role):
+                    obj.__dict__[key] = TypeObjects.Role(data[key])
+                elif isinstance(value, TypeList):
+                    obj.__dict__[key] = TypeList(value.t, list(map(value.t, data[key])))
+                else:
+                    obj.__dict__[key] = data[key]
+            except KeyError:
+                pass
 
         return obj
 
