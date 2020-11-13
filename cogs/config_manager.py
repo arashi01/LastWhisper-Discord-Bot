@@ -12,7 +12,7 @@ class ConfigManager(commands.Cog, name=CogNames.ConfigManager.value):
 
     def __init__(self, client: commands.bot):
         self.client: commands.bot = client
-        self.general_cog = self.client.get_cog(CogNames.General.value)
+        self.general_cog: General = self.client.get_cog(CogNames.General.value)
 
     @commands.Cog.listener()
     async def on_ready(self):
