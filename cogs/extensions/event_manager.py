@@ -90,13 +90,8 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
 
             await ctx.send(embed=embed)
 
-    @commands.command()
-    async def add_trigger(self, ctx: commands.Context, hour_dif: int, minute_dif: int, message: str):
-        self.guildDict[ctx.guild.id].event_reminder_triggers.append(EventReminderTrigger(hour_dif, minute_dif, message))
-        self.save_configs(ctx.guild.id)
-
-    @commands.Cog.listener()
-    async def on_message(self, message: Message):
+    @commands.Cog.listener(name="on_message")
+    async def create_event(self, message: Message):
         if message.author == self.client.user:
             return
 
