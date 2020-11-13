@@ -1,14 +1,15 @@
 import discord
 from discord.ext import commands
 
-from cogs import general, helper_manager
-from cogs.debug import get_cog_list
 import utils
+from cogs import general
+from cogs.debug import get_cog_list
 from utils import logger
 
 intents = discord.Intents.default()
 intents.members = True
 intents.messages = True
+intents.reactions = True
 
 client = commands.Bot(command_prefix=general.General.get_prefix, intents=intents, help_command=None)
 
