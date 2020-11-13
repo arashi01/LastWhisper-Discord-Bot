@@ -54,8 +54,7 @@ class EventConfig(CustomConfigObject):
 
     @classmethod
     def from_json(cls, data):
-        obj = cls()
-        obj.__dict__ = data
+        obj = super().from_json(data)
 
         obj.events = list(map(Event.from_json, obj.events))
         obj.event_reminder_triggers = list(map(EventReminderTrigger.from_json, obj.event_reminder_triggers))
