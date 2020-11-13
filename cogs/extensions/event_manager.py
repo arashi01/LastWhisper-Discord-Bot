@@ -357,13 +357,26 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
         config.add_configuration(Configuration("description_tag", "description_tag", set=self.set))
         config.add_configuration(Configuration("datetime_tag", "datetime_tag", set=self.set))
 
+        config.add_configuration(Configuration("event_ids", "event_ids", add=self.add, remove=self.remove))
+        config.add_configuration(Configuration("event_edit_ids", "event_edit_ids", add=self.add, remove=self.remove))
+        config.add_configuration(Configuration("event_cancel_ids", "event_cancel_ids", add=self.add, remove=self.remove))
+
+        config.add_configuration(Configuration("trigger_ids", "trigger_ids", add=self.add, remove=self.remove))
+        config.add_configuration(Configuration("trigger_edit_ids", "trigger_edit_ids", add=self.add, remove=self.remove))
+        config.add_configuration(Configuration("trigger_remove_ids", "trigger_remove_ids", add=self.add, remove=self.remove))
+
         return config
 
     @property
     def get_function_roles_reference(self) -> dict:
         return {
-            self.add_trigger.name: None,
-            self.get_event_details.name: None
+            self.event.name: "event_ids",
+            self.edit_event.name: "event_edit_ids",
+            self.cancel_event.name: "event_cancel_ids",
+
+            self.add_trigger.name: "trigger_ids",
+            self.edit_trigger.name: "trigger_edit_ids",
+            self.remove_trigger.name: "trigger_remove_ids"
         }
 
 
