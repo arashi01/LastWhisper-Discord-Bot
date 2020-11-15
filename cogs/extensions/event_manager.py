@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from enum import Enum
 from time import strptime, mktime, strftime, asctime
 
-from discord import Embed, Message
+from discord import Embed, Message, HTTPException
 from discord.ext import commands, tasks
 
 import utils
@@ -36,14 +36,15 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
         now = datetime.now()
 
         for guild_id, config in self.guildDict.items():
-            if not len(config.events) or not len(config.event_reminder_triggers):
+            if not (len(config.events) and len(config.event_reminder_triggers)):
                 continue
 
             for event in config.events:
                 event_datetime = datetime.fromtimestamp(mktime(event.datetime))
 
                 if event_datetime.date() == now.date():
-                    channel = self.client.get_guild(guild_id).get_channel(config.reminder_channel_id)
+                    if not (channel := self.client.get_guild(guild_id).get_channel(config.reminder_channel_id)):
+                        continue
 
                     for reminder in config.event_reminder_triggers:
                         if (now + timedelta(hours=reminder.hour_diff, minutes=reminder.minute_diff)).time().replace(
@@ -58,7 +59,10 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
                                 "and": " and " if (reminder.hour_diff * 60) + reminder.minute_diff > 60 else ""
                             }
 
-                            await channel.send(reminder.message % event_dict)
+                            try:
+                                await channel.send(reminder.message % event_dict)
+                            except HTTPException as e:
+                                print(e)
 
             dif = len(config.events)
             config.events = [_event for _event in config.events if
