@@ -167,7 +167,7 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
     async def edit_event(self, ctx: commands.Context, index: int, name: str = "", time: str = "", *,
                          description: str = ""):
         config: EventConfig = self.guildDict[ctx.guild.id]
-        if index - 1 >= len(config.events) or index <= 0:
+        if 0 >= index - 1 >= len(config.events):
             raise commands.BadArgument(f"Index {index} out of range.")
 
         old_event: Event = copy.deepcopy(new_event := config.events[index - 1])
