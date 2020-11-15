@@ -116,12 +116,13 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
         state: States = States.NONE
         for line in content:
             if (hold := line.replace(" ", "")).startswith("[") and hold.endswith("]"):
-                if (guild.name_tag.replace(" ", ""), guild.description_tag.replace(" ", ""),
-                    guild.datetime_tag.replace(" ", "")).__contains__(hold[1:-1]):
+                if hold[1:-1] in (_name_tag := config.name_tag.replace(" ", ""),
+                                  _description_tag := config.description_tag.replace(" ", ""),
+                                  _datetime_tag := config.datetime_tag.replace(" ", "")):
                     state = {
-                        guild.name_tag.replace(" ", ""): States.NAME,
-                        guild.description_tag.replace(" ", ""): States.DESCRIPTION,
-                        guild.datetime_tag.replace(" ", ""): States.TIME
+                        _name_tag: States.NAME,
+                        _description_tag: States.DESCRIPTION,
+                        _datetime_tag: States.TIME
                     }[hold[1:-1]]
                 else:
                     state = States.NONE
