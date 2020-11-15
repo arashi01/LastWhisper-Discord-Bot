@@ -53,6 +53,8 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
                                 return "s" if number > 1 else ""
 
                             event_dict = {
+                                "everyone": "@everyone",
+                                "here": "@here",
                                 "event_name": event.name,
                                 "hours_remaining": f"{reminder.hour_diff} hour{_add_s(reminder.hour_diff)} remaining" if reminder.hour_diff > 0 else "",
                                 "minutes_remaining": f"{reminder.minute_diff} minute{_add_s(reminder.minute_diff)} remaining" if reminder.minute_diff > 0 else "",
