@@ -145,7 +145,7 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
         if not (event.name and event.description and event.datetime):
             return
 
-        guild.events.append(event)
+        config.events.append(event)
         self.save_configs(message.guild.id)
 
     @event.command(name="cancel")
