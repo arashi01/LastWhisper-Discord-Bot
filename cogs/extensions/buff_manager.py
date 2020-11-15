@@ -101,6 +101,8 @@ class BuffManager(CogClass, name=utils.CogNames.BuffManager.value):
         buff: Buff = config.buff_list[list(config.buff_list.keys())[week.get_value(col)]]
         return week, buff
 
+    # todo: rework think into an wizard for both weeks and buffs.
+    # Note: send throws an HTTPException if the thumbnail is not set correctly.
     @commands.command(name="BuffManager")
     async def buff_manager(self, ctx: commands.Context, obj_type: str, action: str = None, *args) -> None:
         if obj_type in ("week", "buff"):
