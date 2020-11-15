@@ -31,21 +31,23 @@ class BuffManager(CogClass, name=utils.CogNames.BuffManager.value):
                 if not (morning_message_channel := self.client.get_channel(config.mm_channel_id)):
                     continue
 
-                # Posts the daily buff message.
-                await morning_message_channel.send("Good morning Everyone!",
-                                                   embed=utils.get_date_buff_embed(
-                                                       "Today's buff shall be:",
-                                                       self.today,
-                                                       buff
-                                                   ))
+                week, buff = self.get_week_buff(config, self.now)
 
-                # Posts the weeks buffs message.
-                if self.today.weekday() == 0:
-                    await morning_message_channel.send(
-                        embed=utils.get_weeks_buff_embed(
-                            week,
-                            guild.buff_list
-                        ))
+                try:
+                    # Posts the daily buff message.
+                    await morning_message_channel.send("Good morning Everyone!",
+                                                       embed=utils.get_date_buff_embed(
+                                                           "Today's buff shall be:",
+                                                           self.now,
+                                                           buff
+                                                       ))
+
+                    # Posts the weeks buffs message.
+                    if self.now.weekday() == 0:
+                        await morning_message_channel.send(embed=utils.get_weeks_buff_embed(week, config.buff_list))
+
+                except HTTPException as e:
+                    print(e)
 
     @commands.command(aliases=["today'sBuff", "tdb"])
     async def today_buff(self, ctx: commands.Context) -> None:
