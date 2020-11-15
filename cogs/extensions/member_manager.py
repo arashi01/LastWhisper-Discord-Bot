@@ -15,7 +15,7 @@ class MemberManager(CogClass, name=utils.CogNames.MemberManager.value):
     async def on_ready(self):
         await super().on_ready()
 
-        for key, config in self.guildDict.items():
+        for config in self.guildDict.values():
             if channel := self.client.get_channel(config.welcome_channel_id):
                 messages: [Message] = await channel.history(limit=None).flatten()
 
