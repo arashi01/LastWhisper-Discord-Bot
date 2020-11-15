@@ -47,7 +47,7 @@ class MemberManager(CogClass, name=utils.CogNames.MemberManager.value):
         embed.add_field(name="Joined On:", value=str(member.joined_at)[:-7])
         embed.add_field(name="Nickname was:", value=member.nick)
         embed.set_thumbnail(url=member.avatar_url)
-        await get(member.guild.channels, id=guild.on_member_leave_logging_channel).send(embed=embed)
+        await self.client.get_channel(guild.on_member_leave_logging_channel).send(embed=embed)
 
     @property
     def get_configs(self) -> ConfigurationDictionary:
