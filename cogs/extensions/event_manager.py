@@ -99,11 +99,15 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
         if message.author == self.client.user:
             return
 
-        if not self.guildDict.__contains__(message.guild.id):
+        # noinspection PyTypeChecker
+        if not self.is_enabled(message):  # This works due to the context have the same setup for getting the guild id.
             return
 
-        guild: EventConfig = self.guildDict[message.guild.id]
-        if not guild.channel_id == message.channel.id:
+        config: EventConfig = self.guildDict[message.guild.id]
+        if not config.channel_id:
+            return
+
+        if not config.channel_id == message.channel.id:
             return
 
         event: Event = Event()
