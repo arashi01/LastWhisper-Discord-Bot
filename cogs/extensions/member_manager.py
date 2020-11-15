@@ -12,6 +12,28 @@ class MemberManager(CogClass, name=utils.CogNames.MemberManager.value):
         super().__init__(client, "./config/member_manager", MemberManagerConfig)
 
     @commands.Cog.listener()
+    async def on_ready(self):
+        await super().on_ready()
+
+        for key, config in self.guildDict.items():
+            if channel := self.client.get_channel(config.welcome_channel_id):
+                messages: [Message] = await channel.history(limit=None).flatten()
+
+                if not ((new_member_role := channel.guild.get_role(config.new_member_role_id)) and
+                        (member_role := channel.guild.get_role(config.member_role_id))):
+                    continue
+
+                for message in messages:
+                    for reaction in message.reactions:
+                        async for member in reaction.users():
+                            if new_member_role in member.roles:
+                                await member.remove_roles(new_member_role)
+                                # noinspection PyUnboundLocalVariable
+                                await member.add_roles(member_role)
+
+                    await message.clear_reactions()
+
+    @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload: RawReactionActionEvent):
         guild_id = payload.guild_id
         config: MemberManagerConfig = self.guildDict[guild_id]
