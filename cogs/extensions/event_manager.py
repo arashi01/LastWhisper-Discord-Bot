@@ -188,6 +188,9 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
             _three = "3\N{COMBINING ENCLOSING KEYCAP}"
             _cancel = "\N{Black Square For Stop}"
 
+            def _wizard_check(_reaction, _member):
+                return _member == ctx.author and _reaction.emoji in (_one, _two, _three, _cancel)
+
             wizard_message: Message = await setup_embed(ctx, "Edit Event Wizard.",
                                                         "Hello this is an automatic wizard to allow for simple edit of an event.\n" +
                                                         "Please prepare your changes in advance to save time.\n" +
@@ -215,9 +218,7 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
                 await asyncio.sleep(1)
 
                 try:
-                    reaction, member = await self.client.wait_for("reaction_add", timeout=60, check=lambda _reaction,
-                                                                                                           _member: _member == ctx.author and _reaction.emoji in (
-                        _one, _two, _three, _cancel))
+                    reaction, member = await self.client.wait_for("reaction_add", timeout=60, check=_wizard_check)
                 except asyncio.TimeoutError:
                     await wizard_message.clear_reactions()
                     return
