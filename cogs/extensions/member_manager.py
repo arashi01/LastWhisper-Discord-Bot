@@ -15,9 +15,9 @@ class MemberManager(CogClass, name=utils.CogNames.MemberManager.value):
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
         guild_id = payload.guild_id
-        guild_config: MemberManagerConfig = self.guildDict[guild_id]
+        config: MemberManagerConfig = self.guildDict[guild_id]
 
-        if not payload.channel_id == guild_config.welcome_channel_id:
+        if not ((channel := self.client.get_channel(config.welcome_channel_id)) and payload.channel_id == channel.id):
             return
 
         member: discord.Member = payload.member
@@ -31,7 +31,7 @@ class MemberManager(CogClass, name=utils.CogNames.MemberManager.value):
             await member.add_roles(member_role)
             await member.remove_roles(new_member_role)
 
-        await (await guild.get_channel(payload.channel_id).fetch_message(payload.message_id)).clear_reactions()
+        await (await channel.fetch_message(payload.message_id)).clear_reactions()
 
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member):
