@@ -20,11 +20,12 @@ class CogClass(commands.Cog):
         self._general_cog = self.client.get_cog(utils.CogNames.General.value)
 
         self.config_object: CustomConfigObject.__class__ = config_object
-
-        self.load_configs()
+        if self.client.is_ready():
+            self.load_configs()
 
     @commands.Cog.listener()
     async def on_ready(self):
+        self.load_configs()
         self._general_cog = self.client.get_cog(utils.CogNames.General.value)
 
     async def cog_check(self, ctx: commands.Context) -> bool:
