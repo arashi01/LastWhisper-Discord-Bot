@@ -35,14 +35,12 @@ class MemberManager(CogClass, name=utils.CogNames.MemberManager.value):
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload: RawReactionActionEvent):
-        guild_id = payload.guild_id
-        config: MemberManagerConfig = self.guildDict[guild_id]
+        config: MemberManagerConfig = self.guildDict[(guild_id := payload.guild_id)]
 
         if not ((channel := self.client.get_channel(config.welcome_channel_id)) and payload.channel_id == channel.id):
             return
 
         member: Member = payload.member
-
         guild: Guild = self.client.get_guild(guild_id)
 
         new_member_role = guild.get_role(config.new_member_role_id)
