@@ -142,7 +142,7 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
                 state = States.NONE
                 continue
 
-        if not event.name or not event.description or not event.datetime:
+        if not (event.name and event.description and event.datetime):
             return
 
         guild.events.append(event)
