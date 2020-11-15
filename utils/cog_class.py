@@ -99,8 +99,13 @@ class CogClass(commands.Cog):
             self.guildDict.clear()
             for filename in os.listdir(self.config_dir):
                 if filename.endswith(".json"):
+                    if filename[:-5] not in [str(guild.id) for guild in self.client.guilds]:
+                        os.remove(f"{self.config_dir}/{filename}")
+                        continue
+
                     with open(f"{self.config_dir}/{filename}") as f:
                         json_obj = json.load(f)
+
                     self.guildDict[int(filename[:-5])] = self.config_object.from_json(json_obj)
 
         else:
