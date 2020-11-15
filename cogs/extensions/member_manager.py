@@ -24,8 +24,8 @@ class MemberManager(CogClass, name=utils.CogNames.MemberManager.value):
 
         guild: discord.Guild = self.client.get_guild(guild_id)
 
-        new_member_role = guild.get_role(guild_config.new_member_role_id)
-        member_role = guild.get_role(guild_config.member_role_id)
+        new_member_role = guild.get_role(config.new_member_role_id)
+        member_role = guild.get_role(config.member_role_id)
 
         if new_member_role in member.roles:
             await member.add_roles(member_role)
