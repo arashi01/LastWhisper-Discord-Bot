@@ -83,7 +83,7 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
                 embed.add_field(name=f"Index {i + 1}:", value=config.events[i].name, inline=False)
             await ctx.send(embed=embed)
         else:
-            if index - 1 >= len(config.events):
+            if 0 >= index - 1 >= len(config.events):
                 raise commands.BadArgument(f"Index {index} out of range.")
 
             event: Event = config.events[index - 1]
@@ -152,7 +152,7 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
     @event.command(name="cancel")
     async def cancel_event(self, ctx: commands.Context, index: int = None, confirm: bool = False):
         config: EventConfig = self.guildDict[ctx.guild.id]
-        if index - 1 >= len(config.events) or index <= 0:
+        if 0 >= index - 1 >= len(config.events):
             raise commands.BadArgument(f"Index {index} out of range.")
 
         if confirm:
@@ -279,7 +279,7 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
         config: EventConfig = self.guildDict[ctx.guild.id]
         embed: Embed = Embed()
         if index:
-            if index - 1 >= len(config.event_reminder_triggers):
+            if 0 >= index - 1 >= len(config.event_reminder_triggers):
                 raise commands.BadArgument(f"Index {index} out of range.")
 
             trigger: EventReminderTrigger = config.event_reminder_triggers[index - 1]
@@ -306,7 +306,7 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
     async def edit_trigger(self, ctx: commands.Context, index: int, hour_diff: int, minute_diff: int, *, message: str):
         config: EventConfig = self.guildDict[ctx.guild.id]
 
-        if index - 1 >= len(config.event_reminder_triggers) or index <= 0:
+        if 0 >= index - 1 >= len(config.event_reminder_triggers):
             raise commands.BadArgument(f"Index {index} is not a valid index.")
 
         old_trigger: EventReminderTrigger = copy.deepcopy(new_trigger := config.event_reminder_triggers[index - 1])
@@ -335,7 +335,7 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
     async def remove_trigger(self, ctx: commands.Context, index: int, confirm: bool = False):
         config: EventConfig = self.guildDict[ctx.guild.id]
 
-        if index - 1 >= len(config.event_reminder_triggers) or index < 0:
+        if 0 >= index - 1 >= len(config.event_reminder_triggers):
             raise commands.BadArgument(f"Index {index} is not a valid index.")
 
         if confirm:
