@@ -1,6 +1,5 @@
-import discord
+from discord import Message, RawReactionActionEvent, Member, Guild, Embed, TextChannel
 from discord.ext import commands
-from discord.utils import get
 
 import utils
 from objects import MemberManagerConfig
@@ -13,16 +12,16 @@ class MemberManager(CogClass, name=utils.CogNames.MemberManager.value):
         super().__init__(client, "./config/member_manager", MemberManagerConfig)
 
     @commands.Cog.listener()
-    async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
+    async def on_raw_reaction_add(self, payload: RawReactionActionEvent):
         guild_id = payload.guild_id
         config: MemberManagerConfig = self.guildDict[guild_id]
 
         if not ((channel := self.client.get_channel(config.welcome_channel_id)) and payload.channel_id == channel.id):
             return
 
-        member: discord.Member = payload.member
+        member: Member = payload.member
 
-        guild: discord.Guild = self.client.get_guild(guild_id)
+        guild: Guild = self.client.get_guild(guild_id)
 
         new_member_role = guild.get_role(config.new_member_role_id)
         member_role = guild.get_role(config.member_role_id)
@@ -34,7 +33,7 @@ class MemberManager(CogClass, name=utils.CogNames.MemberManager.value):
         await (await channel.fetch_message(payload.message_id)).clear_reactions()
 
     @commands.Cog.listener()
-    async def on_member_join(self, member: discord.Member):
+    async def on_member_join(self, member: Member):
         # noinspection PyTypeChecker
         if not self.is_enabled(member):  # Done like this due to guild id being called the same.
             return
@@ -45,13 +44,13 @@ class MemberManager(CogClass, name=utils.CogNames.MemberManager.value):
             await member.add_roles(role)
 
     @commands.Cog.listener()
-    async def on_member_remove(self, member: discord.Member):
+    async def on_member_remove(self, member: Member):
         # noinspection PyTypeChecker
         if not self.is_enabled(member):  # Done like this due to guild id being called the same.
             return
 
         guild = self.guildDict[member.guild.id]
-        embed = discord.Embed(title="User left.", description=f"User **{member.name}** has left this discord server.")
+        embed = Embed(title="User left.", description=f"User **{member.name}** has left this discord server.")
         embed.add_field(name="Joined On:", value=str(member.joined_at)[:-7])
         embed.add_field(name="Nickname was:", value=member.nick)
         embed.set_thumbnail(url=member.avatar_url)
