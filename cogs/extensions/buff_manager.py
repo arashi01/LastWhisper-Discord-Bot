@@ -25,7 +25,7 @@ class BuffManager(CogClass, name=utils.CogNames.BuffManager.value):
         await self.client.wait_until_ready()
         self.now = datetime.now()
 
-        for key, guild in self.guildDict.items():
+        for key, config in self.guildDict.items():
 
             if self.now.hour == config.mm_hour and self.now.minute == 0:
                 if not (morning_message_channel := self.client.get_channel(config.mm_channel_id)):
@@ -49,22 +49,22 @@ class BuffManager(CogClass, name=utils.CogNames.BuffManager.value):
 
     @commands.command(aliases=["today'sBuff", "tdb"])
     async def today_buff(self, ctx: commands.Context) -> None:
-        guild: BuffManagerConfig = self.guildDict[ctx.guild.id]
+        config: BuffManagerConfig = self.guildDict[ctx.guild.id]
 
-        _, buff = self.get_week_buff(guild, self.today)
+        _, buff = self.get_week_buff(config, self.now)
 
         await ctx.send(embed=utils.get_date_buff_embed(
             "Today's buff shall be:",
-            self.today,
+            self.now,
             buff
         ))
 
     @commands.command(aliases=["tomorrow'sBuff", "trb", "tmb"])
     async def tomorrow_buff(self, ctx: commands.Context) -> None:
-        guild: BuffManagerConfig = self.guildDict[ctx.guild.id]
+        config: BuffManagerConfig = self.guildDict[ctx.guild.id]
 
-        tomorrow = self.today + datetime.timedelta(days=1)
-        _, buff = self.get_week_buff(guild, tomorrow)
+        tomorrow = self.now + timedelta(days=1)
+        _, buff = self.get_week_buff(config, tomorrow)
 
         await ctx.send(embed=utils.get_date_buff_embed(
             "Tomorrow's buff shall be:",
@@ -74,24 +74,24 @@ class BuffManager(CogClass, name=utils.CogNames.BuffManager.value):
 
     @commands.command(aliases=["thisWeek'sBuffs", "wbs", "twb"])
     async def week_buffs(self, ctx: commands.Context) -> None:
-        guild: BuffManagerConfig = self.guildDict[ctx.guild.id]
+        config: BuffManagerConfig = self.guildDict[ctx.guild.id]
 
-        week, _ = self.get_week_buff(guild, self.today)
+        week, _ = self.get_week_buff(config, self.now)
 
         await ctx.send(embed=utils.get_weeks_buff_embed(
             week,
-            guild.buff_list
+            config.buff_list
         ))
 
     @commands.command(aliases=["nextWeek'sBuffs", "nwb"])
     async def next_week_buffs(self, ctx: commands.Context) -> None:
-        guild: BuffManagerConfig = self.guildDict[ctx.guild.id]
+        config: BuffManagerConfig = self.guildDict[ctx.guild.id]
 
-        week, _ = self.get_week_buff(guild, self.today + datetime.timedelta(days=7))
+        week, _ = self.get_week_buff(config, self.now + timedelta(days=7))
 
         await ctx.send(embed=utils.get_weeks_buff_embed(
             week,
-            guild.buff_list
+            config.buff_list
         ))
 
     @staticmethod
