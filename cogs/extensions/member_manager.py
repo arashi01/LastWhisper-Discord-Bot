@@ -43,11 +43,14 @@ class MemberManager(CogClass, name=utils.CogNames.MemberManager.value):
         member: Member = payload.member
         guild: Guild = self.client.get_guild(guild_id)
 
-        new_member_role = guild.get_role(config.new_member_role_id)
-        member_role = guild.get_role(config.member_role_id)
+        if not ((new_member_role := guild.get_role(config.new_member_role_id)) and
+                (member_role := guild.get_role(config.member_role_id))):
+            return
 
         if new_member_role in member.roles:
-            await member.add_roles(member_role)
+            # noinspection PyUnboundLocalVariable
+            await member.add_roles(
+                member_role)  # I am guessing there is some logical edge case as the interpreter is not able to fully understand := statements with a bool check.
             await member.remove_roles(new_member_role)
 
         await (await channel.fetch_message(payload.message_id)).clear_reactions()
