@@ -17,7 +17,7 @@ class DialogReturn(Enum):
     ERROR = None
 
 
-async def yes_no(ctx: Context, title: str, description: str, fields: [] = None, timeout: float = 10.0) -> DialogReturn:
+async def setup_embed(ctx: Context, title: str, description: str, fields: list = None, timeout: float = 0.0) -> Message:
     embed: Embed = Embed(title=title, description=description)
 
     if fields:
@@ -25,7 +25,13 @@ async def yes_no(ctx: Context, title: str, description: str, fields: [] = None, 
             if len(field) == 2:
                 embed.add_field(name=field[0], value=field[1])
 
-    message: Message = await ctx.send(embed=embed)
+    embed.set_footer(text=f"You have {timeout} seconds to respond.")
+
+    return await ctx.send(embed=embed)
+
+
+async def yes_no(ctx: Context, title: str, description: str, fields: [] = None, timeout: float = 10.0) -> DialogReturn:
+    message = await setup_embed(ctx, title, description, fields, timeout)
 
     await message.add_reaction(_yes)
     await message.add_reaction(_no)
