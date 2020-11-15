@@ -37,8 +37,8 @@ class MemberManager(CogClass, name=utils.CogNames.MemberManager.value):
     async def on_member_join(self, member: discord.Member):
         guild: MemberManagerConfig = self.guildDict[member.guild.id]
 
-        role: discord.Role = get(member.guild.roles, id=guild.new_member_role_id)
-        await member.add_roles(role)
+        if role := member.guild.get_role(guild.new_member_role_id):
+            await member.add_roles(role)
 
     @commands.Cog.listener()
     async def on_member_remove(self, member: discord.Member):
