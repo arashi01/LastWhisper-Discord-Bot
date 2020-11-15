@@ -35,6 +35,10 @@ class MemberManager(CogClass, name=utils.CogNames.MemberManager.value):
 
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member):
+        # noinspection PyTypeChecker
+        if not self.is_enabled(member):  # Done like this due to guild id being called the same.
+            return
+
         guild: MemberManagerConfig = self.guildDict[member.guild.id]
 
         if role := member.guild.get_role(guild.new_member_role_id):
@@ -42,6 +46,10 @@ class MemberManager(CogClass, name=utils.CogNames.MemberManager.value):
 
     @commands.Cog.listener()
     async def on_member_remove(self, member: discord.Member):
+        # noinspection PyTypeChecker
+        if not self.is_enabled(member):  # Done like this due to guild id being called the same.
+            return
+
         guild = self.guildDict[member.guild.id]
         embed = discord.Embed(title="User left.", description=f"User **{member.name}** has left this discord server.")
         embed.add_field(name="Joined On:", value=str(member.joined_at)[:-7])
