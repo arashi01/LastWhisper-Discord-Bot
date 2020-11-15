@@ -11,7 +11,7 @@ import utils
 from objects import EventConfig, Event, EventReminderTrigger
 from objects.configuration import ConfigurationDictionary, Configuration
 from utils.cog_class import CogClass
-from utils.dialog_utils import yes_no, DialogReturn
+from utils.dialog_utils import yes_no, get_author_written_response, DialogReturn, setup_embed
 
 
 class States(Enum):
@@ -188,7 +188,18 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
             _three = "3\N{COMBINING ENCLOSING KEYCAP}"
             _cancel = "\N{Black Square For Stop}"
 
-            wizard_embed: Embed = Embed()
+            wizard_message: Message = await setup_embed(ctx, "Edit Event Wizard.",
+                                                        "Hello this is an automatic wizard to allow for simple edit of an event.\n" +
+                                                        "Please prepare your changes in advance to save time.\n" +
+                                                        "You will have 60 seconds to commit your change.\n" +
+                                                        "React with what you want to change. Use the key provided for assistance.",
+                                                        [(
+                                                            "Key:",
+                                                            "> %s: Name\n> %s: Time & Date\n> %s: Description\n> %s: Cancel" %
+                                                            (_one, _two, _three, _cancel)
+                                                          )],
+                                                        60.0)
+
             while True:
                 wizard_embed.title = "Edit Event Wizard."
                 wizard_embed.description = "Hello this is an automatic wizard that allows for simple edit to an event. " \
@@ -218,43 +229,38 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
 
                     wizard_embed.set_footer(text="")
                     if reaction.emoji == _one:
-                        wizard_embed.title = "Edit Event Name"
-                        wizard_embed.description = "Your next message will be the new name for the event."
-                        await wizard_message.edit(embed=wizard_embed)
-                        try:
-                            user_message = await self.client.wait_for("message", timeout=60, check=check)
-                        except asyncio.TimeoutError:
-                            pass
-                        else:
-                            new_event.name = user_message.content
+                        text = await get_author_written_response(ctx,
+                                                                 "Edit Event Name",
+                                                                 "Your next message will be the new name for the event.",
+                                                                 timeout=60)
+                        if text:
+                            new_event.name = text
                             break
                     elif reaction.emoji == _two:
-                        wizard_embed.title = "Edit Event Time & Date"
-                        wizard_embed.description = "Your next message will be the new time and date for the event."
-                        await wizard_message.edit(embed=wizard_embed)
-                        try:
-                            user_message = await self.client.wait_for("message", timeout=60, check=check)
-                        except asyncio.TimeoutError:
-                            pass
-                        else:
+                        text = await get_author_written_response(ctx,
+                                                                 "Edit Event Time & Date",
+                                                                 "Your next message will be the new time and date for the event.",
+                                                                 timeout=60)
+                        if text:
                             try:
-                                new_event.datetime = strptime(user_message.content)
+                                new_event.datetime = strptime(text)
                                 break
                             except ValueError:
                                 await ctx.send("Invalid time format.", delete_after=3)
                     elif reaction.emoji == _three:
-                        wizard_embed.title = "Edit Event Description"
-                        wizard_embed.description = "Your next message will be the new description for the event."
-                        await wizard_message.edit(embed=wizard_embed)
-                        try:
-                            user_message = await self.client.wait_for("message", timeout=60, check=check)
-                        except asyncio.TimeoutError:
-                            pass
-                        else:
-                            new_event.description = user_message.content
+                        text = await get_author_written_response(ctx,
+                                                                 "Edit Event Description",
+                                                                 "Your next message will be the new description for the event.",
+                                                                 timeout=60)
+
+                        if text:
+                            new_event.description = text
                             break
+
                     elif reaction.emoji == _cancel:
+                        await wizard_message.delete()
                         return
+            await wizard_message.delete()
 
         title = "Change Event Details?"
         description = "Are you sure you want to change the **Old** event details into the **New** ones?"
