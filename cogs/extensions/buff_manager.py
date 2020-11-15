@@ -11,10 +11,10 @@ from utils.cog_class import CogClass
 
 
 class BuffManager(CogClass, name=utils.CogNames.BuffManager.value):
+    now: datetime
+
     def __init__(self, client: commands.bot) -> None:
         super().__init__(client, "./config/buff_manager", BuffManagerConfig)
-        self.today = datetime.datetime.now()
-
         self.loop.start()
 
     def cog_unload(self) -> None:
