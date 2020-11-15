@@ -160,10 +160,7 @@ class BuffManager(CogClass, name=utils.CogNames.BuffManager.value):
                     for i in range(0, 6):
                         embed.add_field(name=f"Buff index for {utils.days[i]}", value=obj.get_value(i))
                 else:
-                    try:
-                        embed.set_thumbnail(url=obj.image_url)
-                    except Exception:
-                        embed.add_field(name="Image error", value="Sorry the url is not a valid image.")
+                    embed.set_thumbnail(url=obj.image_url)
 
                 await ctx.send(embed=embed)
             else:
