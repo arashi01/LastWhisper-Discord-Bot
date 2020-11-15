@@ -112,8 +112,7 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
 
         event: Event = Event()
 
-        content: [str] = message.content.split("\n")
-        content = [x for x in content if x != '']
+        content: [str] = [x for x in message.content.split("\n") if x != '']
         state: States = States.NONE
         for line in content:
             if (hold := line.replace(" ", "")).startswith("[") and hold.endswith("]"):
