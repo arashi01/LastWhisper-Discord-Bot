@@ -204,13 +204,6 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
                                                         60.0)
 
             while True:
-                wizard_embed.title = "Edit Event Wizard."
-                wizard_embed.description = "Hello this is an automatic wizard that allows for simple edit to an event. " \
-                                           "It is best to have the changes to the event prepared in advance as you will have 60 seconds to commit you change. " \
-                                           "React with what you want to change. Use the footer as a key."
-
-                wizard_embed.set_footer(text=f"1: Name, 2: Time&Date, 3: Description, Stop: Cancel")
-                wizard_message: Message = await ctx.send(embed=wizard_embed)
                 await wizard_message.add_reaction(_one)
                 await wizard_message.add_reaction(_two)
                 await wizard_message.add_reaction(_three)
@@ -224,11 +217,6 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
                     return
                 else:
                     await wizard_message.clear_reactions()
-
-                    def check(_message):
-                        return _message.author == ctx.author
-
-                    wizard_embed.set_footer(text="")
                     if reaction.emoji == _one:
                         text = await get_author_written_response(ctx,
                                                                  "Edit Event Name",
