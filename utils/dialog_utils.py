@@ -56,5 +56,21 @@ async def yes_no(ctx: Context, title: str, description: str, fields: [] = None, 
             return DialogReturn.ERROR
 
 
-async def yes_no_cancel() -> DialogReturn:
-    pass
+async def get_author_written_response(ctx, title, description, fields: [] = None, timeout: float = 30.0, delete_response: bool = False) -> str:
+    message = await setup_embed(ctx, title, description, fields, timeout)
+
+    def check(_message: Message):
+        return _message.author == ctx.author
+
+    try:
+        response: Message = await ctx.bot.wait_for("message", timeout=timeout, check=check)
+        content = response.content
+        if delete_response:
+            await response.delete()
+
+    except asyncio.TimeoutError:
+        await message.delete()
+        return ""
+    else:
+        await message.delete()
+        return content
