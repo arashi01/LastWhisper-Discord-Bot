@@ -147,6 +147,7 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
 
         config.events.append(event)
         self.save_configs(message.guild.id)
+        await message.add_reaction("\N{White Heavy Check Mark}")
 
     @event.command(name="cancel")
     async def cancel_event(self, ctx: commands.Context, index: int = None, confirm: bool = False):
