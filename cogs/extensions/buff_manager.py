@@ -23,13 +23,13 @@ class BuffManager(CogClass, name=utils.CogNames.BuffManager.value):
     @tasks.loop(minutes=1)
     async def loop(self) -> None:
         await self.client.wait_until_ready()
-        self.today = datetime.datetime.now()
+        self.now = datetime.now()
 
         for key, guild in self.guildDict.items():
 
-            if self.today.hour == guild.mm_hour and self.today.minute == 0:
-                week, buff = self.get_week_buff(guild, self.today)
-                morning_message_channel: TextChannel = self.client.get_channel(guild.mm_channel_id)
+            if self.now.hour == config.mm_hour and self.now.minute == 0:
+                if not (morning_message_channel := self.client.get_channel(config.mm_channel_id)):
+                    continue
 
                 # Posts the daily buff message.
                 await morning_message_channel.send("Good morning Everyone!",
