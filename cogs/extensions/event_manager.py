@@ -134,7 +134,7 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
                 continue
 
             if state is States.DESCRIPTION:
-                event.description += (line + "\n")
+                event.description += line + "\n"
                 continue
 
             if state is States.TIME:
