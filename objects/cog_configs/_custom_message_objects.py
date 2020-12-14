@@ -3,8 +3,27 @@ from datetime import datetime
 
 
 class Message(CustomConfigObject):
-    def __init__(self, message: str = None, channel_id: TypeObjects.Channel = None, date: datetime = None,
-                 should_repeat: bool = False):
+    """ Object representing a message.
+
+    This object purely holds information and does not do any form of validation.
+    """
+
+    def __init__(self, message="", channel_id: TypeObjects.Channel = -1,
+                 date: datetime = None, should_repeat: bool = False):
+        """
+        :param message: The message that will be posted.
+        :type message: str
+
+        :param channel_id: The Discord Channel id where the message will be posted.
+        :type channel_id: TypeObjects.Channel
+
+        :param date: The date and time when the message will be posted.
+        :type date: datetime
+
+        :param should_repeat: Bool if the message should be repeated or destroyed once posted.
+        :type should_repeat: bool
+        """
+
         self.message: str = message
         self.channel_id: TypeObjects.Channel = channel_id
         self.date: datetime = date if date else datetime.now()
@@ -26,7 +45,16 @@ class Message(CustomConfigObject):
 
 
 class CustomMessagesConfig(CustomConfigObject):
+    """ The config object for a Discord server with the CustomMessages extension Enabled.
+
+    This object purely holds data and does not do any form of validation.
+    """
+
     def __init__(self, messages: {} = None):
+        """
+        :param messages: A key,value collection of Message objects.
+        :type messages: dict
+        """
         self.messages: {} = {} if messages is None else messages
 
     @classmethod
