@@ -19,8 +19,9 @@ class Debug(commands.Cog, name=utils.CogNames.Debug.value):
         return await ctx.bot.is_owner(ctx.author)
 
     @commands.command()
-    async def print(self, _: commands.Context, text):
-        print(text)
+    async def print(self, _: commands.Context, kwargs, test):
+        print(kwargs)
+        print(test)
 
     @commands.command(aliases=["FIT"])
     async def fit(self, ctx: commands.Context):

@@ -1,9 +1,9 @@
-from discord import Message, RawReactionActionEvent, Member, Guild, Embed, TextChannel
+from discord import Message, RawReactionActionEvent, Member, Guild, Embed
 from discord.ext import commands
 
 import utils
 from objects import MemberManagerConfig
-from objects.configuration import ConfigurationDictionary, Configuration
+from utils.configuration import ConfigurationDictionary, Configuration
 from utils.cog_class import CogClass
 
 

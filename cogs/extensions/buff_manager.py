@@ -6,7 +6,7 @@ from discord.ext import commands, tasks
 
 import utils
 from objects import Week, BuffManagerConfig, Buff
-from objects.configuration import Configuration, ConfigurationDictionary
+from utils.configuration import Configuration, ConfigurationDictionary
 from utils.cog_class import CogClass
 
 

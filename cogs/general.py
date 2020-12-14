@@ -1,15 +1,25 @@
+from typing import Union
+
+from discord import TextChannel, Role, Member
 from discord.ext import commands
+from discord.ext.commands import Context
 
 import utils
 from objects import GeneralConfig
-from objects.configuration import ConfigurationDictionary, Configuration
-from utils.cog_class import CogClass
+from utils.configuration import ConfigurationDictionary, Configuration
+from utils.helpers import ConfigHelper, SaveLoadHelper
+from interfaces import CogABCMeta
+from interfaces import IConfig, IExtension
 
 
-class General(CogClass, name=utils.CogNames.General.value):
+class General(IExtension.IsEnabled, IConfig.Config, commands.Cog, name=utils.CogNames.General.value, metaclass=CogABCMeta):
     def __init__(self, client: commands.bot):
-        super().__init__(client, "./config/general", GeneralConfig)
+        super().__init__()
+        self.client = client
+        self.config_dir = "./config/general"
+        self.config_object = GeneralConfig.__class__
         self.general_cog: General = self
+        self.guildDict: dict = {}
 
     @staticmethod
     def get_prefix(client: commands.bot, message):
@@ -50,6 +60,27 @@ class General(CogClass, name=utils.CogNames.General.value):
         return {
             self.change_prefix.name: None,
         }
+
+    def is_enabled(self, ctx: Context) -> bool:
+        return True
+
+    def load_configs(self, guild_id: int = None) -> None:
+        SaveLoadHelper.load_configs(self.guildDict, self.config_dir, self.config_object.__class__, self.client.guilds, guild_id)
+
+    def save_configs(self, guild_id: int = None) -> None:
+        SaveLoadHelper.save_configs(self.guildDict, self.config_dir, self.config_object.__class__, guild_id)
+
+    def set(self, ctx: commands.Context, variable: str, value: Union[TextChannel, Role, Member, str, int, bool]) -> None:
+        self.guildDict[ctx.guild.id] = ConfigHelper.set(self.guildDict[ctx.guild.id], ctx, variable, value)
+        self.save_configs(ctx.guild.id)
+
+    def add(self, ctx: commands.Context, variable: str, value: Union[TextChannel, Role, Member, str, int, bool]) -> None:
+        self.guildDict[ctx.guild.id] = ConfigHelper.add(self.guildDict[ctx.guild.id], ctx, variable, value)
+        self.save_configs(ctx.guild.id)
+
+    def remove(self, ctx: commands.Context, variable: str, value: Union[TextChannel, Role, Member, str, int, bool]) -> None:
+        self.guildDict[ctx.guild.id] = ConfigHelper.remove(self.guildDict[ctx.guild.id], ctx, variable, value)
+        self.save_configs(ctx.guild.id)
 
 
 def setup(client: commands.bot):

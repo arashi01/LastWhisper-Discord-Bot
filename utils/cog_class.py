@@ -3,28 +3,39 @@ import os
 from abc import abstractmethod
 from typing import Union
 
-from discord import TextChannel, Member, Role, Guild
+from discord import Guild, TextChannel, Role, Member
 from discord.ext import commands
 
 import utils
-from objects import CustomConfigObject, TypeObjects
-from objects.configuration import ConfigurationDictionary
+from cogs.general import General
+from objects import CustomConfigObject
+from utils.helpers import ConfigHelper, SaveLoadHelper
+from utils.configuration import ConfigurationDictionary
+from interfaces import CogABCMeta
+from interfaces import IConfig, IExtension
 
 
-class CogClass(commands.Cog):
+class CogClass(IExtension.Extension, IConfig.Config, commands.Cog, metaclass=CogABCMeta):
+    config_dir: str
+    client: commands.Bot
+    config: ConfigurationDictionary
+    _general_cog: General
+    config_object: CustomConfigObject.__class__
+
     def __init__(self, client: commands.bot, config_dir: str, config_object: CustomConfigObject.__class__) -> None:
-        self.client: commands.bot = client
+        super().__init__()
+        self.client = client
         self.guildDict: dict = {}
-        self.config_dir: str = config_dir
-        self.config: ConfigurationDictionary = self.get_configs
-        self._general_cog = self.client.get_cog(utils.CogNames.General.value)
+        self.config_dir = config_dir
+        self.config = self.get_configs
 
-        self.config_object: CustomConfigObject.__class__ = config_object
+        self.config_object = config_object
         if self.client.is_ready():
+            self._general_cog = self.client.get_cog(utils.CogNames.General.value)
             self.load_configs()
 
     @commands.Cog.listener()
-    async def on_ready(self):
+    async def on_ready(self) -> None:
         self.load_configs()
         self._general_cog = self.client.get_cog(utils.CogNames.General.value)
 
@@ -66,11 +77,6 @@ class CogClass(commands.Cog):
     # region Getters
     @property
     @abstractmethod
-    def get_configs(self) -> ConfigurationDictionary:
-        pass
-
-    @property
-    @abstractmethod
     def get_function_roles_reference(self) -> dict:
         pass
     # endregion
@@ -94,50 +100,21 @@ class CogClass(commands.Cog):
     # endregion
 
     # region Config
+    # region IConfig
+    @property
+    @abstractmethod
+    def get_configs(self) -> ConfigurationDictionary:
+        pass
+
     def load_configs(self, guild_id: int = None) -> None:
-        if not guild_id:
-            self.guildDict.clear()
-            for filename in os.listdir(self.config_dir):
-                if filename.endswith(".json"):
-                    if filename[:-5] not in [str(guild.id) for guild in self.client.guilds]:
-                        os.remove(f"{self.config_dir}/{filename}")
-                        continue
-
-                    with open(f"{self.config_dir}/{filename}") as f:
-                        json_obj = json.load(f)
-
-                    self.guildDict[int(filename[:-5])] = self.config_object.from_json(json_obj)
-
-        else:
-            file_dir = f"{self.config_dir}/{guild_id}.json"
-            obj = self.config_object()
-
-            if os.path.isfile(file_dir + ".disabled"):
-                os.rename(file_dir + ".disabled", file_dir)
-
-            if not os.path.isfile(file_dir):
-                utils.save_as_json(file_dir, obj)
-
-            with open(file_dir) as f:
-                obj = self.config_object.from_json(json.load(f))
-
-            self.guildDict[guild_id] = obj
+        SaveLoadHelper.load_configs(self.guildDict, self.config_dir, self.config_object, self.client.guilds, guild_id)
 
     def save_configs(self, guild_id: int = None) -> None:
-        if not self.config_object:
-            return
+        SaveLoadHelper.save_configs(self.guildDict, self.config_dir, self.config_object, guild_id)
 
-        file_dir = f"{self.config_dir}/{guild_id}.json"
-        if not guild_id:
-            for key in self.guildDict:
-                utils.save_as_json(file_dir, self.guildDict[key])
+    # endregion
 
-        else:
-            if not self.guildDict.__contains__(guild_id):
-                utils.save_as_json(file_dir, self.config_object())
-
-            utils.save_as_json(file_dir, self.guildDict[guild_id])
-
+    # region IExtension
     async def enable(self, ctx: commands.Context) -> None:
         if self.is_enabled(ctx):
             await ctx.send("Already Enabled.")
@@ -158,58 +135,17 @@ class CogClass(commands.Cog):
 
     def is_enabled(self, ctx: commands.Context) -> bool:
         return self.guildDict.__contains__(ctx.guild.id)
-
-    _TypeConditionCheck = {
-        TypeObjects.Channel: lambda ctx, x: x in ctx.guild.channels,
-        TypeObjects.Member: lambda ctx, x: x in ctx.guild.members,
-        TypeObjects.Role: lambda ctx, x: x in ctx.guild.roles,
-        bool: lambda _, _v: True,
-        int: lambda _, _v: True
-    }
+    # endregion
 
     def set(self, ctx: commands.Context, variable: str, value: Union[TextChannel, Role, Member, str, int, bool]) -> None:
-        guild = self.guildDict[ctx.guild.id]
-        variable_type = guild[variable].__class__
-
-        if isinstance(variable_type, str):
-            guild[variable] = value
-        else:
-            if not self._TypeConditionCheck[variable_type](ctx, value):
-                raise commands.BadArgument(f"value {value} is not a valid **{variable_type.__name__}** that is in your server.")
-
-            guild[variable] = value.id if isinstance(value, (TextChannel, Role, Member)) else value
-
+        self.guildDict[ctx.guild.id] = ConfigHelper.set(self.guildDict[ctx.guild.id], ctx, variable, value)
         self.save_configs(ctx.guild.id)
 
     def add(self, ctx: commands.Context, variable: str, value: Union[TextChannel, Role, Member, str, int, bool]) -> None:
-        guild = self.guildDict[ctx.guild.id]
-        variable_type = guild[variable].t
-
-        if isinstance(variable_type, str):
-            guild[variable].append(value)
-        else:
-            if not self._TypeConditionCheck[variable_type](ctx, value):
-                raise commands.BadArgument(f"value {value} is not a valid **{variable_type.__name__}** that is in your server.")
-
-            if (variable_type(value.id) if isinstance(value, (TextChannel, Role, Member)) else value) in guild[variable]:
-                raise commands.BadArgument(f"value {value} is already in the list {variable}.")
-
-            self.guildDict[ctx.guild.id][variable].append(variable_type(value.id) if isinstance(value, (TextChannel, Role, Member)) else value)
+        self.guildDict[ctx.guild.id] = ConfigHelper.add(self.guildDict[ctx.guild.id], ctx, variable, value)
         self.save_configs(ctx.guild.id)
 
     def remove(self, ctx: commands.Context, variable: str, value: Union[TextChannel, Role, Member, str, int, bool]) -> None:
-        guild = self.guildDict[ctx.guild.id]
-        variable_type = guild[variable].t
-        actual_variable: list = guild[variable]
-
-        if not len(actual_variable) > 0:
-            raise commands.BadArgument(f"List **{variable}** is empty.")
-
-        value = variable_type(value.id) if isinstance(value, (TextChannel, Role, Member)) else value
-
-        if value not in actual_variable:
-            raise commands.BadArgument(f"value {value} is not in the list.")
-
-        actual_variable.remove(value)
+        self.guildDict[ctx.guild.id] = ConfigHelper.remove(self.guildDict[ctx.guild.id], ctx, variable, value)
         self.save_configs(ctx.guild.id)
     # endregion

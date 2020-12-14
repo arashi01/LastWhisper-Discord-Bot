@@ -2,7 +2,7 @@ from discord.ext import commands
 
 import utils
 from objects import PlayConfig
-from objects.configuration import ConfigurationDictionary
+from utils.configuration import ConfigurationDictionary
 from utils.cog_class import CogClass
 
 

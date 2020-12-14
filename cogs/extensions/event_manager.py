@@ -9,7 +9,7 @@ from discord.ext import commands, tasks
 
 import utils
 from objects import EventConfig, Event, EventReminderTrigger
-from objects.configuration import ConfigurationDictionary, Configuration
+from utils.configuration import ConfigurationDictionary, Configuration
 from utils.cog_class import CogClass
 from utils.dialog_utils import yes_no, get_author_written_response, DialogReturn, setup_embed
 
@@ -56,9 +56,9 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
                                 "everyone": "@everyone",
                                 "here": "@here",
                                 "event_name": event.name,
-                                "hours_remaining": f"{reminder.hour_diff} hour{_add_s(reminder.hour_diff)} remaining" if reminder.hour_diff > 0 else "",
-                                "minutes_remaining": f"{reminder.minute_diff} minute{_add_s(reminder.minute_diff)} remaining" if reminder.minute_diff > 0 else "",
-                                "and": " and " if (reminder.hour_diff * 60) + reminder.minute_diff > 60 else ""
+                                "hours_remaining": f"{reminder.hour_diff} hour{_add_s(reminder.hour_diff)}" if reminder.hour_diff > 0 else "",
+                                "minutes_remaining": f"{reminder.minute_diff} minute{_add_s(reminder.minute_diff)}" if reminder.minute_diff > 0 else "",
+                                "and": " and " if reminder.hour_diff and reminder.minute_diff else ""
                             }
 
                             try:
@@ -83,14 +83,15 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
                 embed.add_field(name=f"Index {i + 1}:", value=config.events[i].name, inline=False)
             await ctx.send(embed=embed)
         else:
-            if 0 >= index - 1 >= len(config.events):
+            if abs(index) - 1 >= len(config.events):
                 raise commands.BadArgument(f"Index {index} out of range.")
 
-            event: Event = config.events[index - 1]
+            event: Event = config.events[abs(index) - 1]
             embed = Embed(title=event.name, description=f"{event.description}")
 
             embed.add_field(name="Date:", value=f"{strftime('%A %b %d', event.datetime)}", inline=False)
             embed.add_field(name="Time:", value=f"{strftime('%H:%M', event.datetime)}", inline=False)
+            embed.add_field(name="Time Remaining:", value=f"{':'.join(str(datetime.fromtimestamp(mktime(event.datetime)) - datetime.now()).split(':')[:2])}", inline=False)
 
             await ctx.send(embed=embed)
 
@@ -152,18 +153,18 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
     @event.command(name="cancel")
     async def cancel_event(self, ctx: commands.Context, index: int = None, confirm: bool = False):
         config: EventConfig = self.guildDict[ctx.guild.id]
-        if 0 >= index - 1 >= len(config.events):
+        if abs(index) - 1 >= len(config.events):
             raise commands.BadArgument(f"Index {index} out of range.")
 
         if confirm:
-            config.events.pop(index - 1)
+            config.events.pop(abs(index) - 1)
             self.save_configs(ctx.guild.id)
         else:
             result: DialogReturn = await yes_no(ctx, "Are you sure?",
-                                                f"Are you sure you want to cancel the event {config.events[index - 1].name}?",
+                                                f"Are you sure you want to cancel the event {config.events[abs(index) - 1].name}?",
                                                 timeout=20.0)
             if result == DialogReturn.YES:
-                config.events.pop(index - 1)
+                config.events.pop(abs(index) - 1)
                 self.save_configs(ctx.guild.id)
 
         await ctx.send("Done.")
@@ -172,10 +173,10 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
     async def edit_event(self, ctx: commands.Context, index: int, name: str = "", time: str = "", *,
                          description: str = ""):
         config: EventConfig = self.guildDict[ctx.guild.id]
-        if 0 >= index - 1 >= len(config.events):
+        if abs(index) - 1 >= len(config.events):
             raise commands.BadArgument(f"Index {index} out of range.")
 
-        old_event: Event = copy.deepcopy(new_event := config.events[index - 1])
+        old_event: Event = copy.deepcopy(new_event := config.events[abs(index) - 1])
 
         if name or time or description:
             if name:
@@ -267,7 +268,7 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
         ], timeout=60.0)
 
         if result in (DialogReturn.NO, DialogReturn.FAILED, DialogReturn.ERROR):
-            config.events[index - 1] = old_event
+            config.events[abs(index) - 1] = old_event
 
         self.save_configs(ctx.guild.id)
 
@@ -279,10 +280,10 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
         config: EventConfig = self.guildDict[ctx.guild.id]
         embed: Embed = Embed()
         if index:
-            if 0 >= index - 1 >= len(config.event_reminder_triggers):
+            if abs(index) - 1 >= len(config.event_reminder_triggers):
                 raise commands.BadArgument(f"Index {index} out of range.")
 
-            trigger: EventReminderTrigger = config.event_reminder_triggers[index - 1]
+            trigger: EventReminderTrigger = config.event_reminder_triggers[abs(index) - 1]
 
             embed.title = f"Index *{index}*"
             embed.add_field(name="Hours Difference", value=f"> {trigger.hour_diff}")
@@ -306,10 +307,10 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
     async def edit_trigger(self, ctx: commands.Context, index: int, hour_diff: int, minute_diff: int, *, message: str):
         config: EventConfig = self.guildDict[ctx.guild.id]
 
-        if 0 >= index - 1 >= len(config.event_reminder_triggers):
+        if abs(index) - 1 >= len(config.event_reminder_triggers):
             raise commands.BadArgument(f"Index {index} is not a valid index.")
 
-        old_trigger: EventReminderTrigger = copy.deepcopy(new_trigger := config.event_reminder_triggers[index - 1])
+        old_trigger: EventReminderTrigger = copy.deepcopy(new_trigger := config.event_reminder_triggers[abs(index) - 1])
 
         new_trigger.hour_diff = hour_diff
         new_trigger.minute_diff = minute_diff
@@ -327,7 +328,7 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
                                             values)
 
         if result in (DialogReturn.NO, DialogReturn.FAILED, DialogReturn.ERROR):
-            config.event_reminder_triggers[index - 1] = old_trigger
+            config.event_reminder_triggers[abs(index) - 1] = old_trigger
 
         self.save_configs(ctx.guild.id)
 
@@ -335,18 +336,18 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
     async def remove_trigger(self, ctx: commands.Context, index: int, confirm: bool = False):
         config: EventConfig = self.guildDict[ctx.guild.id]
 
-        if 0 >= index - 1 >= len(config.event_reminder_triggers):
+        if abs(index) - 1 >= len(config.event_reminder_triggers):
             raise commands.BadArgument(f"Index {index} is not a valid index.")
 
         if confirm:
-            config.event_reminder_triggers.pop(index - 1)
+            config.event_reminder_triggers.pop(abs(index) - 1)
             self.save_configs(ctx.guild.id)
 
         else:
             result: DialogReturn = await yes_no(ctx, "Are you sure?",
                                                 f"Are you sure you want to remove the Trigger {index}?", timeout=20.0)
             if result == DialogReturn.YES:
-                config.event_reminder_triggers.pop(index - 1)
+                config.event_reminder_triggers.pop(abs(index) - 1)
                 self.save_configs(ctx.guild.id)
 
         await ctx.send("Done.")

@@ -6,6 +6,7 @@ import typing
 from cogs.general import General
 from utils import CogNames
 from utils.cog_class import CogClass
+from interfaces import IConfig, IExtension
 
 
 class ConfigManager(commands.Cog, name=CogNames.ConfigManager.value):
@@ -33,7 +34,7 @@ class ConfigManager(commands.Cog, name=CogNames.ConfigManager.value):
 
         else:
             if extension in self.client.cogs.keys():
-                if isinstance(cog := self.client.cogs[extension], CogClass):
+                if isinstance(cog := self.client.cogs[extension], (IConfig.GetConfig, CogClass)):
                     if isinstance(variable_result := cog.config.get_configurations_dict[variable], dict):
                         if action in ("set", "add", "remove"):
                             variable_result[action](ctx, variable_result["config_name"], value)
@@ -68,23 +69,24 @@ class ConfigManager(commands.Cog, name=CogNames.ConfigManager.value):
             await ctx.send(f"**{extension}** is not a valid extension.")
         await ctx.send("Done.")
 
+    @staticmethod
+    def _is_enabled(cog: IExtension.IsEnabled, ctx: commands.Context) -> str:
+        return ':white_check_mark: Enabled' if cog.is_enabled(ctx) else ':x: Disabled'
+
     @commands.group(invoke_without_command=True)
     async def extension(self, ctx: commands.Context):
         embed: Embed = Embed(title="Extensions Status")
         for cog in self.client.cogs.values():
-            if isinstance(cog, CogClass):
-                embed.add_field(name=cog.qualified_name, value=':white_check_mark: Enabled' if cog.is_enabled(ctx) else ':x: Disabled')
+            if isinstance(cog, (IExtension.IsEnabled, commands.Cog)):
+                embed.add_field(name=cog.qualified_name, value=self._is_enabled(cog, ctx))
 
         await ctx.send(embed=embed)
 
     @extension.command()
     async def is_enabled(self, ctx: commands.Context, extension: str):
         if extension in self.client.cogs:
-            cog = self.client.cogs[extension]
-            if isinstance(cog, CogClass):
-                embed = Embed(title=cog.qualified_name,
-                              description=':white_check_mark: Enabled' if cog.is_enabled(ctx) else ':x: Disabled')
-                await ctx.send(embed=embed)
+            if isinstance(cog := self.client.cogs[extension], (commands.Cog, IExtension.IsEnabled)):
+                await ctx.send(embed=Embed(title=cog.qualified_name, description=self._is_enabled(cog, ctx)))
             else:
                 await ctx.send(f"Extension **{extension}** does not exist.")
         else:
@@ -93,8 +95,7 @@ class ConfigManager(commands.Cog, name=CogNames.ConfigManager.value):
     @extension.command()
     async def enable(self, ctx: commands.Context, extension: str):
         if extension in self.client.cogs:
-            cog = self.client.cogs[extension]
-            if isinstance(cog, CogClass):
+            if isinstance(cog := self.client.cogs[extension], (commands.Cog, IExtension.Enabled)):
                 await cog.enable(ctx)
             else:
                 await ctx.send(f"Extension **{extension}** does not exist.")
@@ -104,8 +105,7 @@ class ConfigManager(commands.Cog, name=CogNames.ConfigManager.value):
     @extension.command()
     async def disable(self, ctx: commands.Context, extension: str):
         if extension in self.client.cogs:
-            cog = self.client.cogs[extension]
-            if isinstance(cog, CogClass):
+            if isinstance(cog := self.client.cogs[extension], (commands.Cog, IExtension.Disable)):
                 await cog.disable(ctx)
             else:
                 await ctx.send(f"Extension **{extension}** does not exist.")

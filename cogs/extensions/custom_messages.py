@@ -4,7 +4,7 @@ from discord import TextChannel, Embed
 from discord.ext import tasks, commands
 
 import utils
-from objects.configuration import ConfigurationDictionary
+from utils.configuration import ConfigurationDictionary
 from utils.cog_class import CogClass
 from objects import CustomMessagesConfig, Message, TypeObjects
 
