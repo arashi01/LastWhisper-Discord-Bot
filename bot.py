@@ -24,7 +24,9 @@ async def on_ready():
 if __name__ == "__main__":
     for extension in get_cog_list("./cogs"):
         client.load_extension(extension)
-
-    client.run(utils.load_as_string(Path("./token")))
+    try:
+        client.run(utils.load_as_string(Path("./token")))
+    except FileNotFoundError:
+        print("Missing token file.")
     print("Good Bye!")
 
