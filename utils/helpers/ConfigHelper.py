@@ -1,3 +1,6 @@
+"""
+This file mainly provides some helper functions for the configuration.
+"""
 from typing import Union
 
 from discord import TextChannel, Role, Member
@@ -5,6 +8,7 @@ from discord.ext.commands import Context, BadArgument
 
 from objects import TypeObjects, CustomConfigObject
 
+# A collection of lambda functions to check if a id is in a guild.
 _TypeConditionCheck = {
     TypeObjects.Channel: lambda ctx, x: x in ctx.guild.channels,
     TypeObjects.Member: lambda ctx, x: x in ctx.guild.members,
@@ -15,6 +19,15 @@ _TypeConditionCheck = {
 
 
 def set(config: CustomConfigObject, ctx: Context, variable: str, value: Union[TextChannel, Role, Member, str, int, bool]) -> CustomConfigObject:
+    """
+    Function used to set the value of a configuration.
+
+    :param config: The configuration object.
+    :param ctx: The Discord Context.
+    :param variable: The variable that is gonna be changed.
+    :param value: The value the variable will be changed to.
+    :return: A potentially modified configuration object.
+    """
     variable_type = config[variable].__class__
 
     if isinstance(variable_type, str):
@@ -29,6 +42,15 @@ def set(config: CustomConfigObject, ctx: Context, variable: str, value: Union[Te
 
 
 def add(config: CustomConfigObject, ctx: Context, variable: str, value: Union[TextChannel, Role, Member, str, int, bool]) -> CustomConfigObject:
+    """
+    Function used to add a value to a configuration.
+
+    :param config: The configuration object.
+    :param ctx: The Discord Context.
+    :param variable: The variable that is gonna be changed.
+    :param value: The value the variable will be changed to.
+    :return: A potentially modified configuration object.
+    """
     variable_type = config[variable].t
 
     if isinstance(variable_type, str):
@@ -47,6 +69,14 @@ def add(config: CustomConfigObject, ctx: Context, variable: str, value: Union[Te
 
 
 def remove(config: CustomConfigObject, _, variable: str, value: Union[TextChannel, Role, Member, str, int, bool]) -> CustomConfigObject:
+    """
+    Function used to remove a value to a configuration.
+
+    :param config: The configuration object.
+    :param variable: The variable that is gonna be changed.
+    :param value: The value the variable will be changed to.
+    :return: A potentially modified configuration object.
+    """
     variable_type = config[variable].t
     actual_variable: list = config[variable]
 

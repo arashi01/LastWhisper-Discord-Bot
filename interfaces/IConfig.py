@@ -1,6 +1,6 @@
 from abc import ABC, ABCMeta, abstractmethod
 
-from utils.configuration import ConfigurationDictionary
+from configuration import ConfigurationDictionary
 
 
 class _HiddenGuildDictObjToEnsureThatSelfGuildDictIsAThing(ABC, metaclass=ABCMeta):

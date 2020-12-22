@@ -1,24 +1,47 @@
 import os
-import pathlib
+from pathlib import Path
 from json import dump
 from objects import CustomConfigObject
+from ast import literal_eval as _literal_eval
 
-os.chdir(pathlib.Path(__file__).parent.parent)
+# Sets the working directory to be the directory of the bot.py file. This is done due to an error occurring when you run the bot outside the expected directory.
+os.chdir(Path(__file__).parent.parent)
 
 
-def load_as_string(path):
-    result = ""
+def load_as_string(path: Path) -> str:
+    """
+    Loads a document and returns the content as a string.
+
+    :param path: Path to document.
+    :return: Content as String.
+    """
+    result: str
 
     with open(path, "r") as f:
-        for line in f:
-            result += line
+        result = f.read()
 
     return result
 
 
-def save_as_json(path: str, obj: object):
+def load_as_dict(path: Path) -> dict:
+    result: dict
+
+    with open(path, "r") as f:
+        result = _literal_eval(f.read())
+
+    return result
+
+
+def save_as_json(path: str, obj: object) -> None:
+    """
+    Saves the object as a json file.
+    Note: does not end the file with the extension .json
+
+    :param path: Path where object is saved to.
+    :param obj: The object being saved.
+    """
     try:
-        pathlib.Path(path[:path.rindex('/')]).mkdir(parents=True, exist_ok=True)
+        Path(path[:path.rindex('/')]).mkdir(parents=True, exist_ok=True)
 
         with open(path, "w") as f:
             if isinstance(obj, CustomConfigObject):
@@ -29,17 +52,12 @@ def save_as_json(path: str, obj: object):
         print(e)
 
 
-def append_to_file(path: str, data: str):
-    try:
-        pathlib.Path(path[:path.rindex('/')]).mkdir(parents=True, exist_ok=True)
+def remove_file(path: str) -> None:
+    """
+    Removes a file in a given directory.
 
-        with open(path, "a") as f:
-            f.write(data)
-    except Exception as e:
-        print(e)
-
-
-def remove_file(path: str):
+    :param path: The location of the file.
+    """
     try:
         os.remove(path)
     except Exception as e:

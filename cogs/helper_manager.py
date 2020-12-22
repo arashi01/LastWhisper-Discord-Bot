@@ -12,7 +12,14 @@ from utils import CogClass
 
 
 class HelperManager(commands.Cog):
+    """
+    A cog that deals with the Help command and the help messages of commands/groups/Cogs.
+    """
+
     def __init__(self, client: commands.Bot):
+        """
+        :param client: A Discord bot client.
+        """
         self.client = client
         if not os.path.isdir("./help_docs"):
             os.mkdir("./help_docs")
@@ -35,6 +42,11 @@ class HelperManager(commands.Cog):
         await ctx.send("done.")
 
     def _load_help_docs(self):
+        """
+        Loads the help for all the commands and sets them.
+        If no help documentation was it nothing is done so the standard way of providing help can be used instead.
+        """
+
         cog: commands.Cog
         for _, cog in self.client.cogs.items():
             if not os.path.isfile(f"./help_docs/{cog.qualified_name}.json"):
@@ -69,13 +81,15 @@ class HelperManager(commands.Cog):
                 print(f"There is an issue with helper doc {cog.qualified_name}. Please Fix.")
 
     class HelpCommand(commands.HelpCommand):
+        """
+        A custom written help command that uses embeds to show help information and provide some user control for long lists of commands.
+        """
         def __init__(self, **options):
             super().__init__(**options)
             self.sort_commands = options.pop("sort_commands", True)
             self.no_category: str = options.pop("no_category", "No Category")
             self.commands_heading: str = options.pop("commands_heading", "Commands:")
-            self.page_size = options.pop("page_size",
-                                         3)  # The size of the help page. (i.e. the number of categories allow to be shown at once.)
+            self.page_size = options.pop("page_size", 3)  # The size of the help page. (i.e. the number of categories allow to be shown at once.)
             self.left_reaction = options.pop("left_reaction", "⬅")
             self.stop_reaction = options.pop("stop_reaction", "⏹️")
             self.right_reaction = options.pop("right_reaction", "➡️")
@@ -84,13 +98,24 @@ class HelperManager(commands.Cog):
 
             self.paginator = self.EmbedPaginator()
 
-        async def prepare_help_command(self, ctx, command=None):
+        async def prepare_help_command(self, ctx, command=None) -> None:
+            """
+            Method used to prepare the help command before it is sent.
+
+            :param ctx: The Discord Context.
+            :param command: The 'command'.
+            """
             self.paginator.clear()
             self.paginator.set_author(ctx.author)
 
             return await super().prepare_help_command(ctx, command)
 
-        async def send_command_help(self, command: commands.Command):
+        async def send_command_help(self, command: commands.Command) -> None:
+            """
+            Sends the help embed for a command.
+
+            :param command: The command that the help is being asked about.
+            """
             self.paginator.title(f"Command *{command.name}*")
             self.paginator.description(command.help)
 
@@ -99,7 +124,12 @@ class HelperManager(commands.Cog):
             self.paginator.close(self.context, command)
             await self.get_destination().send(embed=self.paginator.embed)
 
-        async def send_group_help(self, group: commands.Group):
+        async def send_group_help(self, group: commands.Group) -> None:
+            """
+            Sends the help embed for a group of commands.
+
+            :param group: The command group that help is being asked about.
+            """
             self.paginator.title(f"Command *{group.name}*")
             self.paginator.description(group.help)
 
@@ -111,7 +141,12 @@ class HelperManager(commands.Cog):
 
             await self.get_destination().send(embed=self.paginator.embed)
 
-        async def send_cog_help(self, cog: commands.Cog):
+        async def send_cog_help(self, cog: commands.Cog) -> None:
+            """
+            Sends the help embed for a Cog.
+
+            :param cog: The Cog that help is being asked about.
+            """
             self.paginator.title(f"Category: {cog.qualified_name}")
             self.paginator.description(cog.description)
 
@@ -122,12 +157,16 @@ class HelperManager(commands.Cog):
 
             await self.get_destination().send(embed=self.paginator.embed)
 
-        async def display_help_page(self, number: int):
+        async def display_help_page(self, number: int) -> None:
+            """
+            Method used to create the help pages for the embed.
+
+            :param number: The page number.
+            """
             def get_category(command):
                 return command.cog.qualified_name if command.cog else self.no_category
 
-            filtered_commands = await self.filter_commands(self.context.bot.commands, sort=True,
-                                                           key=get_category)
+            filtered_commands = await self.filter_commands(self.context.bot.commands, sort=True, key=get_category)
 
             self._help_page_number = number
 
@@ -142,7 +181,12 @@ class HelperManager(commands.Cog):
 
             self.paginator.title(f"Help [{self._help_page_number + 1}/{self._max_pages}]")
 
-        async def send_bot_help(self, mapping):
+        async def send_bot_help(self, mapping) -> None:
+            """
+            Sends the help embed.
+
+            :param mapping: A mapping of the commands for the bot.
+            """
             await self.display_help_page(0)
 
             self.paginator.close(self.context, note=self.get_ending_note())
@@ -158,9 +202,7 @@ class HelperManager(commands.Cog):
 
             while True:
                 try:
-                    reaction, member = await self.context.bot.wait_for("reaction_add", timeout=10.0,
-                                                                       check=lambda x,
-                                                                                    _member: _member == self.context.author)
+                    reaction, member = await self.context.bot.wait_for("reaction_add", timeout=10.0, check=lambda x, _member: _member == self.context.author)
                 except asyncio.TimeoutError:
                     break
                 else:
@@ -182,10 +224,15 @@ class HelperManager(commands.Cog):
             await message.clear_reactions()
 
         def get_ending_note(self) -> str:
+            """
+            Returns the ending notes for the help command.
+            """
             return f"Type {self.clean_prefix}{self.invoked_with} command for more info on a command.\n" \
                    f"You can also type {self.clean_prefix}{self.invoked_with} category for more info on a category."
 
         class EmbedPaginator:
+            """A paginator based on the paginator of provided help methods."""
+
             def __init__(self) -> None:
                 self._embed: Embed = Embed()
 

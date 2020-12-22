@@ -1,4 +1,3 @@
-import json
 import os
 from abc import abstractmethod
 from typing import Union
@@ -10,20 +9,29 @@ import utils
 from cogs.general import General
 from objects import CustomConfigObject
 from utils.helpers import ConfigHelper, SaveLoadHelper
-from utils.configuration import ConfigurationDictionary
-from interfaces import CogABCMeta
-from interfaces import IConfig, IExtension
+from configuration import ConfigurationDictionary
+from interfaces import CogABCMeta, IConfig, IExtension
 
 
 class CogClass(IExtension.Extension, IConfig.Config, commands.Cog, metaclass=CogABCMeta):
+    """
+    This is an abstract class used to simplify the creation of the Extensions.
+    While the class is not required it simplifies the creation and removes redundancy from the rest of the codebase.
+    """
+    # Static variable declaration.
     config_dir: str
     client: commands.Bot
     config: ConfigurationDictionary
-    _general_cog: General
+    _general_cog: General  # As there are some functions in the General Cog I cache it to reduce the number of get_cog calls that are done.
     config_object: CustomConfigObject.__class__
 
     def __init__(self, client: commands.bot, config_dir: str, config_object: CustomConfigObject.__class__) -> None:
-        super().__init__()
+        """
+        :param client: The Discord client object.
+        :param config_dir: The directory where the configurations are expected to be stored.
+        :param config_object: A class reference of the object to be initialized during the creation of the configs.
+        """
+        super().__init__()  # I am certain that this is not needed however in case there is a change in the future I am keeping this here to not break.
         self.client = client
         self.guildDict: dict = {}
         self.config_dir = config_dir
@@ -36,8 +44,8 @@ class CogClass(IExtension.Extension, IConfig.Config, commands.Cog, metaclass=Cog
 
     @commands.Cog.listener()
     async def on_ready(self) -> None:
-        self.load_configs()
         self._general_cog = self.client.get_cog(utils.CogNames.General.value)
+        self.load_configs()
 
     async def cog_check(self, ctx: commands.Context) -> bool:
         if not self.is_enabled(ctx):
@@ -45,6 +53,14 @@ class CogClass(IExtension.Extension, IConfig.Config, commands.Cog, metaclass=Cog
         return await self.role_check(ctx)
 
     async def role_check(self, ctx: commands.Context) -> bool:
+        """
+        A check done to ensure the user has the correct role for a given command.
+
+        :param ctx: The Discord Context.
+        :return: If the check has failed.
+        """
+        # I do this to prevent redundancy in the code and allow for dynamic changing of roles while the bot is live.
+        # If a better solution is discovered during the development then it will be implemented.
         approved_roles: [] = []
 
         try:
@@ -66,7 +82,7 @@ class CogClass(IExtension.Extension, IConfig.Config, commands.Cog, metaclass=Cog
             if role in member_roles:
                 return True
 
-        if ctx.invoked_with != "help":
+        if ctx.invoked_with != "help":  # Special check for the help command to prevent the sending of multiple wrong role messages.
             await ctx.send("Sorry you do not have the correct permissions to invoke this command.")
 
         return False
@@ -78,12 +94,19 @@ class CogClass(IExtension.Extension, IConfig.Config, commands.Cog, metaclass=Cog
     @property
     @abstractmethod
     def get_function_roles_reference(self) -> dict:
+        """
+        A function that returns a dictionary of function names and an array of allowed roles ids.
+
+        :return: Dictionary of allowed roles for given commands.
+        """
         pass
     # endregion
 
-    # region Join and Leave Listeners
+    # region Config
+    # region Listeners
     @commands.Cog.listener()
     async def on_guild_join(self, guild: Guild) -> None:
+        # This method is used to generate the default configuration files when a server invites the bot.
         if not self.config_object:
             return
 
@@ -92,6 +115,7 @@ class CogClass(IExtension.Extension, IConfig.Config, commands.Cog, metaclass=Cog
 
     @commands.Cog.listener()
     async def on_guild_remove(self, guild: Guild) -> None:
+        # This method is used to remove the configuration files when a server invites the bot.
         if not self.config_object:
             return
 
@@ -99,7 +123,6 @@ class CogClass(IExtension.Extension, IConfig.Config, commands.Cog, metaclass=Cog
         self.guildDict.pop(guild.id)
     # endregion
 
-    # region Config
     # region IConfig
     @property
     @abstractmethod
@@ -107,7 +130,7 @@ class CogClass(IExtension.Extension, IConfig.Config, commands.Cog, metaclass=Cog
         pass
 
     def load_configs(self, guild_id: int = None) -> None:
-        SaveLoadHelper.load_configs(self.guildDict, self.config_dir, self.config_object, self.client.guilds, guild_id)
+        SaveLoadHelper.load_configs_json(self.guildDict, self.config_dir, self.config_object, self.client.guilds, guild_id)
 
     def save_configs(self, guild_id: int = None) -> None:
         SaveLoadHelper.save_configs(self.guildDict, self.config_dir, self.config_object, guild_id)

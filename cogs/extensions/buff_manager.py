@@ -6,7 +6,7 @@ from discord.ext import commands, tasks
 
 import utils
 from objects import Week, BuffManagerConfig, Buff
-from utils.configuration import Configuration, ConfigurationDictionary
+from configuration import Configuration, ConfigurationDictionary
 from utils.cog_class import CogClass
 
 
@@ -98,7 +98,7 @@ class BuffManager(CogClass, name=utils.CogNames.BuffManager.value):
 
     @staticmethod
     def get_week_buff(config: BuffManagerConfig, date: datetime) -> (int, int):
-        (row, col) = utils.get_index(date, len(config.weeks))
+        (row, col) = utils.calculate_index(date, len(config.weeks))
         week: Week = config.weeks[list(config.weeks.keys())[row]]
         buff: Buff = config.buff_list[list(config.buff_list.keys())[week.get_value(col)]]
         return week, buff
@@ -162,7 +162,7 @@ class BuffManager(CogClass, name=utils.CogNames.BuffManager.value):
                 embed = Embed(title=f"**{obj_type}** in Index {args[0]}", description=f"Name of object {obj_type}\n```\n{obj.name}\n```")
                 if isinstance(obj, Week):
                     for i in range(0, 6):
-                        embed.add_field(name=f"Buff index for {utils.days[i]}", value=obj.get_value(i))
+                        embed.add_field(name=f"Buff index for {utils.days[i]}", value=str(obj.get_value(i)))
                 else:
                     embed.set_thumbnail(url=obj.image_url)
 

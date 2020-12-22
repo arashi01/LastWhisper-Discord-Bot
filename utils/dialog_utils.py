@@ -4,12 +4,13 @@ from enum import Enum
 from discord import Embed, Member, Reaction, Message
 from discord.ext.commands import Context
 
+# Some internal default used for the dialog box.
 _yes = "\N{White Heavy Check Mark}"
 _no = "\N{Negative Squared Cross Mark}"
-_cancel = "\N{Prohibited Sign}"
 
 
 class DialogReturn(Enum):
+    """ A collection of possible responses. """
     YES = 1
     NO = 0
     CANCEL = -1
@@ -18,6 +19,16 @@ class DialogReturn(Enum):
 
 
 async def setup_embed(ctx: Context, title: str, description: str, fields: list = None, timeout: float = 0.0) -> Message:
+    """
+    This sets up the embed with the necessary information before the embed is posted.
+
+    :param ctx: The Discord Context.
+    :param title: The title of the embed.
+    :param description: The description of the embed.
+    :param fields: A list of tuples that are used to represent any additional information.
+    :param timeout: This is used to show how much time is left on the embed in the footer.
+    :return: Returns the message where the embed was posted.
+    """
     embed: Embed = Embed(title=title, description=description)
 
     if fields:
@@ -31,6 +42,16 @@ async def setup_embed(ctx: Context, title: str, description: str, fields: list =
 
 
 async def yes_no(ctx: Context, title: str, description: str, fields: [] = None, timeout: float = 10.0) -> DialogReturn:
+    """
+    An automated dialog response embed message handler that will return a result of a dialog. This one is for yes or no.
+
+    :param ctx: The Discord Context.
+    :param title: The title of the dialog.
+    :param description: The description for the dialog.
+    :param fields: A list of tuples that are used to represent any additional information.
+    :param timeout: The amount of time before the message deletes and returns FAILED.
+    :return: The result of the Dialog.
+    """
     message = await setup_embed(ctx, title, description, fields, timeout)
 
     await message.add_reaction(_yes)
@@ -57,6 +78,17 @@ async def yes_no(ctx: Context, title: str, description: str, fields: [] = None, 
 
 
 async def get_author_written_response(ctx, title, description, fields: [] = None, timeout: float = 30.0, delete_response: bool = False) -> str:
+    """
+    A automatic dialog for getting a users next written response.
+
+    :param ctx: The Discord Context.
+    :param title: The title of the dialog.
+    :param description: The description for the dialog.
+    :param fields: A list of tuples that are used to represent any additional information.
+    :param timeout: The amount of time before the message deletes and returns "".
+    :param delete_response: Should the response be deleted after.
+    :return: The result of the Dialog.
+    """
     message = await setup_embed(ctx, title, description, fields, timeout)
 
     def check(_message: Message):

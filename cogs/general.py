@@ -6,7 +6,7 @@ from discord.ext.commands import Context
 
 import utils
 from objects import GeneralConfig
-from utils.configuration import ConfigurationDictionary, Configuration
+from configuration import ConfigurationDictionary, Configuration
 from utils.helpers import ConfigHelper, SaveLoadHelper
 from interfaces import CogABCMeta
 from interfaces import IConfig, IExtension
@@ -20,6 +20,12 @@ class General(IExtension.IsEnabled, IConfig.Config, commands.Cog, name=utils.Cog
         self.config_object = GeneralConfig.__class__
         self.general_cog: General = self
         self.guildDict: dict = {}
+        if client.is_ready():
+            self.load_configs()
+
+    @commands.Cog.listener()
+    async def on_ready(self) -> None:
+        self.load_configs()
 
     @staticmethod
     def get_prefix(client: commands.bot, message):
@@ -65,10 +71,10 @@ class General(IExtension.IsEnabled, IConfig.Config, commands.Cog, name=utils.Cog
         return True
 
     def load_configs(self, guild_id: int = None) -> None:
-        SaveLoadHelper.load_configs(self.guildDict, self.config_dir, self.config_object.__class__, self.client.guilds, guild_id)
+        SaveLoadHelper.load_configs_json(self.guildDict, self.config_dir, GeneralConfig, self.client.guilds, guild_id)
 
     def save_configs(self, guild_id: int = None) -> None:
-        SaveLoadHelper.save_configs(self.guildDict, self.config_dir, self.config_object.__class__, guild_id)
+        SaveLoadHelper.save_configs(self.guildDict, self.config_dir, GeneralConfig, guild_id)
 
     def set(self, ctx: commands.Context, variable: str, value: Union[TextChannel, Role, Member, str, int, bool]) -> None:
         self.guildDict[ctx.guild.id] = ConfigHelper.set(self.guildDict[ctx.guild.id], ctx, variable, value)

@@ -2,7 +2,7 @@ from discord.ext import commands
 
 import utils
 from objects import ManagementToolsConfig
-from utils.configuration import ConfigurationDictionary, Configuration
+from configuration import ConfigurationDictionary, Configuration
 from utils.cog_class import CogClass
 
 

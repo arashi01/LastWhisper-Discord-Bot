@@ -9,7 +9,7 @@ from discord.ext import commands, tasks
 
 import utils
 from objects import EventConfig, Event, EventReminderTrigger
-from utils.configuration import ConfigurationDictionary, Configuration
+from configuration import ConfigurationDictionary, Configuration
 from utils.cog_class import CogClass
 from utils.dialog_utils import yes_no, get_author_written_response, DialogReturn, setup_embed
 

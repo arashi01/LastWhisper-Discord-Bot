@@ -10,13 +10,9 @@ class GeneralConfig(CustomConfigObject):
                  prefix: str = "|"):
         """
         :param should_clear_command: Bool check if any command executed should be deleted.
-        :type should_clear_command: bool
         :param clear_command_exception_list: A list of Discord member ids that acts as a override to the should_clear_command.
-        :type clear_command_exception_list: TypeList
         :param management_role_ids: A collection of Discord role ids that represent the management roles.
-        :type management_role_ids: TypeList
         :param prefix: The prefix for server commands. Default is '|' to prevent unexpected issues.
-        :type prefix: str
         """
 
         self.should_clear_command: bool = should_clear_command

@@ -3,15 +3,15 @@ from typing import TypeVar, Generic
 
 
 class CustomConfigObject(ABC):
-    """Represents an abstract object used by classes.
-
+    """
+    Represents an abstract object used by classes.
     This is meant to be an abstract class that is used as a base for other objects used throughout out the bot.
     """
 
     @classmethod
     def from_json(cls, data: dict):
-        """From json dict to Class object.
-
+        """
+        From json dict to Class object.
         Converts json data dict to the object.
 
         :param data: The json dictionary.
@@ -38,9 +38,10 @@ class CustomConfigObject(ABC):
 
     @staticmethod
     def converter(obj) -> dict:
-        """ Converter for json parser
-
+        """
+        Converter for json parser
         Converts the object into a json parse friendly form.
+
         :param obj: The object being parsed.
         :return: dict of
         """
@@ -54,9 +55,7 @@ class CustomConfigObject(ABC):
 
 
 class TypeObjects(object):
-    """
-    Class container of the special type objects used.
-    """
+    """ Class container of the special type objects used. """
 
     class Channel(int):
         """ Represents a channel id """
