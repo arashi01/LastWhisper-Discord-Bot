@@ -42,6 +42,12 @@ class CogClass(IExtension.Extension, IConfig.Config, commands.Cog, metaclass=Cog
         if self.client.is_ready():
             self._general_cog = self.client.get_cog(utils.CogNames.General.value)
             self.load_configs()
+            
+    def cog_unload(self):
+        from os.path import isfile
+        for key, value in self.guildDict.items():
+            if not isfile(self.config_dir/(str(key) + SaveLoadHelper.default_extension)):
+                self.save_configs(key)
 
     @commands.Cog.listener()
     async def on_ready(self) -> None:
