@@ -76,7 +76,7 @@ class BuffManagerConfig(CustomConfigObject):
 
     def __init__(self, *, mm_channel_id=-1, mm_hour=-1,
                  tdb_ids=None, tmb_ids=None,
-                 twb_ids=None, nwb_id=None,
+                 twb_ids=None, nwb_ids=None,
                  buff_list=None, weeks=None):
 
         """
@@ -86,7 +86,7 @@ class BuffManagerConfig(CustomConfigObject):
         :param tdb_ids: A collection of Discord Role ids that allow users to execute the tdb command.
         :param tmb_ids: A collection of Discord Role ids that allow users to execute the tmb command.
         :param twb_ids: A collection of Discord Role ids that allow users to execute the twb command.
-        :param nwb_id: A collection of Discord Role ids that allow users to execute the nwb command.
+        :param nwb_ids: A collection of Discord Role ids that allow users to execute the nwb command.
 
         :param buff_list: A key, value collection of the Buff objects used by the server.
         :param weeks: A key, value collection of the Week objects used by the server.
