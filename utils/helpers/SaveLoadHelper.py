@@ -152,7 +152,7 @@ def load_configs_json(guild_dict: dict, config_dir: str, config_obj: CustomConfi
         guild_dict[guild_id] = obj
 
 
-def save_configs(guild_dict: dict, config_dir: str, config_obj: CustomConfigObject.__class__, guild_id: int = None) -> None:
+def save_configs_json(guild_dict: dict, config_dir: str, config_obj: CustomConfigObject.__class__, guild_id: int = None) -> None:
     """
     Function used to save the configuration file of an extension.
 
