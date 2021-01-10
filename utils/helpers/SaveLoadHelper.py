@@ -170,5 +170,6 @@ def save_configs_json(guild_dict: dict, config_dir: str, config_obj: CustomConfi
     else:
         if guild_id not in guild_dict:
             save_as_json(file_dir, config_obj())
+            return
 
         save_as_json(file_dir, guild_dict[guild_id])
