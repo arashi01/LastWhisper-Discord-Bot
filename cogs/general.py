@@ -79,7 +79,7 @@ class General(IExtension.IsEnabled, IConfig.Config, commands.Cog, name=utils.Cog
         }
 
     def is_enabled(self, ctx: Context) -> bool:
-        return True
+        return ctx.guild.id in self.guildDict
 
     def load_configs(self, guild_id: int = None) -> None:
         SaveLoadHelper.load_configs(self.guildDict, self.config_dir, GeneralConfig, self.client.guilds)
