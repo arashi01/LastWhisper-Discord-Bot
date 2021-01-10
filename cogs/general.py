@@ -1,4 +1,5 @@
 from typing import Union
+from pathlib import Path as _Path
 
 from discord import TextChannel, Role, Member
 from discord.ext import commands
@@ -16,10 +17,11 @@ class General(IExtension.IsEnabled, IConfig.Config, commands.Cog, name=utils.Cog
     def __init__(self, client: commands.bot):
         super().__init__()
         self.client = client
-        self.config_dir = "./config/general"
+        self.config_dir:_Path = _Path("./config/general")
         self.config_object = GeneralConfig.__class__
         self.general_cog: General = self
         self.guildDict: dict = {}
+
         if client.is_ready():
             self.load_configs()
 
@@ -71,7 +73,7 @@ class General(IExtension.IsEnabled, IConfig.Config, commands.Cog, name=utils.Cog
         return True
 
     def load_configs(self, guild_id: int = None) -> None:
-        SaveLoadHelper.load_configs_json(self.guildDict, self.config_dir, GeneralConfig, self.client.guilds, guild_id)
+        SaveLoadHelper.load_configs(self.guildDict, self.config_dir, GeneralConfig, self.client.guilds)
 
     def save_configs(self, guild_id: int = None) -> None:
         SaveLoadHelper.save_configs(self.guildDict, self.config_dir, GeneralConfig, guild_id)
