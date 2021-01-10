@@ -23,11 +23,17 @@ class General(IExtension.IsEnabled, IConfig.Config, commands.Cog, name=utils.Cog
         self.guildDict: dict = {}
 
         if client.is_ready():
-            self.load_configs()
+            self.on_ready()
 
-    @commands.Cog.listener()
-    async def on_ready(self) -> None:
+    def on_ready(self) -> None:
         self.load_configs()
+
+        for guild in [guild.id for guild in self.client.guilds if guild.id not in self.guildDict]:
+            self.save_configs(guild)
+            
+    @commands.Cog.listener("on_ready")
+    async def _on_ready(self) -> None:
+        self.on_ready()
 
     @staticmethod
     def get_prefix(client: commands.bot, message):
