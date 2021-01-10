@@ -137,7 +137,8 @@ class CogClass(IExtension.Extension, IConfig.Config, commands.Cog, metaclass=Cog
         pass
 
     def load_configs(self, guild_id: int = None) -> None:
-        SaveLoadHelper.load_configs_json(self.guildDict, self.config_dir, self.config_object, self.client.guilds, guild_id)
+        SaveLoadHelper.load_configs_json(self.guildDict, str(self.config_dir), self.config_object, self.client.guilds, guild_id)
+        SaveLoadHelper.load_configs(self.guildDict, self.config_dir, self.config_object, self.client.guilds, guild_id, clear_existing=False)
 
     def save_configs(self, guild_id: int = None) -> None:
         SaveLoadHelper.save_configs(self.guildDict, self.config_dir, self.config_object, guild_id)
