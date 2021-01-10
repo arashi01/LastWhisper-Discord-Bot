@@ -57,7 +57,10 @@ class General(IExtension.IsEnabled, IConfig.Config, commands.Cog, name=utils.Cog
             await ctx.message.delete()
 
     def get_management_role_ids(self, guild_id: int):
-        return self.guildDict[guild_id].management_role_ids
+        try:
+            return self.guildDict[guild_id].management_role_ids
+        except KeyError:
+            return []
 
     @property
     def get_configs(self) -> ConfigurationDictionary:
