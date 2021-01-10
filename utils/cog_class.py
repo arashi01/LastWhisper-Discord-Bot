@@ -19,13 +19,13 @@ class CogClass(IExtension.Extension, IConfig.Config, commands.Cog, metaclass=Cog
     While the class is not required it simplifies the creation and removes redundancy from the rest of the codebase.
     """
     # Static variable declaration.
-    config_dir: str
+    config_dir: Path
     client: commands.Bot
     config: ConfigurationDictionary
     _general_cog: General  # As there are some functions in the General Cog I cache it to reduce the number of get_cog calls that are done.
     config_object: CustomConfigObject.__class__
 
-    def __init__(self, client: commands.bot, config_dir: str, config_object: CustomConfigObject.__class__) -> None:
+    def __init__(self, client: commands.bot, config_dir: Path, config_object: CustomConfigObject.__class__) -> None:
         """
         :param client: The Discord client object.
         :param config_dir: The directory where the configurations are expected to be stored.
@@ -34,7 +34,7 @@ class CogClass(IExtension.Extension, IConfig.Config, commands.Cog, metaclass=Cog
         super().__init__()  # I am certain that this is not needed however in case there is a change in the future I am keeping this here to not break.
         self.client = client
         self.guildDict: dict = {}
-        self.config_dir = config_dir
+        self.config_dir = config_dir if isinstance(config_dir, Path) else Path(config_dir)
         self.config = self.get_configs
 
         self.config_object = config_object
