@@ -95,9 +95,9 @@ class BuffManagerConfig(CustomConfigObject):
         self.mm_hour: int = mm_hour if mm_hour else 0
 
         self.tdb_ids: TypeList = TypeList(t=TypeObjects.Role) if not tdb_ids else tdb_ids
-        self.tmb_ids: TypeList = TypeList(t=TypeObjects.Role) if not tdb_ids else tmb_ids
-        self.twb_ids: TypeList = TypeList(t=TypeObjects.Role) if not tdb_ids else twb_ids
-        self.nwb_ids: TypeList = TypeList(t=TypeObjects.Role) if not tdb_ids else nwb_id
+        self.tmb_ids: TypeList = TypeList(t=TypeObjects.Role) if not tmb_ids else tmb_ids
+        self.twb_ids: TypeList = TypeList(t=TypeObjects.Role) if not twb_ids else twb_ids
+        self.nwb_ids: TypeList = TypeList(t=TypeObjects.Role) if not nwb_ids else nwb_ids
 
         self.buff_list: dict = {} if buff_list is None else buff_list
         self.buff_list: dict = convert_dict(self.buff_list, Buff)
