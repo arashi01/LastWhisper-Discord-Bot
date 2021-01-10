@@ -1,4 +1,4 @@
-from objects import CustomConfigObject, convert_dict_list, TypeObjects, TypeList
+from objects import CustomConfigObject, convert_dict_list_json, convert_dict, TypeObjects, TypeList
 
 
 class Buff(CustomConfigObject):
@@ -36,7 +36,6 @@ class Week(CustomConfigObject):
         :param Saturday: The index of the buff for Saturday.
         :param Sunday: The index of the buff for Sunday.
         """
-
         self.name: str = name
         self.Monday: int = Monday
         self.Tuesday: int = Tuesday
@@ -92,7 +91,6 @@ class BuffManagerConfig(CustomConfigObject):
         :param buff_list: A key, value collection of the Buff objects used by the server.
         :param weeks: A key, value collection of the Week objects used by the server.
         """
-
         self.mm_channel_id: TypeObjects.Channel = mm_channel_id if mm_channel_id else TypeObjects.Channel()
         self.mm_hour: int = mm_hour if mm_hour else 0
 
@@ -102,13 +100,15 @@ class BuffManagerConfig(CustomConfigObject):
         self.nwb_ids: TypeList = TypeList(t=TypeObjects.Role) if not tdb_ids else nwb_id
 
         self.buff_list: dict = {} if buff_list is None else buff_list
+        self.buff_list: dict = convert_dict(self.buff_list, Buff)
         self.weeks: dict = {} if weeks is None else weeks
+        self.weeks: dict = convert_dict(self.weeks, Week)
 
     @classmethod
     def from_json(cls, data):
         obj: BuffManagerConfig = super().from_json(data)
 
-        convert_dict_list(obj.buff_list, Buff)
-        convert_dict_list(obj.weeks, Week)
+        convert_dict_list_json(obj.buff_list, Buff)
+        convert_dict_list_json(obj.weeks, Week)
 
         return obj
