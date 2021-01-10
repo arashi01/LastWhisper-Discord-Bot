@@ -105,7 +105,8 @@ def _try_get_obj(config_dir: Path, filename: str, config_obj: CustomConfigObject
         else:
             return obj
 
-def load_configs_json(guild_dict: dict, config_dir: str, config_obj: CustomConfigObject.__class__, guilds: [], guild_id: int = None) -> None:
+
+def load_configs_json(guild_dict: dict, config_dir: str, config_obj: CustomConfigObject.__class__, guilds: [], guild_id: int = None, clear_existing: bool = True) -> None:
     """
     Function that loads the configuration files for a extension and adds them to the list of configurations.
     This clears the guild_dict of all entries so should be used with caution.
@@ -115,19 +116,25 @@ def load_configs_json(guild_dict: dict, config_dir: str, config_obj: CustomConfi
     :param config_obj: A class representation of the configuration.
     :param guilds: A list of guilds that the bot is registered with used to remove configs that are no longer valid.
     :param guild_id: The Discord server id or guild id that is used to load the configurations of a specific config.
+    :param clear_existing: flag that if set True will clear the guild_dict
     """
     if not guild_id:
-        guild_dict.clear()
-        for filename in os.listdir(config_dir):
-            if filename.endswith(".json"):
-                if filename[:-5] not in [str(guild.id) for guild in guilds]:
-                    os.remove(f"{config_dir}/{filename}")
-                    continue
+        if clear_existing:
+            guild_dict.clear()
+    
+        try:
+            for filename in os.listdir(config_dir):
+                if filename.endswith(".json"):
+                    if filename[:-5] not in [str(guild.id) for guild in guilds]:
+                        os.remove(f"{config_dir}/{filename}")
+                        continue
 
-                with open(f"{config_dir}/{filename}") as f:
-                    json_obj = json.load(f)
+                    with open(f"{config_dir}/{filename}") as f:
+                        json_obj = json.load(f)
 
-                guild_dict[int(filename[:-5])] = config_obj.from_json(json_obj)
+                    guild_dict[int(filename[:-5])] = config_obj.from_json(json_obj)
+        except FileNotFoundError:
+            logger.warning(f"The config directory '{config_dir}' does not exist. Kindly create one manually or save a configuration in")
 
     else:
         file_dir = f"{config_dir}/{guild_id}.json"
