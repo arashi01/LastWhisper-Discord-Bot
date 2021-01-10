@@ -53,6 +53,10 @@ class CustomConfigObject(ABC):
     def __setitem__(self, key, value) -> None:
         self.__dict__[key] = value
 
+    # Made sure that it shows a dict
+    def __repr__(self):
+        return str(self.__dict__)
+
 
 class TypeObjects(object):
     """ Class container of the special type objects used. """
