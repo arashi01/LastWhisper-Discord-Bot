@@ -13,6 +13,7 @@ intents.members = True
 intents.messages = True
 intents.reactions = True
 
+
 client = commands.Bot(command_prefix=general.General.get_prefix, intents=intents, help_command=None)
 
 
