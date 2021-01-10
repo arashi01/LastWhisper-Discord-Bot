@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from pathlib import Path
 from typing import Union
 
 from discord import Embed, HTTPException
@@ -14,10 +15,11 @@ class BuffManager(CogClass, name=utils.CogNames.BuffManager.value):
     now: datetime
 
     def __init__(self, client: commands.bot) -> None:
-        super().__init__(client, "./config/buff_manager", BuffManagerConfig)
+        super().__init__(client, Path("./config/buff_manager"), BuffManagerConfig)
         self.loop.start()
 
     def cog_unload(self) -> None:
+        super().cog_unload()
         self.loop.cancel()
 
     @tasks.loop(minutes=1)
