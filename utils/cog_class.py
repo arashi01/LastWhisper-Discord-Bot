@@ -1,6 +1,7 @@
 import os
 from abc import abstractmethod
 from typing import Union
+from pathlib import Path
 
 from discord import Guild, TextChannel, Role, Member
 from discord.ext import commands
