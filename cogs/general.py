@@ -75,7 +75,7 @@ class General(IExtension.IsEnabled, IConfig.Config, commands.Cog, name=utils.Cog
     @property
     def get_function_roles_reference(self) -> dict:
         return {
-            self.change_prefix.name: None,
+            self.change_prefix.name: None
         }
 
     def is_enabled(self, ctx: Context) -> bool:
