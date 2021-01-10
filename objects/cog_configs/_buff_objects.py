@@ -24,26 +24,26 @@ class Week(CustomConfigObject):
     This object purely holds information and does not do any form of verification.
     """
 
-    def __init__(self, name="", Monday: int = -1, Tuesday: int = -1, Wednesday: int = -1, Thursday: int = -1, Friday: int = -1, Saturday: int = -1, Sunday: int = -1):
+    def __init__(self, name="", monday: int = -1, tuesday: int = -1, wednesday: int = -1, thursday: int = -1, friday: int = -1, saturday: int = -1, sunday: int = -1):
         """
         :param name: The name of the week.
 
-        :param Monday: The index of the buff for Monday.
-        :param Tuesday: The index of the buff for Tuesday.
-        :param Wednesday: The index of the buff for Wednesday.
-        :param Thursday: The index of the buff for Thursday.
-        :param Friday: The index of the buff for Friday.
-        :param Saturday: The index of the buff for Saturday.
-        :param Sunday: The index of the buff for Sunday.
+        :param monday: The index of the buff for Monday.
+        :param tuesday: The index of the buff for Tuesday.
+        :param wednesday: The index of the buff for Wednesday.
+        :param thursday: The index of the buff for Thursday.
+        :param friday: The index of the buff for Friday.
+        :param saturday: The index of the buff for Saturday.
+        :param sunday: The index of the buff for Sunday.
         """
         self.name: str = name
-        self.Monday: int = Monday
-        self.Tuesday: int = Tuesday
-        self.Wednesday: int = Wednesday
-        self.Thursday: int = Thursday
-        self.Friday: int = Friday
-        self.Saturday: int = Saturday
-        self.Sunday: int = Sunday
+        self.monday: int = monday
+        self.tuesday: int = tuesday
+        self.wednesday: int = wednesday
+        self.thursday: int = thursday
+        self.friday: int = friday
+        self.saturday: int = saturday
+        self.sunday: int = sunday
 
     def get_value(self, index: int) -> int:
         """
@@ -55,13 +55,13 @@ class Week(CustomConfigObject):
 
         try:
             return {
-                0: self.Monday,
-                1: self.Tuesday,
-                2: self.Wednesday,
-                3: self.Thursday,
-                4: self.Friday,
-                5: self.Saturday,
-                6: self.Sunday,
+                0: self.monday,
+                1: self.tuesday,
+                2: self.wednesday,
+                3: self.thursday,
+                4: self.friday,
+                5: self.saturday,
+                6: self.sunday,
             }[index]
         except KeyError:
             return -1
