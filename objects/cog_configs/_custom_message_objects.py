@@ -1,4 +1,4 @@
-from objects import CustomConfigObject, convert_dict_list, TypeObjects
+from objects import CustomConfigObject, convert_dict_list_json, TypeObjects
 from datetime import datetime
 
 
@@ -54,6 +54,6 @@ class CustomMessagesConfig(CustomConfigObject):
         obj = cls()
         obj.__dict__ = data
 
-        convert_dict_list(obj.messages, Message)
+        convert_dict_list_json(obj.messages, Message)
 
         return obj
