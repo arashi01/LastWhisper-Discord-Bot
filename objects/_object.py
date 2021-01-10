@@ -74,7 +74,20 @@ class TypeObjects(object):
         pass
 
 
-def convert_dict_list(dictionary: dict, class_object: CustomConfigObject.__class__) -> None:
+def convert_dict(dictionary: dict, class_object: CustomConfigObject.__class__) -> dict:
+    copy: dict = dictionary.copy()
+    dictionary.clear()
+
+    for key, value in sorted(copy.items()):
+        try:
+            dictionary[key] = class_object(**value)
+        except TypeError:
+            continue
+        
+    return dictionary
+
+
+def convert_dict_list_json(dictionary: dict, class_object: CustomConfigObject.__class__) -> None:
     copy: dict = dictionary.copy()
     dictionary.clear()
 
