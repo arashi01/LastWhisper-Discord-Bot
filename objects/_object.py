@@ -2,7 +2,7 @@ from abc import ABC
 from typing import TypeVar, Generic
 
 
-class CustomConfigObject(ABC):
+class CustomConfigObject(dict, ABC):
     """
     Represents an abstract object used by classes.
     This is meant to be an abstract class that is used as a base for other objects used throughout out the bot.
