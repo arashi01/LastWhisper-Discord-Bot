@@ -34,7 +34,7 @@ class ConfigManager(commands.Cog, name=CogNames.ConfigManager.value):
 
         else:
             if extension in self.client.cogs.keys():
-                if isinstance(cog := self.client.cogs[extension], (IConfig.GetConfig, CogClass)):
+                if isinstance(cog := self.client.cogs[extension], IConfig.GetConfig):
                     if isinstance(variable_result := cog.config.get_configurations_dict[variable], dict):
                         if action in ("set", "add", "remove"):
                             variable_result[action](ctx, variable_result["config_name"], value)
@@ -56,7 +56,7 @@ class ConfigManager(commands.Cog, name=CogNames.ConfigManager.value):
     async def reload(self, ctx: commands.Context, extension: str):
         if extension in self.client.cogs:
             cog = self.client.cogs[extension]
-            if isinstance(cog, CogClass):
+            if isinstance(cog, IExtension.IsEnabled) and isinstance(cog, IConfig.Load):
                 if not cog.is_enabled(ctx):
                     await ctx.send(f"Extension **{extension}** is **Not** enabled on your server. Nothing to do.")
                     return
@@ -77,7 +77,7 @@ class ConfigManager(commands.Cog, name=CogNames.ConfigManager.value):
     async def extension(self, ctx: commands.Context):
         embed: Embed = Embed(title="Extensions Status")
         for cog in self.client.cogs.values():
-            if isinstance(cog, (IExtension.IsEnabled, commands.Cog)):
+            if isinstance(cog, IExtension.IsEnabled):
                 embed.add_field(name=cog.qualified_name, value=self._is_enabled(cog, ctx))
 
         await ctx.send(embed=embed)
@@ -85,7 +85,7 @@ class ConfigManager(commands.Cog, name=CogNames.ConfigManager.value):
     @extension.command()
     async def is_enabled(self, ctx: commands.Context, extension: str):
         if extension in self.client.cogs:
-            if isinstance(cog := self.client.cogs[extension], (commands.Cog, IExtension.IsEnabled)):
+            if isinstance(cog := self.client.cogs[extension], IExtension.IsEnabled):
                 await ctx.send(embed=Embed(title=cog.qualified_name, description=self._is_enabled(cog, ctx)))
             else:
                 await ctx.send(f"Extension **{extension}** does not exist.")
@@ -95,7 +95,7 @@ class ConfigManager(commands.Cog, name=CogNames.ConfigManager.value):
     @extension.command()
     async def enable(self, ctx: commands.Context, extension: str):
         if extension in self.client.cogs:
-            if isinstance(cog := self.client.cogs[extension], (commands.Cog, IExtension.Enabled)):
+            if isinstance(cog := self.client.cogs[extension], IExtension.Enabled):
                 await cog.enable(ctx)
             else:
                 await ctx.send(f"Extension **{extension}** does not exist.")
@@ -105,7 +105,7 @@ class ConfigManager(commands.Cog, name=CogNames.ConfigManager.value):
     @extension.command()
     async def disable(self, ctx: commands.Context, extension: str):
         if extension in self.client.cogs:
-            if isinstance(cog := self.client.cogs[extension], (commands.Cog, IExtension.Disable)):
+            if isinstance(cog := self.client.cogs[extension], IExtension.Disable):
                 await cog.disable(ctx)
             else:
                 await ctx.send(f"Extension **{extension}** does not exist.")
