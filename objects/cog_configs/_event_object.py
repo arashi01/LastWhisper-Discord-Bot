@@ -85,8 +85,7 @@ class EventConfig(CustomConfigObject):
         self.trigger_edit_ids: TypeList = TypeList(TypeObjects.Role)
         self.trigger_remove_ids: TypeList = TypeList(TypeObjects.Role)
 
-        self.event_reminder_triggers: [
-            EventReminderTrigger] = event_reminder_triggers if event_reminder_triggers else []
+        self.event_reminder_triggers: [EventReminderTrigger] = event_reminder_triggers if event_reminder_triggers else []
         self.events: [Event] = [] if not events else events
 
     @classmethod
