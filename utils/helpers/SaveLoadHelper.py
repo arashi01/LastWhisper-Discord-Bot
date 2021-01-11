@@ -9,7 +9,7 @@ from ast import literal_eval as _literal_eval
 from pathlib import Path
 from typing import Union
 
-from utils import save_as_json, CustomConfigObject, logger, save_as_string
+from utils import save_as_json, CustomConfigObject, logger, save_as_string, deprecated
 
 
 default_disabled_extension = ".disabled"
@@ -106,6 +106,7 @@ def _try_get_obj(config_dir: Path, filename: str, config_obj: CustomConfigObject
             return obj
 
 
+@deprecated
 def load_configs_json(guild_dict: dict, config_dir: str, config_obj: CustomConfigObject.__class__, guilds: [], guild_id: int = None, clear_existing: bool = True) -> None:
     """
     Function that loads the configuration files for a extension and adds them to the list of configurations.
@@ -152,6 +153,7 @@ def load_configs_json(guild_dict: dict, config_dir: str, config_obj: CustomConfi
         guild_dict[guild_id] = obj
 
 
+@deprecated
 def save_configs_json(guild_dict: dict, config_dir: str, config_obj: CustomConfigObject.__class__, guild_id: int = None) -> None:
     """
     Function used to save the configuration file of an extension.
