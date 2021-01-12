@@ -66,5 +66,7 @@ def remove_file(path: str) -> None:
     """
     try:
         os.remove(path)
+    except FileNotFoundError:
+        pass
     except Exception as e:
         print(e)
