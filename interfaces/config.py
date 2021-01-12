@@ -8,28 +8,28 @@ class _HiddenGuildDictObjToEnsureThatSelfGuildDictIsAThing(ABC, metaclass=ABCMet
         self.guildDict: dict = {}
 
 
-class Load(_HiddenGuildDictObjToEnsureThatSelfGuildDictIsAThing, ABC, metaclass=ABCMeta):
+class ILoader(_HiddenGuildDictObjToEnsureThatSelfGuildDictIsAThing, ABC, metaclass=ABCMeta):
     @abstractmethod
     def load_configs(self, guild_id: int = None) -> None:
         pass
 
 
-class Save(_HiddenGuildDictObjToEnsureThatSelfGuildDictIsAThing, ABC, metaclass=ABCMeta):
+class ISaver(_HiddenGuildDictObjToEnsureThatSelfGuildDictIsAThing, ABC, metaclass=ABCMeta):
     @abstractmethod
     def save_configs(self, guild_id: int = None) -> None:
         pass
 
 
-class ConfigFileManager(Load, Save, ABC, metaclass=ABCMeta):
+class IConfigFileManager(ILoader, ISaver, ABC, metaclass=ABCMeta):
     pass
 
 
-class GetConfig(_HiddenGuildDictObjToEnsureThatSelfGuildDictIsAThing, ABC, metaclass=ABCMeta):
+class IConfigDeliverer(_HiddenGuildDictObjToEnsureThatSelfGuildDictIsAThing, ABC, metaclass=ABCMeta):
     @property
     @abstractmethod
     def get_configs(self) -> ConfigurationDictionary:
         pass
 
 
-class Config(Load, Save, GetConfig, ABC, metaclass=ABCMeta):
+class IConfigManager(ILoader, ISaver, IConfigDeliverer, ABC, metaclass=ABCMeta):
     pass

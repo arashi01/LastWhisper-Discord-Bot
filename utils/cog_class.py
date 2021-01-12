@@ -11,10 +11,10 @@ from cogs.general import General
 from objects import CustomConfigObject
 from utils.helpers import ConfigHelper, SaveLoadHelper
 from configuration import ConfigurationDictionary
-from interfaces import CogABCMeta, IConfig, IExtension
+from interfaces import CogABCMeta, config, iextensionhandler
 
 
-class CogClass(IExtension.Extension, IConfig.Config, commands.Cog, metaclass=CogABCMeta):
+class CogClass(iextensionhandler.IExtensionHandler, config.IConfigManager, commands.Cog, metaclass=CogABCMeta):
     """
     This is an abstract class used to simplify the creation of the Extensions.
     While the class is not required it simplifies the creation and removes redundancy from the rest of the codebase.

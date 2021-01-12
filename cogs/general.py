@@ -10,10 +10,10 @@ from objects import GeneralConfig
 from configuration import ConfigurationDictionary, Configuration
 from utils.helpers import ConfigHelper, SaveLoadHelper
 from interfaces import CogABCMeta
-from interfaces import IConfig, IExtension
+from interfaces import config, iextensionhandler
 
 
-class General(IExtension.IsEnabled, IConfig.Config, commands.Cog, name=utils.CogNames.General.value, metaclass=CogABCMeta):
+class General(iextensionhandler.IEnabled, config.IConfigManager, commands.Cog, name=utils.CogNames.General.value, metaclass=CogABCMeta):
     def __init__(self, client: commands.bot):
         super().__init__()
         self.client = client
