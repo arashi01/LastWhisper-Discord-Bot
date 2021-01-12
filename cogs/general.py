@@ -88,7 +88,21 @@ class General(extension.IEnabled, config.IConfigManager, commands.Cog, name=util
         SaveLoadHelper.load_configs(self.guildDict, self.config_dir, GeneralConfig, self.client.guilds)
 
     def save_configs(self, guild_id: int = None) -> None:
-        SaveLoadHelper.save_configs(self.guildDict, self.config_dir, GeneralConfig, guild_id)
+        SaveLoadHelper.save_configs(self._guildDict, self._config_dir, GeneralConfig, guild_id)
+
+    @commands.Cog.listener()
+    async def on_guild_join(self, guild: Guild) -> None:
+        self.save_configs(guild.id)
+        self.load_configs(guild.id)
+
+    @commands.Cog.listener()
+    async def on_guild_remove(self, guild: Guild) -> None:
+        if guild.id not in self._guildDict:
+            return
+
+        utils.remove_file(f"{self._config_dir}/{str(guild.id) + SaveLoadHelper.default_extension}")
+        utils.remove_file(f"{self._config_dir}/{str(guild.id) + SaveLoadHelper.default_extension + SaveLoadHelper.default_disabled_extension}")
+        self._guildDict.pop(guild.id)
 
     def set(self, ctx: commands.Context, variable: str, value: Union[TextChannel, Role, Member, str, int, bool]) -> None:
         self.guildDict[ctx.guild.id] = ConfigHelper.set(self.guildDict[ctx.guild.id], ctx, variable, value)

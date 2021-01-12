@@ -115,8 +115,8 @@ class CogClass(extension.IExtensionHandler, config.IConfigManager, commands.Cog,
         if not self._config_object:
             return
 
-        utils.save_as_json(f"{self._config_dir}/{guild.id}.json", self._config_object())
-        self._guildDict[guild.id] = self._config_object()
+        self.save_configs(guild.id)
+        self.load_configs(guild.id)
 
     @commands.Cog.listener()
     async def on_guild_remove(self, guild: Guild) -> None:
@@ -124,7 +124,11 @@ class CogClass(extension.IExtensionHandler, config.IConfigManager, commands.Cog,
         if not self._config_object:
             return
 
-        utils.remove_file(f"{self._config_dir}/{guild.id}.json")
+        if guild.id not in self._guildDict:
+            return
+
+        utils.remove_file(f"{self._config_dir}/{str(guild.id) + SaveLoadHelper.default_extension}")
+        utils.remove_file(f"{self._config_dir}/{str(guild.id) + SaveLoadHelper.default_extension + SaveLoadHelper.default_disabled_extension}")
         self._guildDict.pop(guild.id)
     # endregion
 
