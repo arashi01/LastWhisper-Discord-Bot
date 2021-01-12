@@ -1,4 +1,5 @@
 from datetime import datetime
+from pathlib import Path
 
 from discord import TextChannel, Embed
 from discord.ext import tasks, commands
@@ -11,7 +12,7 @@ from objects import CustomMessagesConfig, Message, TypeObjects
 
 class CustomMessages(CogClass, name=utils.CogNames.CustomMessages.value):
     def __init__(self, client: commands.bot):
-        super().__init__(client, "./config/custom_message", CustomMessagesConfig)
+        super().__init__(client, Path("./config/custom_message"), CustomMessagesConfig)
         self.loop.start()
 
     def cog_unload(self):

@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from discord.ext import commands
 
 import utils
@@ -8,7 +10,7 @@ from utils.cog_class import CogClass
 
 class ManagementTools(CogClass, name=utils.CogNames.ManagementTools.value):
     def __init__(self, client: commands.bot):
-        super().__init__(client, "./config/management_tools", ManagementToolsConfig)
+        super().__init__(client, Path("./config/management_tools"), ManagementToolsConfig)
 
     @commands.command()
     async def clear(self, ctx: commands.Context, number: str = "3"):

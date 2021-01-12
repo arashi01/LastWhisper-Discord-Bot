@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from discord import Message, RawReactionActionEvent, Member, Guild, Embed
 from discord.ext import commands
 
@@ -9,7 +11,7 @@ from utils.cog_class import CogClass
 
 class MemberManager(CogClass, name=utils.CogNames.MemberManager.value):
     def __init__(self, client: commands.bot):
-        super().__init__(client, "./config/member_manager", MemberManagerConfig)
+        super().__init__(client, Path("./config/member_manager"), MemberManagerConfig)
 
     @commands.Cog.listener()
     async def on_ready(self):

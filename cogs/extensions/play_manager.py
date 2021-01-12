@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from discord.ext import commands
 
 import utils
@@ -8,7 +10,7 @@ from utils.cog_class import CogClass
 
 class PlayManager(CogClass, name=utils.CogNames.PlayManager.value):
     def __init__(self, client: commands.bot):
-        super().__init__(client, "./config/play_manager", PlayConfig)
+        super().__init__(client, Path("./config/play_manager"), PlayConfig)
 
         self.player: dict = {}
 

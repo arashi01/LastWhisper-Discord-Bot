@@ -2,6 +2,7 @@ import asyncio
 import copy
 from datetime import datetime, timedelta
 from enum import Enum
+from pathlib import Path
 from time import strptime, mktime, strftime, asctime
 
 from discord import Embed, Message, HTTPException
@@ -24,7 +25,7 @@ class States(Enum):
 class EventManager(CogClass, name=utils.CogNames.EventManager.value):
 
     def __init__(self, client: commands.bot):
-        super().__init__(client, "./config/event_manager", EventConfig)
+        super().__init__(client, Path("./config/event_manager"), EventConfig)
         self.loop.start()
 
     def cog_unload(self):
