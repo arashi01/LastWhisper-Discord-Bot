@@ -21,19 +21,19 @@ class ConfigManager(commands.Cog, name=CogNames.ConfigManager.value):
         self._general_cog: General = self._client.get_cog(CogNames.General.value)
 
     @commands.group(invoke_without_command=True)
-    async def config(self, ctx: commands.Context, extension: str = None, variable: str = "", action: str = "", value: typing.Union[TextChannel, Role, Member, str, int, bool] = None):
-        if not extension:
+    async def config(self, ctx: commands.Context, extension_name: str = None, variable: str = "", action: str = "", value: typing.Union[TextChannel, Role, Member, str, int, bool] = None):
+        if not extension_name:
             embed: Embed = Embed(title="Available Extensions Configs")
-            for cog in self.client.cogs.values():
+            for cog in self._client.cogs.values():
                 if isinstance(cog, CogClass):
                     embed.add_field(name=cog.qualified_name, value="___")
 
             await ctx.send(embed=embed)
 
         else:
-            if extension in self.client.cogs.keys():
-                if isinstance(cog := self.client.cogs[extension], config.IConfigDeliverer):
-                    if isinstance(variable_result := cog.config.get_configurations_dict[variable], dict):
+            if extension_name in self._client.cogs.keys():
+                if isinstance(cog := self._client.cogs[extension_name], config.IConfigDeliverer):
+                    if isinstance(variable_result := cog.config_settings.get_configurations_dict[variable], dict):
                         if action in ("set", "add", "remove"):
                             variable_result[action](ctx, variable_result["config_name"], value)
                         elif action == "":
@@ -42,79 +42,81 @@ class ConfigManager(commands.Cog, name=CogNames.ConfigManager.value):
                         else:
                             raise commands.BadArgument(f"Action **{action}** is not valid.")
                     else:
-                        raise commands.BadArgument(f"**{variable}** is not valid configuration name for Extension **{extension}**.")
+                        raise commands.BadArgument(f"**{variable}** is not valid configuration name for Extension **{extension_name}**.")
                 else:
-                    raise commands.BadArgument(f"**{extension}** is not Extension.")
+                    raise commands.BadArgument(f"**{extension_name}** is not Extension.")
             else:
-                raise commands.BadArgument(f"**{extension}** does not exist.")
+                raise commands.BadArgument(f"**{extension_name}** does not exist.")
 
         await ctx.send("Done.")
 
     @config.command()
-    async def reload(self, ctx: commands.Context, extension: str):
-        if extension in self.client.cogs:
-            cog = self.client.cogs[extension]
-            if isinstance(cog, extension.IsEnabled) and isinstance(cog, config.ILoader):
+    async def reload(self, ctx: commands.Context, extension_name: str):
+        if extension_name in self._client.cogs:
+            cog = self._client.cogs[extension_name]
+            if isinstance(cog, extension.IEnabled):
                 if not cog.is_enabled(ctx):
-                    await ctx.send(f"Extension **{extension}** is **Not** enabled on your server. Nothing to do.")
+                    await ctx.send(f"Extension **{extension_name}** is **Not** enabled on your server. Nothing to do.")
                     return
-
-                cog.load_configs(ctx.guild.id)
+                if isinstance(cog, config.ILoader):
+                    cog.load_configs(ctx.guild.id)
+                else:
+                    raise AttributeError(f"Cog {cog.__name__} does not implement interface interface.config.ILoader")
             else:
-                await ctx.send(f"**{extension}** is not a valid extension.")
+                await ctx.send(f"**{extension_name}** is not a valid extension.")
 
         else:
-            await ctx.send(f"**{extension}** is not a valid extension.")
+            await ctx.send(f"**{extension_name}** is not a valid extension.")
         await ctx.send("Done.")
 
     @staticmethod
-    def _is_enabled(cog: iextensionhandler.IEnabled, ctx: commands.Context) -> str:
+    def _is_enabled(cog: extension.IEnabled, ctx: commands.Context) -> str:
         return ':white_check_mark: Enabled' if cog.is_enabled(ctx) else ':x: Disabled'
 
     @commands.group(invoke_without_command=True)
     async def extension(self, ctx: commands.Context):
         embed: Embed = Embed(title="Extensions Status")
-        for cog in self.client.cogs.values():
-            if isinstance(cog, iextensionhandler.IEnabled):
+        for cog in self._client.cogs.values():
+            if isinstance(cog, extension.IEnabled):
                 embed.add_field(name=cog.qualified_name, value=self._is_enabled(cog, ctx))
 
         await ctx.send(embed=embed)
 
     @extension.command()
-    async def is_enabled(self, ctx: commands.Context, extension: str):
-        if extension in self.client.cogs:
-            if isinstance(cog := self.client.cogs[extension], extension.IsEnabled):
+    async def is_enabled(self, ctx: commands.Context, extension_name: str):
+        if extension_name in self._client.cogs:
+            if isinstance(cog := self._client.cogs[extension_name], extension.IEnabled):
                 await ctx.send(embed=Embed(title=cog.qualified_name, description=self._is_enabled(cog, ctx)))
             else:
-                await ctx.send(f"Extension **{extension}** does not exist.")
+                await ctx.send(f"Extension **{extension_name}** does not exist.")
         else:
-            await ctx.send(f"Extension **{extension}** does not exist.")
+            await ctx.send(f"Extension **{extension_name}** does not exist.")
 
     @extension.command()
-    async def enable(self, ctx: commands.Context, extension: str):
-        if extension in self.client.cogs:
-            if isinstance(cog := self.client.cogs[extension], extension.Enabled):
+    async def enable(self, ctx: commands.Context, extension_name: str):
+        if extension_name in self._client.cogs:
+            if isinstance(cog := self._client.cogs[extension_name], extension.IEnabler):
                 await cog.enable(ctx)
             else:
-                await ctx.send(f"Extension **{extension}** does not exist.")
+                await ctx.send(f"Extension **{extension_name}** does not exist.")
         else:
-            await ctx.send(f"Extension **{extension}** does not exist.")
+            await ctx.send(f"Extension **{extension_name}** does not exist.")
 
     @extension.command()
-    async def disable(self, ctx: commands.Context, extension: str):
-        if extension in self.client.cogs:
-            if isinstance(cog := self.client.cogs[extension], extension.Disable):
+    async def disable(self, ctx: commands.Context, extension_name: str):
+        if extension_name in self._client.cogs:
+            if isinstance(cog := self._client.cogs[extension_name], extension.IDisabler):
                 await cog.disable(ctx)
             else:
-                await ctx.send(f"Extension **{extension}** does not exist.")
+                await ctx.send(f"Extension **{extension_name}** does not exist.")
         else:
-            await ctx.send(f"Extension **{extension}** does not exist.")
+            await ctx.send(f"Extension **{extension_name}** does not exist.")
 
     async def cog_check(self, ctx: commands.Context):
         return await self.role_check(ctx)
 
     async def role_check(self, ctx: commands.Context) -> bool:
-        roles = self.general_cog.get_management_role_ids(ctx.guild.id)
+        roles = self._general_cog.get_management_role_ids(ctx.guild.id)
 
         if len(roles) <= 0:
             return True
@@ -122,6 +124,7 @@ class ConfigManager(commands.Cog, name=CogNames.ConfigManager.value):
         for role in ctx.author.roles:
             if roles.__contains__(role.id):
                 return True
+
         if ctx.invoked_with != "help":
             await ctx.send("Sorry you do not have the correct permissions to invoke this command.")
 
