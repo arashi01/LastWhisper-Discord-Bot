@@ -12,7 +12,7 @@ class ManagementTools(CogClass, name=utils.CogNames.ManagementTools.value):
 
     @commands.command()
     async def clear(self, ctx: commands.Context, number: str = "3"):
-        guild: ManagementToolsConfig = self.guildDict[ctx.guild.id]
+        guild: ManagementToolsConfig = self._guildDict[ctx.guild.id]
 
         if guild.clear_channel_id_blacklist.__contains__(ctx.channel.id):
             await ctx.send("Sorry this channel has been blacklisted from this command.", delete_after=5)

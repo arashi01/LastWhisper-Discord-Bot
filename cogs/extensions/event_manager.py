@@ -32,10 +32,10 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
 
     @tasks.loop(minutes=1)
     async def loop(self):
-        await self.client.wait_until_ready()
+        await self._client.wait_until_ready()
         now = datetime.now()
 
-        for guild_id, config in self.guildDict.items():
+        for guild_id, config in self._guildDict.items():
             if not (len(config.events) and len(config.event_reminder_triggers)):
                 continue
 
@@ -43,7 +43,7 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
                 event_datetime = datetime.fromtimestamp(mktime(event.datetime))
 
                 if event_datetime.date() == now.date():
-                    if not (channel := self.client.get_guild(guild_id).get_channel(config.reminder_channel_id)):
+                    if not (channel := self._client.get_guild(guild_id).get_channel(config.reminder_channel_id)):
                         continue
 
                     for reminder in config.event_reminder_triggers:
@@ -75,7 +75,7 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
     # region Events
     @commands.group(name="Event", invoke_without_command=True)
     async def event(self, ctx: commands.Context, index: int = None):
-        config: EventConfig = self.guildDict[ctx.guild.id]
+        config: EventConfig = self._guildDict[ctx.guild.id]
 
         if not index:
             embed: Embed = Embed(title="List of Upcoming Events.")
@@ -97,14 +97,14 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
 
     @commands.Cog.listener(name="on_message")
     async def create_event(self, message: Message):
-        if message.author == self.client.user:
+        if message.author == self._client.user:
             return
 
         # noinspection PyTypeChecker
         if not self.is_enabled(message):  # This works due to the context have the same setup for getting the guild id.
             return
 
-        config: EventConfig = self.guildDict[message.guild.id]
+        config: EventConfig = self._guildDict[message.guild.id]
         if not config.channel_id:
             return
 
@@ -152,7 +152,7 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
 
     @event.command(name="cancel")
     async def cancel_event(self, ctx: commands.Context, index: int = None, confirm: bool = False):
-        config: EventConfig = self.guildDict[ctx.guild.id]
+        config: EventConfig = self._guildDict[ctx.guild.id]
         if abs(index) - 1 >= len(config.events):
             raise commands.BadArgument(f"Index {index} out of range.")
 
@@ -172,7 +172,7 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
     @event.command(name="edit")
     async def edit_event(self, ctx: commands.Context, index: int, name: str = "", time: str = "", *,
                          description: str = ""):
-        config: EventConfig = self.guildDict[ctx.guild.id]
+        config: EventConfig = self._guildDict[ctx.guild.id]
         if abs(index) - 1 >= len(config.events):
             raise commands.BadArgument(f"Index {index} out of range.")
 
@@ -217,7 +217,7 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
                 await asyncio.sleep(1)
 
                 try:
-                    reaction, member = await self.client.wait_for("reaction_add", timeout=60, check=_wizard_check)
+                    reaction, member = await self._client.wait_for("reaction_add", timeout=60, check=_wizard_check)
                 except asyncio.TimeoutError:
                     await wizard_message.clear_reactions()
                     return
@@ -277,7 +277,7 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
     # region Triggers
     @commands.group(name="Trigger", invoke_without_command=True)
     async def trigger(self, ctx: commands.Context, index: int = None):
-        config: EventConfig = self.guildDict[ctx.guild.id]
+        config: EventConfig = self._guildDict[ctx.guild.id]
         embed: Embed = Embed()
         if index:
             if abs(index) - 1 >= len(config.event_reminder_triggers):
@@ -300,12 +300,12 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
 
     @trigger.command(name="add")
     async def add_trigger(self, ctx: commands.Context, hour_dif: int, minute_dif: int, *, message: str):
-        self.guildDict[ctx.guild.id].event_reminder_triggers.append(EventReminderTrigger(hour_dif, minute_dif, message))
+        self._guildDict[ctx.guild.id].event_reminder_triggers.append(EventReminderTrigger(hour_dif, minute_dif, message))
         self.save_configs(ctx.guild.id)
 
     @trigger.command(name="edit")
     async def edit_trigger(self, ctx: commands.Context, index: int, hour_diff: int, minute_diff: int, *, message: str):
-        config: EventConfig = self.guildDict[ctx.guild.id]
+        config: EventConfig = self._guildDict[ctx.guild.id]
 
         if abs(index) - 1 >= len(config.event_reminder_triggers):
             raise commands.BadArgument(f"Index {index} is not a valid index.")
@@ -334,7 +334,7 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
 
     @trigger.command(name="remove")
     async def remove_trigger(self, ctx: commands.Context, index: int, confirm: bool = False):
-        config: EventConfig = self.guildDict[ctx.guild.id]
+        config: EventConfig = self._guildDict[ctx.guild.id]
 
         if abs(index) - 1 >= len(config.event_reminder_triggers):
             raise commands.BadArgument(f"Index {index} is not a valid index.")

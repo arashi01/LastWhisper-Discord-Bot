@@ -24,13 +24,13 @@ class BuffManager(CogClass, name=utils.CogNames.BuffManager.value):
 
     @tasks.loop(minutes=1)
     async def loop(self) -> None:
-        await self.client.wait_until_ready()
+        await self._client.wait_until_ready()
         self.now = datetime.now()
 
-        for key, config in self.guildDict.items():
+        for key, config in self._guildDict.items():
 
             if self.now.hour == config.mm_hour and self.now.minute == 0:
-                if not (morning_message_channel := self.client.get_channel(config.mm_channel_id)):
+                if not (morning_message_channel := self._client.get_channel(config.mm_channel_id)):
                     continue
 
                 week, buff = self.get_week_buff(config, self.now)
@@ -53,7 +53,7 @@ class BuffManager(CogClass, name=utils.CogNames.BuffManager.value):
 
     @commands.command(aliases=["today'sBuff", "tdb"])
     async def today_buff(self, ctx: commands.Context) -> None:
-        config: BuffManagerConfig = self.guildDict[ctx.guild.id]
+        config: BuffManagerConfig = self._guildDict[ctx.guild.id]
 
         _, buff = self.get_week_buff(config, self.now)
 
@@ -65,7 +65,7 @@ class BuffManager(CogClass, name=utils.CogNames.BuffManager.value):
 
     @commands.command(aliases=["tomorrow'sBuff", "trb", "tmb"])
     async def tomorrow_buff(self, ctx: commands.Context) -> None:
-        config: BuffManagerConfig = self.guildDict[ctx.guild.id]
+        config: BuffManagerConfig = self._guildDict[ctx.guild.id]
 
         tomorrow = self.now + timedelta(days=1)
         _, buff = self.get_week_buff(config, tomorrow)
@@ -78,7 +78,7 @@ class BuffManager(CogClass, name=utils.CogNames.BuffManager.value):
 
     @commands.command(aliases=["thisWeek'sBuffs", "wbs", "twb"])
     async def week_buffs(self, ctx: commands.Context) -> None:
-        config: BuffManagerConfig = self.guildDict[ctx.guild.id]
+        config: BuffManagerConfig = self._guildDict[ctx.guild.id]
 
         week, _ = self.get_week_buff(config, self.now)
 
@@ -89,7 +89,7 @@ class BuffManager(CogClass, name=utils.CogNames.BuffManager.value):
 
     @commands.command(aliases=["nextWeek'sBuffs", "nwb"])
     async def next_week_buffs(self, ctx: commands.Context) -> None:
-        config: BuffManagerConfig = self.guildDict[ctx.guild.id]
+        config: BuffManagerConfig = self._guildDict[ctx.guild.id]
 
         week, _ = self.get_week_buff(config, self.now + timedelta(days=7))
 
@@ -118,7 +118,7 @@ class BuffManager(CogClass, name=utils.CogNames.BuffManager.value):
                 # but index will leave it here unless it starts giving issues. Trying to save memory.
 
                 obj: Union[Week, Buff] = Week(*args) if obj_type == "week" else Buff(*args)
-                config: BuffManagerConfig = self.guildDict[ctx.guild.id]
+                config: BuffManagerConfig = self._guildDict[ctx.guild.id]
 
                 index: int = 0
                 for key in sorted(config["buff_list" if obj_type == "buff" else "weeks"].keys()):
@@ -134,7 +134,7 @@ class BuffManager(CogClass, name=utils.CogNames.BuffManager.value):
                     if len(args) != 1:
                         raise commands.BadArgument("Arguments must be 1.")
 
-                    self.guildDict[ctx.guild.id]["buff_list" if obj_type == "buff" else "weeks"].pop(*args)
+                    self._guildDict[ctx.guild.id]["buff_list" if obj_type == "buff" else "weeks"].pop(*args)
                     self.save_configs(ctx.guild.id)
                 except KeyError:
                     await ctx.send("Sorry the index is not valid!")
@@ -143,7 +143,7 @@ class BuffManager(CogClass, name=utils.CogNames.BuffManager.value):
                     result: Embed = Embed(title=f"Indexes of object **{obj_type}**", description="These are the indexes and the names of the objects registered.")
 
                     # noinspection PyShadowingNames
-                    for index, value in self.guildDict[ctx.guild.id]["buff_list" if obj_type == "buff" else "weeks"].items():
+                    for index, value in self._guildDict[ctx.guild.id]["buff_list" if obj_type == "buff" else "weeks"].items():
                         result.add_field(name=f"Index {index}", value=f"```\n{value.name}\n```", inline=False)
 
                     return result
@@ -156,7 +156,7 @@ class BuffManager(CogClass, name=utils.CogNames.BuffManager.value):
                     raise commands.TooManyArguments()
 
                 try:
-                    obj: Union[Week, Buff] = self.guildDict[ctx.guild.id]["buff_list" if obj_type == "buff" else "weeks"][str(args[0])]
+                    obj: Union[Week, Buff] = self._guildDict[ctx.guild.id]["buff_list" if obj_type == "buff" else "weeks"][str(args[0])]
                 except KeyError:
                     await ctx.send(f"Sorry the index {args[0]} is not valid. Please give a correct index.", embed=get_embed())
                     return

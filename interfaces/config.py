@@ -5,7 +5,7 @@ from configuration import ConfigurationDictionary
 
 class _HiddenGuildDictObjToEnsureThatSelfGuildDictIsAThing(ABC, metaclass=ABCMeta):
     def __init__(self):
-        self.guildDict: dict = {}
+        self._guildDict: dict = {}
 
 
 class ILoader(_HiddenGuildDictObjToEnsureThatSelfGuildDictIsAThing, ABC, metaclass=ABCMeta):

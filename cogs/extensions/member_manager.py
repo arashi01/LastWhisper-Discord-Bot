@@ -15,8 +15,8 @@ class MemberManager(CogClass, name=utils.CogNames.MemberManager.value):
     async def on_ready(self):
         await super().on_ready()
 
-        for config in self.guildDict.values():
-            if channel := self.client.get_channel(config.welcome_channel_id):
+        for config in self._guildDict.values():
+            if channel := self._client.get_channel(config.welcome_channel_id):
                 messages: [Message] = await channel.history(limit=None).flatten()
 
                 if not ((new_member_role := channel.guild.get_role(config.new_member_role_id)) and
@@ -35,13 +35,13 @@ class MemberManager(CogClass, name=utils.CogNames.MemberManager.value):
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload: RawReactionActionEvent):
-        config: MemberManagerConfig = self.guildDict[(guild_id := payload.guild_id)]
+        config: MemberManagerConfig = self._guildDict[(guild_id := payload.guild_id)]
 
-        if not ((channel := self.client.get_channel(config.welcome_channel_id)) and payload.channel_id == channel.id):
+        if not ((channel := self._client.get_channel(config.welcome_channel_id)) and payload.channel_id == channel.id):
             return
 
         member: Member = payload.member
-        guild: Guild = self.client.get_guild(guild_id)
+        guild: Guild = self._client.get_guild(guild_id)
 
         if not ((new_member_role := guild.get_role(config.new_member_role_id)) and
                 (member_role := guild.get_role(config.member_role_id))):
@@ -61,7 +61,7 @@ class MemberManager(CogClass, name=utils.CogNames.MemberManager.value):
         if not self.is_enabled(member):  # Done like this due to guild id being called the same.
             return
 
-        guild: MemberManagerConfig = self.guildDict[member.guild.id]
+        guild: MemberManagerConfig = self._guildDict[member.guild.id]
 
         if role := member.guild.get_role(guild.new_member_role_id):
             await member.add_roles(role)
@@ -72,12 +72,12 @@ class MemberManager(CogClass, name=utils.CogNames.MemberManager.value):
         if not self.is_enabled(member):  # Done like this due to guild id being called the same.
             return
 
-        guild = self.guildDict[member.guild.id]
+        guild = self._guildDict[member.guild.id]
         embed = Embed(title="User left.", description=f"User **{member.name}** has left this discord server.")
         embed.add_field(name="Joined On:", value=str(member.joined_at)[:-7])
         embed.add_field(name="Nickname was:", value=member.nick)
         embed.set_thumbnail(url=member.avatar_url)
-        await self.client.get_channel(guild.on_member_leave_logging_channel).send(embed=embed)
+        await self._client.get_channel(guild.on_member_leave_logging_channel).send(embed=embed)
 
     @property
     def get_configs(self) -> ConfigurationDictionary:

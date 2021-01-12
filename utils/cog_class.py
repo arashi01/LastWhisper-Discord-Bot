@@ -11,20 +11,19 @@ from cogs.general import General
 from objects import CustomConfigObject
 from utils.helpers import ConfigHelper, SaveLoadHelper
 from configuration import ConfigurationDictionary
-from interfaces import CogABCMeta, config, iextensionhandler
+from interfaces import CogABCMeta, config, extension
 
 
-class CogClass(iextensionhandler.IExtensionHandler, config.IConfigManager, commands.Cog, metaclass=CogABCMeta):
+class CogClass(extension.IExtensionHandler, config.IConfigManager, commands.Cog, metaclass=CogABCMeta):
     """
     This is an abstract class used to simplify the creation of the Extensions.
     While the class is not required it simplifies the creation and removes redundancy from the rest of the codebase.
     """
     # Static variable declaration.
-    config_dir: Path
-    client: commands.Bot
-    config: ConfigurationDictionary
+    _config_dir: Path
+    _client: commands.Bot
     _general_cog: General  # As there are some functions in the General Cog I cache it to reduce the number of get_cog calls that are done.
-    config_object: CustomConfigObject.__class__
+    _config_object: CustomConfigObject.__class__
 
     def __init__(self, client: commands.bot, config_dir: Path, config_object: CustomConfigObject.__class__) -> None:
         """
@@ -33,25 +32,24 @@ class CogClass(iextensionhandler.IExtensionHandler, config.IConfigManager, comma
         :param config_object: A class reference of the object to be initialized during the creation of the configs.
         """
         super().__init__()  # I am certain that this is not needed however in case there is a change in the future I am keeping this here to not break.
-        self.client = client
-        self.guildDict: dict = {}
-        self.config_dir = config_dir if isinstance(config_dir, Path) else Path(config_dir)
-        self.config = self.get_configs
+        self._client = client
+        self._guildDict: dict = {}
+        self._config_dir = config_dir if isinstance(config_dir, Path) else Path(config_dir)
 
-        self.config_object = config_object
-        if self.client.is_ready():
-            self._general_cog = self.client.get_cog(utils.CogNames.General.value)
+        self._config_object = config_object
+        if self._client.is_ready():
+            self._general_cog = self._client.get_cog(utils.CogNames.General.value)
             self.load_configs()
             
     def cog_unload(self):
         from os.path import isfile
-        for key, value in self.guildDict.items():
-            if not isfile(self.config_dir/(str(key) + SaveLoadHelper.default_extension)):
+        for key, value in self._guildDict.items():
+            if not isfile(self._config_dir / (str(key) + SaveLoadHelper.default_extension)):
                 self.save_configs(key)
 
     @commands.Cog.listener()
     async def on_ready(self) -> None:
-        self._general_cog = self.client.get_cog(utils.CogNames.General.value)
+        self._general_cog = self._client.get_cog(utils.CogNames.General.value)
         self.load_configs()
 
     async def cog_check(self, ctx: commands.Context) -> bool:
@@ -71,7 +69,7 @@ class CogClass(iextensionhandler.IExtensionHandler, config.IConfigManager, comma
         approved_roles: [] = []
 
         try:
-            approved_roles = self.guildDict[ctx.guild.id][self.get_function_roles_reference[ctx.command.name]]
+            approved_roles = self._guildDict[ctx.guild.id][self.get_function_roles_reference[ctx.command.name]]
         except KeyError:
             approved_roles = None
         except NotImplementedError:
@@ -114,20 +112,20 @@ class CogClass(iextensionhandler.IExtensionHandler, config.IConfigManager, comma
     @commands.Cog.listener()
     async def on_guild_join(self, guild: Guild) -> None:
         # This method is used to generate the default configuration files when a server invites the bot.
-        if not self.config_object:
+        if not self._config_object:
             return
 
-        utils.save_as_json(f"{self.config_dir}/{guild.id}.json", self.config_object())
-        self.guildDict[guild.id] = self.config_object()
+        utils.save_as_json(f"{self._config_dir}/{guild.id}.json", self._config_object())
+        self._guildDict[guild.id] = self._config_object()
 
     @commands.Cog.listener()
     async def on_guild_remove(self, guild: Guild) -> None:
         # This method is used to remove the configuration files when a server invites the bot.
-        if not self.config_object:
+        if not self._config_object:
             return
 
-        utils.remove_file(f"{self.config_dir}/{guild.id}.json")
-        self.guildDict.pop(guild.id)
+        utils.remove_file(f"{self._config_dir}/{guild.id}.json")
+        self._guildDict.pop(guild.id)
     # endregion
 
     # region IConfig
@@ -137,11 +135,11 @@ class CogClass(iextensionhandler.IExtensionHandler, config.IConfigManager, comma
         pass
 
     def load_configs(self, guild_id: int = None) -> None:
-        SaveLoadHelper.load_configs_json(self.guildDict, str(self.config_dir), self.config_object, self.client.guilds, guild_id)
-        SaveLoadHelper.load_configs(self.guildDict, self.config_dir, self.config_object, self.client.guilds, guild_id, clear_existing=False)
+        SaveLoadHelper.load_configs_json(self._guildDict, str(self._config_dir), self._config_object, self._client.guilds, guild_id)
+        SaveLoadHelper.load_configs(self._guildDict, self._config_dir, self._config_object, self._client.guilds, guild_id, clear_existing=False)
 
     def save_configs(self, guild_id: int = None) -> None:
-        SaveLoadHelper.save_configs(self.guildDict, self.config_dir, self.config_object, guild_id)
+        SaveLoadHelper.save_configs(self._guildDict, self._config_dir, self._config_object, guild_id)
 
     # endregion
 
@@ -159,24 +157,24 @@ class CogClass(iextensionhandler.IExtensionHandler, config.IConfigManager, comma
             await ctx.send("Already Disabled.")
             return
 
-        self.guildDict.pop(ctx.guild.id)
-        os.rename(f"{self.config_dir}/{ctx.guild.id}.json", f"{self.config_dir}/{ctx.guild.id}.json.disabled")
+        self._guildDict.pop(ctx.guild.id)
+        os.rename(f"{self._config_dir}/{ctx.guild.id}.json", f"{self._config_dir}/{ctx.guild.id}.json.disabled")
 
         await ctx.send("Done.")
 
     def is_enabled(self, ctx: commands.Context) -> bool:
-        return self.guildDict.__contains__(ctx.guild.id)
+        return self._guildDict.__contains__(ctx.guild.id)
     # endregion
 
     def set(self, ctx: commands.Context, variable: str, value: Union[TextChannel, Role, Member, str, int, bool]) -> None:
-        self.guildDict[ctx.guild.id] = ConfigHelper.set(self.guildDict[ctx.guild.id], ctx, variable, value)
+        self._guildDict[ctx.guild.id] = ConfigHelper.set(self._guildDict[ctx.guild.id], ctx, variable, value)
         self.save_configs(ctx.guild.id)
 
     def add(self, ctx: commands.Context, variable: str, value: Union[TextChannel, Role, Member, str, int, bool]) -> None:
-        self.guildDict[ctx.guild.id] = ConfigHelper.add(self.guildDict[ctx.guild.id], ctx, variable, value)
+        self._guildDict[ctx.guild.id] = ConfigHelper.add(self._guildDict[ctx.guild.id], ctx, variable, value)
         self.save_configs(ctx.guild.id)
 
     def remove(self, ctx: commands.Context, variable: str, value: Union[TextChannel, Role, Member, str, int, bool]) -> None:
-        self.guildDict[ctx.guild.id] = ConfigHelper.remove(self.guildDict[ctx.guild.id], ctx, variable, value)
+        self._guildDict[ctx.guild.id] = ConfigHelper.remove(self._guildDict[ctx.guild.id], ctx, variable, value)
         self.save_configs(ctx.guild.id)
     # endregion

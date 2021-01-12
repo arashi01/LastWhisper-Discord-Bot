@@ -6,21 +6,19 @@ import typing
 from cogs.general import General
 from utils import CogNames
 from utils.cog_class import CogClass
-from interfaces import config, iextensionhandler
+from interfaces import config, extension
 
 
 class ConfigManager(commands.Cog, name=CogNames.ConfigManager.value):
 
     def __init__(self, client: commands.bot):
-        self.client: commands.bot = client
-        self.general_cog: General = self.client.get_cog(CogNames.General.value)
+        self._client: commands.bot = client
+        if self._client.is_ready:
+            self._general_cog: General = self._client.get_cog(CogNames.General.value)
 
     @commands.Cog.listener()
     async def on_ready(self):
-        self.general_cog: General = self.client.get_cog(CogNames.General.value)
-
-    async def cog_before_invoke(self, ctx: commands.Context):
-        pass
+        self._general_cog: General = self._client.get_cog(CogNames.General.value)
 
     @commands.group(invoke_without_command=True)
     async def config(self, ctx: commands.Context, extension: str = None, variable: str = "", action: str = "", value: typing.Union[TextChannel, Role, Member, str, int, bool] = None):

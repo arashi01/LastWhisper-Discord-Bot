@@ -38,7 +38,7 @@ class General(iextensionhandler.IEnabled, config.IConfigManager, commands.Cog, n
     @staticmethod
     def get_prefix(client: commands.bot, message):
         try:
-            return client.get_cog(utils.CogNames.General.value).guildDict[message.guild.id].prefix
+            return client.get_cog(utils.CogNames.General.value)._guildDict[message.guild.id].prefix
         except KeyError:
             return "|"
 
