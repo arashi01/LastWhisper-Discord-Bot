@@ -35,15 +35,18 @@ class General(extension.IEnabled, config.IConfigManager, commands.Cog, name=util
     async def _on_ready(self) -> None:
         self.on_ready()
 
+    def get_guild_prefix(self, guild_id: int):
+        try:
+            return self._guildDict[guild_id].prefix
+        except KeyError:
+            return "/"
+
     @staticmethod
     def get_prefix(client: commands.bot, message):
-        try:
-            return client.get_cog(utils.CogNames.General.value)._guildDict[message.guild.id].prefix
-        except KeyError:
-            return "|"
+        return client.get_cog(utils.CogNames.General.value).get_guild_prefix(message.guild.id)
 
     @commands.command(name="changePrefix")
-    async def change_prefix(self, ctx: commands.Context, prefix: str = "|"):
+    async def change_prefix(self, ctx: commands.Context, prefix: str = "/"):
         guild: GeneralConfig = self.guildDict[ctx.guild.id]
         guild.prefix = prefix
         self.save_configs(ctx.guild.id)
