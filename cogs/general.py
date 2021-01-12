@@ -45,7 +45,7 @@ class General(extension.IEnabled, config.IConfigManager, commands.Cog, name=util
     def get_prefix(client: commands.bot, message):
         return client.get_cog(utils.CogNames.General.value).get_guild_prefix(message.guild.id)
 
-    @commands.command(name="changePrefix")
+    @commands.command(name="LastWhisper_ChangePrefix")
     async def change_prefix(self, ctx: commands.Context, prefix: str = "/"):
         guild: GeneralConfig = self._guildDict[ctx.guild.id]
         guild.prefix = prefix
