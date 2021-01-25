@@ -21,7 +21,7 @@ class Debug(commands.Cog, name=utils.CogNames.Debug.value):
     @commands.command()
     async def print(self, _: commands.Context):
         cog = self.client.get_cog("General")
-        print(cog._guildDict)
+        print(cog.guildDict)
 
     @commands.command(aliases=["FIT"])
     async def fit(self, ctx: commands.Context):
