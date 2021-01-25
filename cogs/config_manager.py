@@ -4,9 +4,11 @@ from discord import Embed, TextChannel, Role, Member
 import typing
 
 from cogs.general import General
+from objects.role_object import RoleObject
 from utils import CogNames
 from utils.cog_class import CogClass
-from interfaces import config, extension
+from interfaces import config, extension, roles
+from utils.helpers import role_helper
 
 
 class ConfigManager(commands.Cog, name=CogNames.ConfigManager.value):
@@ -113,22 +115,19 @@ class ConfigManager(commands.Cog, name=CogNames.ConfigManager.value):
             await ctx.send(f"Extension **{extension_name}** does not exist.")
 
     async def cog_check(self, ctx: commands.Context):
-        return await self.role_check(ctx)
+        pass
 
-    async def role_check(self, ctx: commands.Context) -> bool:
-        roles = self._general_cog.get_management_role_ids(ctx.guild.id)
+    @property
+    def role_list(self) -> dict:
+        return {
+            self.config.name:       RoleObject("", "", True),
+            self.reload.name:       RoleObject("", "", True),
 
-        if len(roles) <= 0:
-            return True
-
-        for role in ctx.author.roles:
-            if roles.__contains__(role.id):
-                return True
-
-        if ctx.invoked_with != "help":
-            await ctx.send("Sorry you do not have the correct permissions to invoke this command.")
-
-        return False
+            self.extension.name:    RoleObject("", "", True),
+            self.is_enabled.name:   RoleObject("", "", True),
+            self.enable.name:       RoleObject("", "", True),
+            self.disable:           RoleObject("", "", True)
+        }
 
 
 def setup(client: commands.bot):
