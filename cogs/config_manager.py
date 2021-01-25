@@ -28,9 +28,12 @@ class ConfigManager(roles.IRoleProvider, commands.Cog, name=CogNames.ConfigManag
             embed: Embed = Embed(title="Available Extensions Configs")
             for cog in self._client.cogs.values():
                 if isinstance(cog, CogClass):
+                    if isinstance(cog, extension.IEnabled) and not cog.is_enabled(ctx):
+                        continue
+
                     embed.add_field(name=cog.qualified_name, value="___")
 
-            await ctx.send(embed=embed)
+            await ctx.reply(embed=embed, mention_author=False)
 
         else:
             if extension_name in self._client.cogs.keys():
@@ -40,7 +43,7 @@ class ConfigManager(roles.IRoleProvider, commands.Cog, name=CogNames.ConfigManag
                             variable_result[action](ctx, variable_result["config_name"], value)
                         elif action == "":
                             embed: Embed = variable_result["long preview"](Embed(), ctx, variable_result["config_name"])
-                            await ctx.send(embed=embed)
+                            await ctx.reply(embed=embed, mention_author=False)
                         else:
                             raise commands.BadArgument(f"Action **{action}** is not valid.")
                     else:
@@ -50,7 +53,7 @@ class ConfigManager(roles.IRoleProvider, commands.Cog, name=CogNames.ConfigManag
             else:
                 raise commands.BadArgument(f"**{extension_name}** does not exist.")
 
-        await ctx.send("Done.")
+            await ctx.reply("Done.", mention_author=False)
 
     @config.command()
     async def reload(self, ctx: commands.Context, extension_name: str):
@@ -58,18 +61,18 @@ class ConfigManager(roles.IRoleProvider, commands.Cog, name=CogNames.ConfigManag
             cog = self._client.cogs[extension_name]
             if isinstance(cog, extension.IEnabled):
                 if not cog.is_enabled(ctx):
-                    await ctx.send(f"Extension **{extension_name}** is **Not** enabled on your server. Nothing to do.")
+                    await ctx.reply(f"Extension **{extension_name}** is **Not** enabled on your server. Nothing to do.", mention_author=False)
                     return
                 if isinstance(cog, config.ILoader):
                     cog.load_configs(ctx.guild.id)
                 else:
                     raise AttributeError(f"Cog {cog.__name__} does not implement interface interface.config.ILoader")
             else:
-                await ctx.send(f"**{extension_name}** is not a valid extension.")
+                await ctx.reply(f"**{extension_name}** is not a valid extension.", mention_author=False)
 
         else:
-            await ctx.send(f"**{extension_name}** is not a valid extension.")
-        await ctx.send("Done.")
+            await ctx.reply(f"**{extension_name}** is not a valid extension.", mention_author=False)
+        await ctx.reply("Done.", mention_author=False)
 
     @staticmethod
     def _is_enabled(cog: extension.IEnabled, ctx: commands.Context) -> str:
@@ -82,17 +85,17 @@ class ConfigManager(roles.IRoleProvider, commands.Cog, name=CogNames.ConfigManag
             if isinstance(cog, extension.IEnabled):
                 embed.add_field(name=cog.qualified_name, value=self._is_enabled(cog, ctx))
 
-        await ctx.send(embed=embed)
+        await ctx.reply(embed=embed, mention_author=False)
 
     @extension.command()
     async def is_enabled(self, ctx: commands.Context, extension_name: str):
         if extension_name in self._client.cogs:
             if isinstance(cog := self._client.cogs[extension_name], extension.IEnabled):
-                await ctx.send(embed=Embed(title=cog.qualified_name, description=self._is_enabled(cog, ctx)))
+                await ctx.reply(embed=Embed(title=cog.qualified_name, description=self._is_enabled(cog, ctx)), mention_author=False)
             else:
-                await ctx.send(f"Extension **{extension_name}** does not exist.")
+                await ctx.reply(f"Extension **{extension_name}** does not exist.", mention_author=False)
         else:
-            await ctx.send(f"Extension **{extension_name}** does not exist.")
+            await ctx.reply(f"Extension **{extension_name}** does not exist.", mention_author=False)
 
     @extension.command()
     async def enable(self, ctx: commands.Context, extension_name: str):
@@ -100,9 +103,9 @@ class ConfigManager(roles.IRoleProvider, commands.Cog, name=CogNames.ConfigManag
             if isinstance(cog := self._client.cogs[extension_name], extension.IEnabler):
                 await cog.enable(ctx)
             else:
-                await ctx.send(f"Extension **{extension_name}** does not exist.")
+                await ctx.reply(f"Extension **{extension_name}** does not exist.", mention_author=False)
         else:
-            await ctx.send(f"Extension **{extension_name}** does not exist.")
+            await ctx.reply(f"Extension **{extension_name}** does not exist.", mention_author=False)
 
     @extension.command()
     async def disable(self, ctx: commands.Context, extension_name: str):
@@ -110,9 +113,9 @@ class ConfigManager(roles.IRoleProvider, commands.Cog, name=CogNames.ConfigManag
             if isinstance(cog := self._client.cogs[extension_name], extension.IDisabler):
                 await cog.disable(ctx)
             else:
-                await ctx.send(f"Extension **{extension_name}** does not exist.")
+                await ctx.reply(f"Extension **{extension_name}** does not exist.", mention_author=False)
         else:
-            await ctx.send(f"Extension **{extension_name}** does not exist.")
+            await ctx.reply(f"Extension **{extension_name}** does not exist.", mention_author=False)
 
     @role_helper.cog_check_replacement
     async def cog_check(self, ctx: commands.Context):
