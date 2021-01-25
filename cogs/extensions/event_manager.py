@@ -29,6 +29,7 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
         self.loop.start()
 
     def cog_unload(self):
+        super().cog_unload()
         self.loop.cancel()
 
     @tasks.loop(minutes=1)
