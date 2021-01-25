@@ -8,4 +8,5 @@ class CogABCMeta(CogMeta, ABCMeta):
 
 
 class _HiddenGuildDictObjToEnsureThatSelfGuildDictIsAThing(ABC, metaclass=CogABCMeta):
-    guildDict: dict = {}
+    def __init__(self):
+        self.guildDict: dict = {}
