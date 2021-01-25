@@ -5,6 +5,7 @@ from discord.ext import commands
 import utils
 from objects import ManagementToolsConfig
 from configuration import ConfigurationDictionary, Configuration
+from objects.role_object import RoleObject
 from utils.cog_class import CogClass
 
 
@@ -42,9 +43,9 @@ class ManagementTools(CogClass, name=utils.CogNames.ManagementTools.value):
         return config
 
     @property
-    def get_function_roles_reference(self) -> dict:
+    def role_list(self) -> dict:
         return {
-            self.clear.name: None
+            self.clear.name: RoleObject("", "", True)
         }
 
 
