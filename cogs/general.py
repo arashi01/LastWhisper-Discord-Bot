@@ -8,19 +8,24 @@ from discord.ext.commands import Context
 import utils
 from objects import GeneralConfig
 from configuration import ConfigurationDictionary, Configuration
-from utils.helpers import ConfigHelper, SaveLoadHelper
-from interfaces import CogABCMeta
+from utils.helpers import config_helper, save_and_load_helper, role_helper
+from interfaces import CogABCMeta, roles
 from interfaces import config, extension
+from objects.role_object import RoleObject
 
 
-class General(extension.IEnabled, config.IConfigManager, commands.Cog, name=utils.CogNames.General.value, metaclass=CogABCMeta):
+class General(extension.IEnabled, config.IConfigManager, roles.IRoleProvider, commands.Cog,
+              name=utils.CogNames.General.value, metaclass=CogABCMeta):
+
+    _config_dir: _Path
+    _config_object = GeneralConfig.__class__
+
     def __init__(self, client: commands.bot):
         super().__init__()
         self._client = client
         self._config_dir: _Path = _Path("./config/general")
-        self._config_object = GeneralConfig.__class__
         self._general_cog: General = self
-        self._guildDict: dict = {}
+        self.guildDict: dict = {}
 
         if client.is_ready():
             self.on_ready()
@@ -28,16 +33,16 @@ class General(extension.IEnabled, config.IConfigManager, commands.Cog, name=util
     def on_ready(self) -> None:
         self.load_configs()
 
-        for guild in [guild.id for guild in self._client.guilds if guild.id not in self._guildDict]:
+        for guild in [guild.id for guild in self._client.guilds if guild.id not in self.guildDict]:
             self.save_configs(guild)
-            
+
     @commands.Cog.listener("on_ready")
     async def _on_ready(self) -> None:
         self.on_ready()
 
     def get_guild_prefix(self, guild_id: int):
         try:
-            return self._guildDict[guild_id].prefix
+            return self.guildDict[guild_id].prefix
         except KeyError:
             return "/"
 
@@ -47,13 +52,13 @@ class General(extension.IEnabled, config.IConfigManager, commands.Cog, name=util
 
     @commands.command(name="LastWhisper_ChangePrefix")
     async def change_prefix(self, ctx: commands.Context, prefix: str = "/"):
-        guild: GeneralConfig = self._guildDict[ctx.guild.id]
+        guild: GeneralConfig = self.guildDict[ctx.guild.id]
         guild.prefix = prefix
         self.save_configs(ctx.guild.id)
-        await ctx.send(f"Prefix changed to {prefix}")
+        await ctx.reply(f"Prefix changed to {prefix}", mention_author=False)
 
     async def remove_message(self, ctx: commands.Context):
-        guild: GeneralConfig = self._guildDict[ctx.guild.id]
+        guild: GeneralConfig = self.guildDict[ctx.guild.id]
         if guild.should_clear_command:
             await ctx.message.delete()
         elif guild.clear_command_exception_list.__contains__(ctx.author.id):
@@ -61,7 +66,7 @@ class General(extension.IEnabled, config.IConfigManager, commands.Cog, name=util
 
     def get_management_role_ids(self, guild_id: int):
         try:
-            return self._guildDict[guild_id].management_role_ids
+            return self.guildDict[guild_id].management_role_ids
         except KeyError:
             return []
 
@@ -70,25 +75,33 @@ class General(extension.IEnabled, config.IConfigManager, commands.Cog, name=util
         _config: ConfigurationDictionary = ConfigurationDictionary()
 
         _config.add_configuration(Configuration("should_clear_commands", "should_clear_command", set=self.set))
-        _config.add_configuration(Configuration("clear_command_exception_list", "clear_command_exception_list", add=self.add, remove=self.remove))
-        _config.add_configuration(Configuration("management_role_ids", "management_role_ids", add=self.add, remove=self.remove))
+        _config.add_configuration(
+            Configuration("clear_command_exception_list", "clear_command_exception_list", add=self.add,
+                          remove=self.remove))
+        _config.add_configuration(
+            Configuration("management_role_ids", "management_role_ids", add=self.add, remove=self.remove))
 
         return _config
 
+    @role_helper.cog_check_replacement
+    async def cog_check(self, ctx: commands.Context) -> bool:
+        pass
+
     @property
-    def get_function_roles_reference(self) -> dict:
+    def role_list(self) -> dict:
         return {
-            self.change_prefix.name: None
+            self.change_prefix.name: RoleObject(self.change_prefix.name, "change_prefix", True)
         }
 
+    # region Configs
     def is_enabled(self, ctx: Context) -> bool:
-        return ctx.guild.id in self._guildDict
+        return ctx.guild.id in self.guildDict
 
     def load_configs(self, guild_id: int = None) -> None:
-        SaveLoadHelper.load_configs(self._guildDict, self._config_dir, GeneralConfig, self._client.guilds)
+        save_and_load_helper.load_configs(self.guildDict, self._config_dir, GeneralConfig, self._client.guilds)
 
     def save_configs(self, guild_id: int = None) -> None:
-        SaveLoadHelper.save_configs(self._guildDict, self._config_dir, GeneralConfig, guild_id)
+        save_and_load_helper.save_configs(self.guildDict, self._config_dir, GeneralConfig, guild_id)
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild: Guild) -> None:
@@ -97,24 +110,29 @@ class General(extension.IEnabled, config.IConfigManager, commands.Cog, name=util
 
     @commands.Cog.listener()
     async def on_guild_remove(self, guild: Guild) -> None:
-        if guild.id not in self._guildDict:
+        if guild.id not in self.guildDict:
             return
 
-        utils.remove_file(f"{self._config_dir}/{str(guild.id) + SaveLoadHelper.default_extension}")
-        utils.remove_file(f"{self._config_dir}/{str(guild.id) + SaveLoadHelper.default_extension + SaveLoadHelper.default_disabled_extension}")
-        self._guildDict.pop(guild.id)
+        utils.remove_file(f"{self._config_dir}/{str(guild.id) + save_and_load_helper.default_extension}")
+        utils.remove_file(
+            f"{self._config_dir}/{str(guild.id) + save_and_load_helper.default_extension + save_and_load_helper.default_disabled_extension}")
+        self.guildDict.pop(guild.id)
 
-    def set(self, ctx: commands.Context, variable: str, value: Union[TextChannel, Role, Member, str, int, bool]) -> None:
-        self._guildDict[ctx.guild.id] = ConfigHelper.set(self._guildDict[ctx.guild.id], ctx, variable, value)
+    def set(self, ctx: commands.Context, variable: str,
+            value: Union[TextChannel, Role, Member, str, int, bool]) -> None:
+        self.guildDict[ctx.guild.id] = config_helper.set(self.guildDict[ctx.guild.id], ctx, variable, value)
         self.save_configs(ctx.guild.id)
 
-    def add(self, ctx: commands.Context, variable: str, value: Union[TextChannel, Role, Member, str, int, bool]) -> None:
-        self._guildDict[ctx.guild.id] = ConfigHelper.add(self._guildDict[ctx.guild.id], ctx, variable, value)
+    def add(self, ctx: commands.Context, variable: str,
+            value: Union[TextChannel, Role, Member, str, int, bool]) -> None:
+        self.guildDict[ctx.guild.id] = config_helper.add(self.guildDict[ctx.guild.id], ctx, variable, value)
         self.save_configs(ctx.guild.id)
 
-    def remove(self, ctx: commands.Context, variable: str, value: Union[TextChannel, Role, Member, str, int, bool]) -> None:
-        self._guildDict[ctx.guild.id] = ConfigHelper.remove(self._guildDict[ctx.guild.id], ctx, variable, value)
+    def remove(self, ctx: commands.Context, variable: str,
+               value: Union[TextChannel, Role, Member, str, int, bool]) -> None:
+        self.guildDict[ctx.guild.id] = config_helper.remove(self.guildDict[ctx.guild.id], ctx, variable, value)
         self.save_configs(ctx.guild.id)
+    # endregion
 
 
 def setup(client: commands.bot):
