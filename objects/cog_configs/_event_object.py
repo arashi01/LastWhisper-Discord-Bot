@@ -18,7 +18,14 @@ class Event(CustomConfigObject):
 
         self.name: str = name
         self.description: str = description
-        self.datetime: struct_time = datetime
+        try:
+            self.datetime: struct_time = struct_time(datetime)
+        except Exception:
+            self.datetime: struct_time = datetime
+
+    def __repr__(self):
+        self.datetime = list(self.datetime)
+        return str(self.__dict__)
 
     @classmethod
     def from_json(cls, data):
@@ -87,8 +94,8 @@ class EventConfig(CustomConfigObject):
         self.trigger_edit_ids: list = trigger_edit_ids or []
         self.trigger_remove_ids: list = trigger_remove_ids or []
 
-        self.event_reminder_triggers: [EventReminderTrigger] = event_reminder_triggers or []
-        self.events: [Event] = events or []
+        self.event_reminder_triggers: [EventReminderTrigger] = map(lambda a: EventReminderTrigger(**a), event_reminder_triggers) or[]
+        self.events: [Event] = list(map(lambda a: Event(**a), events)) or []
 
     @classmethod
     def from_json(cls, data):
