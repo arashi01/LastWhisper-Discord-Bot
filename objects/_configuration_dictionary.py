@@ -1,4 +1,4 @@
-from ._configuration import Configuration
+from objects._configuration import Configuration
 from objects import TypeList
 
 
