@@ -189,12 +189,12 @@ class BuffManager(CogClass, name=utils.CogNames.BuffManager.value):
         return config
 
     @property
-    def get_function_roles_reference(self) -> dict:
+    def role_list(self) -> dict:
         return {
-            self.today_buff.qualified_name: "tdb_ids",
-            self.tomorrow_buff.qualified_name: "tmb_ids",
-            self.week_buffs.qualified_name: "twb_ids",
-            self.next_week_buffs.qualified_name: "nwb_ids"
+            self.today_buff.qualified_name:         RoleObject(self.today_buff.name, "tdb_ids"),
+            self.tomorrow_buff.qualified_name:      RoleObject(self.tomorrow_buff.name, "tmb_ids"),
+            self.week_buffs.qualified_name:         RoleObject(self.week_buffs.name, "twb_ids", True),
+            self.next_week_buffs.qualified_name:    RoleObject(self.next_week_buffs.name, "nwb_ids", True)
         }
     # endregion
 
