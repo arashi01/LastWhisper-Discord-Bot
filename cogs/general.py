@@ -27,17 +27,17 @@ class General(extension.IEnabled, config.IConfigManager, roles.IRoleProvider, co
         self.guildDict: dict = {}
 
         if client.is_ready():
-            self.on_ready()
+            self.load_configs()
 
-    def on_ready(self) -> None:
+            for guild in [guild.id for guild in self._client.guilds if guild.id not in self.guildDict]:
+                self.save_configs(guild)
+
+    @commands.Cog.listener()
+    async def on_ready(self) -> None:
         self.load_configs()
 
         for guild in [guild.id for guild in self._client.guilds if guild.id not in self.guildDict]:
             self.save_configs(guild)
-
-    @commands.Cog.listener("on_ready")
-    async def _on_ready(self) -> None:
-        self.on_ready()
 
     def get_guild_prefix(self, guild_id: int):
         try:
@@ -97,7 +97,8 @@ class General(extension.IEnabled, config.IConfigManager, roles.IRoleProvider, co
         return ctx.guild.id in self.guildDict
 
     def load_configs(self, guild_id: int = None) -> None:
-        save_and_load_helper.load_configs(self.guildDict, self._config_dir, GeneralConfig, self._client.guilds)
+        save_and_load_helper.load_configs_json(self.guildDict, str(self._config_dir), GeneralConfig, self._client.guilds, guild_id)
+        save_and_load_helper.load_configs(self.guildDict, self._config_dir, GeneralConfig, self._client.guilds, guild_id, clear_existing=False)
 
     def save_configs(self, guild_id: int = None) -> None:
         save_and_load_helper.save_configs(self.guildDict, self._config_dir, GeneralConfig, guild_id)

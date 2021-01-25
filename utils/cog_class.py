@@ -19,10 +19,8 @@ class CogClass(extension.IExtensionHandler, config.IConfigManager, ABC, commands
     While the class is not required it simplifies the creation and removes redundancy from the rest of the codebase.
     """
     # Static variable declaration.
-    _config_dir: Path
     _client: commands.Bot
     _general_cog: General  # As there are some functions in the General Cog I cache it to reduce the number of get_cog calls that are done.
-    _config_object: CustomConfigObject.__class__
 
     def __init__(self, client: commands.bot, config_dir: Path, config_object: CustomConfigObject.__class__) -> None:
         """
@@ -32,7 +30,8 @@ class CogClass(extension.IExtensionHandler, config.IConfigManager, ABC, commands
         """
         super().__init__()  # I am certain that this is not needed however in case there is a change in the future I am keeping this here to not break.
         self._client = client
-        self._config_dir = config_dir if isinstance(config_dir, Path) else Path(config_dir)
+        self._config_dir = config_dir
+        self._config_object: CustomConfigObject.__class__
 
         self._config_object = config_object
         if self._client.is_ready():
@@ -86,10 +85,8 @@ class CogClass(extension.IExtensionHandler, config.IConfigManager, ABC, commands
 
     # region config interfaces
     def load_configs(self, guild_id: int = None) -> None:
-        save_and_load_helper.load_configs_json(self.guildDict, str(self._config_dir), self._config_object,
-                                               self._client.guilds, guild_id)
-        save_and_load_helper.load_configs(self.guildDict, self._config_dir, self._config_object, self._client.guilds,
-                                          guild_id, clear_existing=False)
+        save_and_load_helper.load_configs_json(self.guildDict, str(self._config_dir), self._config_object, self._client.guilds, guild_id)
+        save_and_load_helper.load_configs(self.guildDict, self._config_dir, self._config_object, self._client.guilds, guild_id, clear_existing=False)
 
     def save_configs(self, guild_id: int = None) -> None:
         save_and_load_helper.save_configs(self.guildDict, self._config_dir, self._config_object, guild_id)

@@ -374,14 +374,11 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
 
         config.add_configuration(Configuration("event_ids", "event_ids", add=self.add, remove=self.remove))
         config.add_configuration(Configuration("event_edit_ids", "event_edit_ids", add=self.add, remove=self.remove))
-        config.add_configuration(
-            Configuration("event_cancel_ids", "event_cancel_ids", add=self.add, remove=self.remove))
+        config.add_configuration(Configuration("event_cancel_ids", "event_cancel_ids", add=self.add, remove=self.remove))
 
         config.add_configuration(Configuration("trigger_ids", "trigger_ids", add=self.add, remove=self.remove))
-        config.add_configuration(
-            Configuration("trigger_edit_ids", "trigger_edit_ids", add=self.add, remove=self.remove))
-        config.add_configuration(
-            Configuration("trigger_remove_ids", "trigger_remove_ids", add=self.add, remove=self.remove))
+        config.add_configuration(Configuration("trigger_edit_ids", "trigger_edit_ids", add=self.add, remove=self.remove))
+        config.add_configuration(Configuration("trigger_remove_ids", "trigger_remove_ids", add=self.add, remove=self.remove))
 
         return config
 

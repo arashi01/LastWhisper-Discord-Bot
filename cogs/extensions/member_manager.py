@@ -88,8 +88,7 @@ class MemberManager(CogClass, name=utils.CogNames.MemberManager.value):
         config.add_configuration(Configuration("member_role_id", "member_role_id", set=self.set))
         config.add_configuration(Configuration("new_member_role_id", "new_member_role_id", set=self.set))
         config.add_configuration(Configuration("welcome_channel_id", "welcome_channel_id", set=self.set))
-        config.add_configuration(
-            Configuration("on_member_leave_logging_channel", "on_member_leave_logging_channel", set=self.set))
+        config.add_configuration(Configuration("on_member_leave_logging_channel", "on_member_leave_logging_channel", set=self.set))
 
         return config
 
