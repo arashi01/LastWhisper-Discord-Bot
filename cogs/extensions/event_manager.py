@@ -11,6 +11,7 @@ from discord.ext import commands, tasks
 import utils
 from objects import EventConfig, Event, EventReminderTrigger
 from configuration import ConfigurationDictionary, Configuration
+from objects.role_object import RoleObject
 from utils.cog_class import CogClass
 from utils.dialog_utils import yes_no, get_author_written_response, DialogReturn, setup_embed
 
@@ -37,7 +38,7 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
         await self._client.wait_until_ready()
         now = datetime.now()
 
-        for guild_id, config in self._guildDict.items():
+        for guild_id, config in self.guildDict.items():
             if not (len(config.events) and len(config.event_reminder_triggers)):
                 continue
 
@@ -69,21 +70,20 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
                                 print(e)
 
             dif = len(config.events)
-            config.events = [_event for _event in config.events if
-                             datetime.fromtimestamp(mktime(_event.datetime)) > now]
+            config.events = [_event for _event in config.events if datetime.fromtimestamp(mktime(_event.datetime)) > now]
             if dif > len(config.events):
                 self.save_configs(guild_id)
 
     # region Events
     @commands.group(name="Event", invoke_without_command=True)
     async def event(self, ctx: commands.Context, index: int = None):
-        config: EventConfig = self._guildDict[ctx.guild.id]
+        config: EventConfig = self.guildDict[ctx.guild.id]
 
         if not index:
             embed: Embed = Embed(title="List of Upcoming Events.")
             for i in range(len(config.events)):
                 embed.add_field(name=f"Index {i + 1}:", value=config.events[i].name, inline=False)
-            await ctx.send(embed=embed)
+            await ctx.reply(embed=embed, mention_author=False)
         else:
             if abs(index) - 1 >= len(config.events):
                 raise commands.BadArgument(f"Index {index} out of range.")
@@ -95,7 +95,7 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
             embed.add_field(name="Time:", value=f"{strftime('%H:%M', event.datetime)}", inline=False)
             embed.add_field(name="Time Remaining:", value=f"{':'.join(str(datetime.fromtimestamp(mktime(event.datetime)) - datetime.now()).split(':')[:2])}", inline=False)
 
-            await ctx.send(embed=embed)
+            await ctx.reply(embed=embed, mention_author=False)
 
     @commands.Cog.listener(name="on_message")
     async def create_event(self, message: Message):
@@ -106,11 +106,14 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
         if not self.is_enabled(message):  # This works due to the context have the same setup for getting the guild id.
             return
 
-        config: EventConfig = self._guildDict[message.guild.id]
+        config: EventConfig = self.guildDict[message.guild.id]
         if not config.channel_id:
             return
 
         if not config.channel_id == message.channel.id:
+            return
+
+        if not (config.name_tag and config.datetime_tag and config.description_tag):
             return
 
         event: Event = Event()
@@ -154,7 +157,7 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
 
     @event.command(name="cancel")
     async def cancel_event(self, ctx: commands.Context, index: int = None, confirm: bool = False):
-        config: EventConfig = self._guildDict[ctx.guild.id]
+        config: EventConfig = self.guildDict[ctx.guild.id]
         if abs(index) - 1 >= len(config.events):
             raise commands.BadArgument(f"Index {index} out of range.")
 
@@ -169,12 +172,12 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
                 config.events.pop(abs(index) - 1)
                 self.save_configs(ctx.guild.id)
 
-        await ctx.send("Done.")
+        await ctx.reply("Done.", mention_author=False)
 
     @event.command(name="edit")
     async def edit_event(self, ctx: commands.Context, index: int, name: str = "", time: str = "", *,
                          description: str = ""):
-        config: EventConfig = self._guildDict[ctx.guild.id]
+        config: EventConfig = self.guildDict[ctx.guild.id]
         if abs(index) - 1 >= len(config.events):
             raise commands.BadArgument(f"Index {index} out of range.")
 
@@ -279,7 +282,7 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
     # region Triggers
     @commands.group(name="Trigger", invoke_without_command=True)
     async def trigger(self, ctx: commands.Context, index: int = None):
-        config: EventConfig = self._guildDict[ctx.guild.id]
+        config: EventConfig = self.guildDict[ctx.guild.id]
         embed: Embed = Embed()
         if index:
             if abs(index) - 1 >= len(config.event_reminder_triggers):
@@ -298,16 +301,16 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
                                 value=f"> **Hours Diff:** {trigger.hour_diff}, **Minutes Diff:** {trigger.minute_diff}",
                                 inline=False)
 
-        await ctx.send(embed=embed)
+        await ctx.reply(embed=embed, mention_author=False)
 
     @trigger.command(name="add")
     async def add_trigger(self, ctx: commands.Context, hour_dif: int, minute_dif: int, *, message: str):
-        self._guildDict[ctx.guild.id].event_reminder_triggers.append(EventReminderTrigger(hour_dif, minute_dif, message))
+        self.guildDict[ctx.guild.id].event_reminder_triggers.append(EventReminderTrigger(hour_dif, minute_dif, message))
         self.save_configs(ctx.guild.id)
 
     @trigger.command(name="edit")
     async def edit_trigger(self, ctx: commands.Context, index: int, hour_diff: int, minute_diff: int, *, message: str):
-        config: EventConfig = self._guildDict[ctx.guild.id]
+        config: EventConfig = self.guildDict[ctx.guild.id]
 
         if abs(index) - 1 >= len(config.event_reminder_triggers):
             raise commands.BadArgument(f"Index {index} is not a valid index.")
@@ -336,7 +339,7 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
 
     @trigger.command(name="remove")
     async def remove_trigger(self, ctx: commands.Context, index: int, confirm: bool = False):
-        config: EventConfig = self._guildDict[ctx.guild.id]
+        config: EventConfig = self.guildDict[ctx.guild.id]
 
         if abs(index) - 1 >= len(config.event_reminder_triggers):
             raise commands.BadArgument(f"Index {index} is not a valid index.")
@@ -352,7 +355,7 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
                 config.event_reminder_triggers.pop(abs(index) - 1)
                 self.save_configs(ctx.guild.id)
 
-        await ctx.send("Done.")
+        await ctx.reply("Done.", mention_author=False)
 
     # endregion
 
@@ -377,15 +380,15 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
         return config
 
     @property
-    def get_function_roles_reference(self) -> dict:
+    def role_list(self) -> dict:
         return {
-            self.event.name: "event_ids",
-            self.edit_event.name: "event_edit_ids",
-            self.cancel_event.name: "event_cancel_ids",
+            self.event.name:            RoleObject(self.event.name, "event_ids", True),
+            self.edit_event.name:       RoleObject(self.edit_event.name, "event_edit_ids", True),
+            self.cancel_event.name:     RoleObject(self.cancel_event.name, "event_cancel_ids", True),
 
-            self.add_trigger.name: "trigger_ids",
-            self.edit_trigger.name: "trigger_edit_ids",
-            self.remove_trigger.name: "trigger_remove_ids"
+            self.add_trigger.name:      RoleObject(self.add_trigger.name, "trigger_ids", True),
+            self.edit_trigger.name:     RoleObject(self.edit_trigger.name, "trigger_edit_ids", True),
+            self.remove_trigger.name:   RoleObject(self.remove_trigger.name, "trigger_remove_ids", True)
         }
 
 
