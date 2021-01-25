@@ -77,7 +77,8 @@ async def yes_no(ctx: Context, title: str, description: str, fields: [] = None, 
             return DialogReturn.ERROR
 
 
-async def get_author_written_response(ctx, title, description, fields: [] = None, timeout: float = 30.0, delete_response: bool = False) -> str:
+async def get_author_written_response(ctx, title, description, fields: [] = None, timeout: float = 30.0,
+                                      delete_response: bool = False) -> str:
     """
     A automatic dialog for getting a users next written response.
 

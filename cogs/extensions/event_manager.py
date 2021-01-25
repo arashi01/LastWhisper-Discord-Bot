@@ -5,12 +5,12 @@ from enum import Enum
 from pathlib import Path
 from time import strptime, mktime, strftime, asctime
 
+from configuration import ConfigurationDictionary, Configuration
 from discord import Embed, Message, HTTPException
 from discord.ext import commands, tasks
 
 import utils
 from objects import EventConfig, Event, EventReminderTrigger
-from configuration import ConfigurationDictionary, Configuration
 from objects.role_object import RoleObject
 from utils.cog_class import CogClass
 from utils.dialog_utils import yes_no, get_author_written_response, DialogReturn, setup_embed
@@ -70,7 +70,8 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
                                 print(e)
 
             dif = len(config.events)
-            config.events = [_event for _event in config.events if datetime.fromtimestamp(mktime(_event.datetime)) > now]
+            config.events = [_event for _event in config.events if
+                             datetime.fromtimestamp(mktime(_event.datetime)) > now]
             if dif > len(config.events):
                 self.save_configs(guild_id)
 
@@ -93,7 +94,9 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
 
             embed.add_field(name="Date:", value=f"{strftime('%A %b %d', event.datetime)}", inline=False)
             embed.add_field(name="Time:", value=f"{strftime('%H:%M', event.datetime)}", inline=False)
-            embed.add_field(name="Time Remaining:", value=f"{':'.join(str(datetime.fromtimestamp(mktime(event.datetime)) - datetime.now()).split(':')[:2])}", inline=False)
+            embed.add_field(name="Time Remaining:",
+                            value=f"{':'.join(str(datetime.fromtimestamp(mktime(event.datetime)) - datetime.now()).split(':')[:2])}",
+                            inline=False)
 
             await ctx.reply(embed=embed, mention_author=False)
 
@@ -211,7 +214,7 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
                                                             "Key:",
                                                             "> %s: Name\n> %s: Time & Date\n> %s: Description\n> %s: Cancel" %
                                                             (_one, _two, _three, _cancel)
-                                                          )],
+                                                        )],
                                                         60.0)
 
             while True:
@@ -371,24 +374,27 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
 
         config.add_configuration(Configuration("event_ids", "event_ids", add=self.add, remove=self.remove))
         config.add_configuration(Configuration("event_edit_ids", "event_edit_ids", add=self.add, remove=self.remove))
-        config.add_configuration(Configuration("event_cancel_ids", "event_cancel_ids", add=self.add, remove=self.remove))
+        config.add_configuration(
+            Configuration("event_cancel_ids", "event_cancel_ids", add=self.add, remove=self.remove))
 
         config.add_configuration(Configuration("trigger_ids", "trigger_ids", add=self.add, remove=self.remove))
-        config.add_configuration(Configuration("trigger_edit_ids", "trigger_edit_ids", add=self.add, remove=self.remove))
-        config.add_configuration(Configuration("trigger_remove_ids", "trigger_remove_ids", add=self.add, remove=self.remove))
+        config.add_configuration(
+            Configuration("trigger_edit_ids", "trigger_edit_ids", add=self.add, remove=self.remove))
+        config.add_configuration(
+            Configuration("trigger_remove_ids", "trigger_remove_ids", add=self.add, remove=self.remove))
 
         return config
 
     @property
     def role_list(self) -> dict:
         return {
-            self.event.name:            RoleObject(self.event.name, "event_ids", True),
-            self.edit_event.name:       RoleObject(self.edit_event.name, "event_edit_ids", True),
-            self.cancel_event.name:     RoleObject(self.cancel_event.name, "event_cancel_ids", True),
+            self.event.name: RoleObject(self.event.name, "event_ids", True),
+            self.edit_event.name: RoleObject(self.edit_event.name, "event_edit_ids", True),
+            self.cancel_event.name: RoleObject(self.cancel_event.name, "event_cancel_ids", True),
 
-            self.add_trigger.name:      RoleObject(self.add_trigger.name, "trigger_ids", True),
-            self.edit_trigger.name:     RoleObject(self.edit_trigger.name, "trigger_edit_ids", True),
-            self.remove_trigger.name:   RoleObject(self.remove_trigger.name, "trigger_remove_ids", True)
+            self.add_trigger.name: RoleObject(self.add_trigger.name, "trigger_ids", True),
+            self.edit_trigger.name: RoleObject(self.edit_trigger.name, "trigger_edit_ids", True),
+            self.remove_trigger.name: RoleObject(self.remove_trigger.name, "trigger_remove_ids", True)
         }
 
 

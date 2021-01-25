@@ -1,8 +1,9 @@
 import os
-from pathlib import Path
-from json import dump
-from objects import CustomConfigObject
 from ast import literal_eval as _literal_eval
+from json import dump
+from pathlib import Path
+
+from objects import CustomConfigObject
 
 # Sets the working directory to be the directory of the bot.py file. This is done due to an error occurring when you run the bot outside the expected directory.
 os.chdir(Path(__file__).parent.parent)

@@ -1,12 +1,12 @@
 import asyncio
 import itertools
+import json
+import os
+from math import ceil
 from typing import Union
 
-from discord.ext import commands
 from discord import Embed, Message, Reaction, Member
-import os
-import json
-from math import ceil
+from discord.ext import commands
 
 from utils import CogClass
 
@@ -84,12 +84,14 @@ class HelperManager(commands.Cog):
         """
         A custom written help command that uses embeds to show help information and provide some user control for long lists of commands.
         """
+
         def __init__(self, **options):
             super().__init__(**options)
             self.sort_commands = options.pop("sort_commands", True)
             self.no_category: str = options.pop("no_category", "No Category")
             self.commands_heading: str = options.pop("commands_heading", "Commands:")
-            self.page_size = options.pop("page_size", 3)  # The size of the help page. (i.e. the number of categories allow to be shown at once.)
+            self.page_size = options.pop("page_size",
+                                         3)  # The size of the help page. (i.e. the number of categories allow to be shown at once.)
             self.left_reaction = options.pop("left_reaction", "⬅")
             self.stop_reaction = options.pop("stop_reaction", "⏹️")
             self.right_reaction = options.pop("right_reaction", "➡️")
@@ -163,6 +165,7 @@ class HelperManager(commands.Cog):
 
             :param number: The page number.
             """
+
             def get_category(command):
                 return command.cog.qualified_name if command.cog else self.no_category
 
@@ -202,7 +205,8 @@ class HelperManager(commands.Cog):
 
             while True:
                 try:
-                    reaction, member = await self.context.bot.wait_for("reaction_add", timeout=10.0, check=lambda x, _member: _member == self.context.author)
+                    reaction, member = await self.context.bot.wait_for("reaction_add", timeout=10.0, check=lambda x,
+                                                                                                                  _member: _member == self.context.author)
                 except asyncio.TimeoutError:
                     break
                 else:
@@ -268,7 +272,8 @@ class HelperManager(commands.Cog):
                                           [f"***{command.name}:*** {command.short_doc}" for command in commands]),
                                       inline=False)
 
-            def close(self, context: commands.Context, obj: Union[commands.Group, commands.Cog, commands.Command] = None,
+            def close(self, context: commands.Context,
+                      obj: Union[commands.Group, commands.Cog, commands.Command] = None,
                       note=None) -> None:
 
                 if obj:

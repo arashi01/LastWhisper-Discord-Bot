@@ -1,7 +1,7 @@
+from pathlib import Path
+
 import discord
 from discord.ext import commands
-
-from pathlib import Path
 
 import utils
 from cogs import general
@@ -12,7 +12,6 @@ intents = discord.Intents.default()
 intents.members = True
 intents.messages = True
 intents.reactions = True
-
 
 client = commands.Bot(command_prefix=general.General.get_prefix, intents=intents, help_command=None)
 
@@ -30,4 +29,3 @@ if __name__ == "__main__":
     except FileNotFoundError:
         print("Missing token file.")
     print("Good Bye!")
-

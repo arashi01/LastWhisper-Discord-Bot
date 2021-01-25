@@ -1,13 +1,13 @@
 from datetime import datetime
 from pathlib import Path
 
+from configuration import ConfigurationDictionary
 from discord import TextChannel, Embed
 from discord.ext import tasks, commands
 
 import utils
-from configuration import ConfigurationDictionary
-from utils.cog_class import CogClass
 from objects import CustomMessagesConfig, Message, TypeObjects
+from utils.cog_class import CogClass
 
 
 class CustomMessages(CogClass, name=utils.CogNames.CustomMessages.value):
@@ -53,7 +53,8 @@ class CustomMessages(CogClass, name=utils.CogNames.CustomMessages.value):
         if channel_id not in ctx.guild.channels:
             raise commands.BadArgument(f"There is not channel with the ID **{channel_id}** on your server.")
 
-        message = Message(message, TypeObjects.Channel(channel_id.id), datetime(year, month, day, hour, minute), should_repeat)
+        message = Message(message, TypeObjects.Channel(channel_id.id), datetime(year, month, day, hour, minute),
+                          should_repeat)
 
         index = 0
         for key in sorted(guild.messages.keys()):

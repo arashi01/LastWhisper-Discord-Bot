@@ -1,10 +1,10 @@
 from pathlib import Path
 
+from configuration import ConfigurationDictionary
 from discord.ext import commands
 
 import utils
 from objects import PlayConfig
-from configuration import ConfigurationDictionary
 from objects.role_object import RoleObject
 from utils.cog_class import CogClass
 

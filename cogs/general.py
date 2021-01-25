@@ -1,22 +1,21 @@
-from typing import Union
 from pathlib import Path as _Path
+from typing import Union
 
+from configuration import ConfigurationDictionary, Configuration
 from discord import TextChannel, Role, Member, Guild
 from discord.ext import commands
 from discord.ext.commands import Context
 
 import utils
-from objects import GeneralConfig
-from configuration import ConfigurationDictionary, Configuration
-from utils.helpers import config_helper, save_and_load_helper, role_helper
 from interfaces import CogABCMeta, roles
 from interfaces import config, extension
+from objects import GeneralConfig
 from objects.role_object import RoleObject
+from utils.helpers import config_helper, save_and_load_helper, role_helper
 
 
 class General(extension.IEnabled, config.IConfigManager, roles.IRoleProvider, commands.Cog,
               name=utils.CogNames.General.value, metaclass=CogABCMeta):
-
     _config_dir: _Path
     _config_object = GeneralConfig.__class__
 

@@ -1,6 +1,6 @@
 from time import struct_time
 
-from objects import CustomConfigObject, TypeObjects, TypeList
+from objects import CustomConfigObject, TypeObjects
 
 
 class Event(CustomConfigObject):

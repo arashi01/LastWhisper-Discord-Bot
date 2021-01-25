@@ -3,20 +3,18 @@ This file mainly provides helper functions for saving and loading configurations
 """
 import json
 import os
-
 from ast import literal_eval as _literal_eval
-
 from pathlib import Path
 from typing import Union
 
 from utils import save_as_json, CustomConfigObject, logger, save_as_string, deprecated
 
-
 default_disabled_extension = ".disabled"
 default_extension = ".conf"
 
 
-def load_configs(guild_dict: dict, config_dir: Path, config_obj: CustomConfigObject.__class__, guilds: [], guild_id: int = None, extension: str = default_extension, clear_existing: bool = True) -> bool:
+def load_configs(guild_dict: dict, config_dir: Path, config_obj: CustomConfigObject.__class__, guilds: [],
+                 guild_id: int = None, extension: str = default_extension, clear_existing: bool = True) -> bool:
     """
         Function that loads the configuration files for a extension and adds them to the list of configurations.
         This clears the guild_dict of all entries so should be used with caution.
@@ -30,20 +28,23 @@ def load_configs(guild_dict: dict, config_dir: Path, config_obj: CustomConfigObj
         :param clear_existing: flag that if set True will clear the guild_dict
     """
     if not os.path.isdir(config_dir):
-        logger.warning(f"The config directory '{config_dir}' does not exist. Kindly create one manually or save a configuration in")
+        logger.warning(
+            f"The config directory '{config_dir}' does not exist. Kindly create one manually or save a configuration in")
         return False
-    
+
     def _get_extension(x):
         return extension + (default_disabled_extension if not x else "")
 
     if guild_id:
-        if flag := os.path.isfile(filename := str(guild_id) + extension) or os.path.isfile(filename + default_disabled_extension):
+        if flag := os.path.isfile(filename := str(guild_id) + extension) or os.path.isfile(
+                filename + default_disabled_extension):
             hold = _try_get_obj(config_dir, filename + (default_disabled_extension if not flag else ""), config_obj)
             if hold:
                 guild_dict[int(filename[:len(_get_extension(flag)) * -1])] = hold
             return True
         else:
-            logger.warning(f"No such config file '{str(guild_id) + extension}' or '{str(guild_id) + extension + default_disabled_extension}' in directory {config_dir}.")
+            logger.warning(
+                f"No such config file '{str(guild_id) + extension}' or '{str(guild_id) + extension + default_disabled_extension}' in directory {config_dir}.")
             return False
 
     else:
@@ -57,19 +58,20 @@ def load_configs(guild_dict: dict, config_dir: Path, config_obj: CustomConfigObj
                     logger.warning(f"{filename} Not associated with any know guild. Removing!")
                     os.remove(config_dir / filename)
                     continue
-                
+
                 hold = _try_get_obj(config_dir, filename + (default_disabled_extension if not flag else ""), config_obj)
                 if hold:
                     guild_dict[int(filename[:len(_get_extension(flag)) * -1])] = hold
             else:
                 logger.warning(f"{filename} Not a valid config file. Removing!")
-                os.remove(config_dir/filename)
+                os.remove(config_dir / filename)
                 continue
 
         return True
 
 
-def save_configs(guild_dict: dict, config_dir: Path, config_obj: CustomConfigObject.__class__, guild_id: int = None, extension: str = default_extension) -> None:
+def save_configs(guild_dict: dict, config_dir: Path, config_obj: CustomConfigObject.__class__, guild_id: int = None,
+                 extension: str = default_extension) -> None:
     """
         Function used to save the configuration file of an extension.
 
@@ -84,22 +86,25 @@ def save_configs(guild_dict: dict, config_dir: Path, config_obj: CustomConfigObj
             save_as_string(Path(config_dir / (str(guild_id) + extension)), str(guild_dict[guild_id]))
         else:
             if os.path.isfile(config_dir / (str(guild_id) + extension + default_disabled_extension)):
-                os.rename(config_dir / (str(guild_id) + extension + default_disabled_extension), config_dir / (str(guild_id) + extension))
+                os.rename(config_dir / (str(guild_id) + extension + default_disabled_extension),
+                          config_dir / (str(guild_id) + extension))
             else:
                 save_as_string(Path(config_dir / (str(guild_id) + extension)), str(config_obj()))
-        
+
     else:
         for key, value in guild_dict.items():
             save_as_string(Path(config_dir / (str(key) + extension)), str(value))
 
 
-def _try_get_obj(config_dir: Path, filename: str, config_obj: CustomConfigObject.__class__) -> Union[CustomConfigObject, None]:
+def _try_get_obj(config_dir: Path, filename: str, config_obj: CustomConfigObject.__class__) -> Union[
+    CustomConfigObject, None]:
     """Helper function to attempt to reduce some redundant code."""
     with open(config_dir / filename) as f:
         try:
             obj = config_obj(**_literal_eval(f.read()))
         except NameError:
-            logger.warning(f"The config file {filename} under config dir {config_dir} is either not valid or corrupted and cannot be used.\nIt will be disabled until the file is either fixed or a new file is created.")
+            logger.warning(
+                f"The config file {filename} under config dir {config_dir} is either not valid or corrupted and cannot be used.\nIt will be disabled until the file is either fixed or a new file is created.")
             os.rename(config_dir / filename, filename + default_disabled_extension)
             return None
         else:
@@ -107,7 +112,8 @@ def _try_get_obj(config_dir: Path, filename: str, config_obj: CustomConfigObject
 
 
 @deprecated
-def load_configs_json(guild_dict: dict, config_dir: str, config_obj: CustomConfigObject.__class__, guilds: [], guild_id: int = None, clear_existing: bool = True) -> None:
+def load_configs_json(guild_dict: dict, config_dir: str, config_obj: CustomConfigObject.__class__, guilds: [],
+                      guild_id: int = None, clear_existing: bool = True) -> None:
     """
     Function that loads the configuration files for a extension and adds them to the list of configurations.
     This clears the guild_dict of all entries so should be used with caution.
@@ -122,7 +128,7 @@ def load_configs_json(guild_dict: dict, config_dir: str, config_obj: CustomConfi
     if not guild_id:
         if clear_existing:
             guild_dict.clear()
-    
+
         try:
             for filename in os.listdir(config_dir):
                 if filename.endswith(".json"):
@@ -135,13 +141,15 @@ def load_configs_json(guild_dict: dict, config_dir: str, config_obj: CustomConfi
 
                     guild_dict[int(filename[:-5])] = config_obj.from_json(json_obj)
         except FileNotFoundError:
-            logger.warning(f"The config directory '{config_dir}' does not exist. Kindly create one manually or save a configuration in")
+            logger.warning(
+                f"The config directory '{config_dir}' does not exist. Kindly create one manually or save a configuration in")
 
     else:
         file_dir = f"{config_dir}/{guild_id}.json"
         obj = config_obj()
 
-        if os.path.isfile(file_dir + ".disabled"):  # Checks if there is an existing configuration that is disabled by default.
+        if os.path.isfile(
+                file_dir + ".disabled"):  # Checks if there is an existing configuration that is disabled by default.
             os.rename(file_dir + ".disabled", file_dir)
 
         if not os.path.isfile(file_dir):
@@ -154,7 +162,8 @@ def load_configs_json(guild_dict: dict, config_dir: str, config_obj: CustomConfi
 
 
 @deprecated
-def save_configs_json(guild_dict: dict, config_dir: str, config_obj: CustomConfigObject.__class__, guild_id: int = None) -> None:
+def save_configs_json(guild_dict: dict, config_dir: str, config_obj: CustomConfigObject.__class__,
+                      guild_id: int = None) -> None:
     """
     Function used to save the configuration file of an extension.
 

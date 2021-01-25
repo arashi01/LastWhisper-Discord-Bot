@@ -1,6 +1,7 @@
 import random
-from discord import Embed, Color
 from datetime import date as date_object  # I have to do this to keep my ide from complaining.
+
+from discord import Embed, Color
 
 from objects import Week, Buff
 

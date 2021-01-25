@@ -38,7 +38,7 @@ class CogClass(extension.IExtensionHandler, config.IConfigManager, ABC, commands
         if self._client.is_ready():
             self._general_cog = self._client.get_cog(utils.CogNames.General.value)
             self.load_configs()
-            
+
     def cog_unload(self):
         from os.path import isfile
         for key, value in self.guildDict.items():
@@ -78,14 +78,18 @@ class CogClass(extension.IExtensionHandler, config.IConfigManager, ABC, commands
             return
 
         utils.remove_file(f"{self._config_dir}/{str(guild.id) + save_and_load_helper.default_extension}")
-        utils.remove_file(f"{self._config_dir}/{str(guild.id) + save_and_load_helper.default_extension + save_and_load_helper.default_disabled_extension}")
+        utils.remove_file(
+            f"{self._config_dir}/{str(guild.id) + save_and_load_helper.default_extension + save_and_load_helper.default_disabled_extension}")
         self.guildDict.pop(guild.id)
+
     # endregion
 
     # region config interfaces
     def load_configs(self, guild_id: int = None) -> None:
-        save_and_load_helper.load_configs_json(self.guildDict, str(self._config_dir), self._config_object, self._client.guilds, guild_id)
-        save_and_load_helper.load_configs(self.guildDict, self._config_dir, self._config_object, self._client.guilds, guild_id, clear_existing=False)
+        save_and_load_helper.load_configs_json(self.guildDict, str(self._config_dir), self._config_object,
+                                               self._client.guilds, guild_id)
+        save_and_load_helper.load_configs(self.guildDict, self._config_dir, self._config_object, self._client.guilds,
+                                          guild_id, clear_existing=False)
 
     def save_configs(self, guild_id: int = None) -> None:
         save_and_load_helper.save_configs(self.guildDict, self._config_dir, self._config_object, guild_id)
@@ -113,17 +117,21 @@ class CogClass(extension.IExtensionHandler, config.IConfigManager, ABC, commands
 
     def is_enabled(self, ctx: commands.Context) -> bool:
         return ctx.guild.id in self.guildDict
+
     # endregion
 
-    def set(self, ctx: commands.Context, variable: str, value: Union[TextChannel, Role, Member, str, int, bool]) -> None:
+    def set(self, ctx: commands.Context, variable: str,
+            value: Union[TextChannel, Role, Member, str, int, bool]) -> None:
         self.guildDict[ctx.guild.id] = config_helper.set(self.guildDict[ctx.guild.id], ctx, variable, value)
         self.save_configs(ctx.guild.id)
 
-    def add(self, ctx: commands.Context, variable: str, value: Union[TextChannel, Role, Member, str, int, bool]) -> None:
+    def add(self, ctx: commands.Context, variable: str,
+            value: Union[TextChannel, Role, Member, str, int, bool]) -> None:
         self.guildDict[ctx.guild.id] = config_helper.add(self.guildDict[ctx.guild.id], ctx, variable, value)
         self.save_configs(ctx.guild.id)
 
-    def remove(self, ctx: commands.Context, variable: str, value: Union[TextChannel, Role, Member, str, int, bool]) -> None:
+    def remove(self, ctx: commands.Context, variable: str,
+               value: Union[TextChannel, Role, Member, str, int, bool]) -> None:
         self.guildDict[ctx.guild.id] = config_helper.remove(self.guildDict[ctx.guild.id], ctx, variable, value)
         self.save_configs(ctx.guild.id)
     # endregion

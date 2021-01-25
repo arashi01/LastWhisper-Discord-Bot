@@ -1,10 +1,10 @@
 from pathlib import Path
 
+from configuration import ConfigurationDictionary, Configuration
 from discord.ext import commands
 
 import utils
 from objects import ManagementToolsConfig
-from configuration import ConfigurationDictionary, Configuration
 from objects.role_object import RoleObject
 from utils.cog_class import CogClass
 
@@ -29,7 +29,8 @@ class ManagementTools(CogClass, name=utils.CogNames.ManagementTools.value):
         elif str(number).lower() == "all":
             await ctx.channel.purge(limit=None)
         else:
-            await ctx.reply(f"Cannot remove {number} as it is not a valid command.", delete_after=5, mention_author=False)
+            await ctx.reply(f"Cannot remove {number} as it is not a valid command.", delete_after=5,
+                            mention_author=False)
 
         await ctx.send("Finished clearing.", delete_after=5)
 
@@ -37,8 +38,10 @@ class ManagementTools(CogClass, name=utils.CogNames.ManagementTools.value):
     def get_configs(self) -> ConfigurationDictionary:
         config: ConfigurationDictionary = ConfigurationDictionary()
 
-        config.add_configuration(Configuration("clear_allowed_role_ids", "clear_allowed_role_ids", add=self.add, remove=self.remove))
-        config.add_configuration(Configuration("clear_channel_id_blacklist", "clear_channel_id_blacklist", add=self.add, remove=self.remove))
+        config.add_configuration(
+            Configuration("clear_allowed_role_ids", "clear_allowed_role_ids", add=self.add, remove=self.remove))
+        config.add_configuration(
+            Configuration("clear_channel_id_blacklist", "clear_channel_id_blacklist", add=self.add, remove=self.remove))
 
         return config
 

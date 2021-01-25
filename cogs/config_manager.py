@@ -1,13 +1,13 @@
-from discord.ext import commands
-from discord import Embed, TextChannel, Role, Member
-
 import typing
 
+from discord import Embed, TextChannel, Role, Member
+from discord.ext import commands
+
 from cogs.general import General
+from interfaces import config, extension, roles
 from objects.role_object import RoleObject
 from utils import CogNames
 from utils.cog_class import CogClass
-from interfaces import config, extension, roles
 from utils.helpers import role_helper
 
 
@@ -23,7 +23,8 @@ class ConfigManager(roles.IRoleProvider, commands.Cog, name=CogNames.ConfigManag
         self._general_cog: General = self._client.get_cog(CogNames.General.value)
 
     @commands.group(invoke_without_command=True)
-    async def config(self, ctx: commands.Context, extension_name: str = None, variable: str = "", action: str = "", value: typing.Union[TextChannel, Role, Member, str, int, bool] = None):
+    async def config(self, ctx: commands.Context, extension_name: str = None, variable: str = "", action: str = "",
+                     value: typing.Union[TextChannel, Role, Member, str, int, bool] = None):
         if not extension_name:
             embed: Embed = Embed(title="Available Extensions Configs")
             for cog in self._client.cogs.values():
@@ -47,7 +48,8 @@ class ConfigManager(roles.IRoleProvider, commands.Cog, name=CogNames.ConfigManag
                         else:
                             raise commands.BadArgument(f"Action **{action}** is not valid.")
                     else:
-                        raise commands.BadArgument(f"**{variable}** is not valid configuration name for Extension **{extension_name}**.")
+                        raise commands.BadArgument(
+                            f"**{variable}** is not valid configuration name for Extension **{extension_name}**.")
                 else:
                     raise commands.BadArgument(f"**{extension_name}** is not Extension.")
             else:
@@ -61,7 +63,8 @@ class ConfigManager(roles.IRoleProvider, commands.Cog, name=CogNames.ConfigManag
             cog = self._client.cogs[extension_name]
             if isinstance(cog, extension.IEnabled):
                 if not cog.is_enabled(ctx):
-                    await ctx.reply(f"Extension **{extension_name}** is **Not** enabled on your server. Nothing to do.", mention_author=False)
+                    await ctx.reply(f"Extension **{extension_name}** is **Not** enabled on your server. Nothing to do.",
+                                    mention_author=False)
                     return
                 if isinstance(cog, config.ILoader):
                     cog.load_configs(ctx.guild.id)
@@ -91,7 +94,8 @@ class ConfigManager(roles.IRoleProvider, commands.Cog, name=CogNames.ConfigManag
     async def is_enabled(self, ctx: commands.Context, extension_name: str):
         if extension_name in self._client.cogs:
             if isinstance(cog := self._client.cogs[extension_name], extension.IEnabled):
-                await ctx.reply(embed=Embed(title=cog.qualified_name, description=self._is_enabled(cog, ctx)), mention_author=False)
+                await ctx.reply(embed=Embed(title=cog.qualified_name, description=self._is_enabled(cog, ctx)),
+                                mention_author=False)
             else:
                 await ctx.reply(f"Extension **{extension_name}** does not exist.", mention_author=False)
         else:
@@ -124,13 +128,13 @@ class ConfigManager(roles.IRoleProvider, commands.Cog, name=CogNames.ConfigManag
     @property
     def role_list(self) -> dict:
         return {
-            self.config.name:       RoleObject("", "", True),
-            self.reload.name:       RoleObject("", "", True),
+            self.config.name: RoleObject("", "", True),
+            self.reload.name: RoleObject("", "", True),
 
-            self.extension.name:    RoleObject("", "", True),
-            self.is_enabled.name:   RoleObject("", "", True),
-            self.enable.name:       RoleObject("", "", True),
-            self.disable:           RoleObject("", "", True)
+            self.extension.name: RoleObject("", "", True),
+            self.is_enabled.name: RoleObject("", "", True),
+            self.enable.name: RoleObject("", "", True),
+            self.disable: RoleObject("", "", True)
         }
 
 

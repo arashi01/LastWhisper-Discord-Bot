@@ -1,5 +1,6 @@
-from objects import CustomConfigObject, convert_dict_list_json, TypeObjects
 from datetime import datetime
+
+from objects import CustomConfigObject, convert_dict_list_json, TypeObjects
 
 
 class Message(CustomConfigObject):

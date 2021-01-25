@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
 
+from configuration import ConfigurationDictionary
 from discord.ext.commands import Cog
 
-from configuration import ConfigurationDictionary
 from interfaces import CogABCMeta, _HiddenGuildDictObjToEnsureThatSelfGuildDictIsAThing
 
 
@@ -18,7 +18,8 @@ class ISaver(_HiddenGuildDictObjToEnsureThatSelfGuildDictIsAThing, ABC, Cog, met
         pass
 
 
-class IConfigFileManager(ILoader, ISaver, _HiddenGuildDictObjToEnsureThatSelfGuildDictIsAThing, ABC, metaclass=CogABCMeta):
+class IConfigFileManager(ILoader, ISaver, _HiddenGuildDictObjToEnsureThatSelfGuildDictIsAThing, ABC,
+                         metaclass=CogABCMeta):
     pass
 
 

@@ -24,7 +24,8 @@ class Week(CustomConfigObject):
     This object purely holds information and does not do any form of verification.
     """
 
-    def __init__(self, name="", monday: int = -1, tuesday: int = -1, wednesday: int = -1, thursday: int = -1, friday: int = -1, saturday: int = -1, sunday: int = -1):
+    def __init__(self, name="", monday: int = -1, tuesday: int = -1, wednesday: int = -1, thursday: int = -1,
+                 friday: int = -1, saturday: int = -1, sunday: int = -1):
         """
         :param name: The name of the week.
 
@@ -78,7 +79,6 @@ class BuffManagerConfig(CustomConfigObject):
                  tdb_ids=None, tmb_ids=None,
                  twb_ids=None, nwb_ids=None,
                  buff_list=None, weeks=None):
-
         """
         :param mm_channel_id: The Discord channel id where the morning message will be posted.
         :param mm_hour: The hour when the morning message is posted.

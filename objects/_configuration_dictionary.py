@@ -1,5 +1,5 @@
-from objects._configuration import Configuration
 from objects import TypeList
+from objects._configuration import Configuration
 
 
 class ConfigurationDictionary(object):

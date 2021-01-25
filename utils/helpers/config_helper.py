@@ -18,7 +18,8 @@ _TypeConditionCheck = {
 }
 
 
-def set(config: CustomConfigObject, ctx: Context, variable: str, value: Union[TextChannel, Role, Member, str, int, bool]) -> CustomConfigObject:
+def set(config: CustomConfigObject, ctx: Context, variable: str,
+        value: Union[TextChannel, Role, Member, str, int, bool]) -> CustomConfigObject:
     """
     Function used to set the value of a configuration.
 
@@ -41,7 +42,8 @@ def set(config: CustomConfigObject, ctx: Context, variable: str, value: Union[Te
     return config
 
 
-def add(config: CustomConfigObject, ctx: Context, variable: str, value: Union[TextChannel, Role, Member, str, int, bool]) -> CustomConfigObject:
+def add(config: CustomConfigObject, ctx: Context, variable: str,
+        value: Union[TextChannel, Role, Member, str, int, bool]) -> CustomConfigObject:
     """
     Function used to add a value to a configuration.
 
@@ -68,7 +70,8 @@ def add(config: CustomConfigObject, ctx: Context, variable: str, value: Union[Te
     return config
 
 
-def remove(config: CustomConfigObject, _, variable: str, value: Union[TextChannel, Role, Member, str, int, bool]) -> CustomConfigObject:
+def remove(config: CustomConfigObject, _, variable: str,
+           value: Union[TextChannel, Role, Member, str, int, bool]) -> CustomConfigObject:
     """
     Function used to remove a value to a configuration.
 

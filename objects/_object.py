@@ -83,7 +83,7 @@ def convert_dict(dictionary: dict, class_object: CustomConfigObject.__class__) -
             dictionary[key] = class_object(**value)
         except TypeError:
             continue
-        
+
     return dictionary
 
 

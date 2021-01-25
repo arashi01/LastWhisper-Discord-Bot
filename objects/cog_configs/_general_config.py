@@ -17,8 +17,10 @@ class GeneralConfig(CustomConfigObject):
         """
 
         self.should_clear_command: bool = should_clear_command
-        self.clear_command_exception_list: TypeList = TypeList(TypeObjects.Member) if not clear_command_exception_list else clear_command_exception_list
-        self.management_role_ids: TypeList = TypeList(TypeObjects.Role) if not management_role_ids else management_role_ids
+        self.clear_command_exception_list: TypeList = TypeList(
+            TypeObjects.Member) if not clear_command_exception_list else clear_command_exception_list
+        self.management_role_ids: TypeList = TypeList(
+            TypeObjects.Role) if not management_role_ids else management_role_ids
         self.prefix: str = prefix
 
         self.change_prefix: list = change_prefix or []

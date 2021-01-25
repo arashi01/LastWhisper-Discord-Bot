@@ -6,6 +6,7 @@ class MemberManagerConfig(CustomConfigObject):
     Object representing the configs for the MemberManager extension
     This object purely holds information and does not do any form of validation.
     """
+
     def __init__(self, member_role_id: TypeObjects.Role = None,
                  new_member_role_id: TypeObjects.Role = None,
                  welcome_channel_id: TypeObjects.Channel = None,
