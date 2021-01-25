@@ -13,6 +13,7 @@ from utils.helpers import role_helper
 
 class ConfigManager(roles.IRoleProvider, commands.Cog, name=CogNames.ConfigManager.value):
     def __init__(self, client: commands.bot):
+        super().__init__()
         self._client: commands.bot = client
         if self._client.is_ready:
             self._general_cog: General = self._client.get_cog(CogNames.General.value)
@@ -113,6 +114,7 @@ class ConfigManager(roles.IRoleProvider, commands.Cog, name=CogNames.ConfigManag
         else:
             await ctx.send(f"Extension **{extension_name}** does not exist.")
 
+    @role_helper.cog_check_replacement
     async def cog_check(self, ctx: commands.Context):
         pass
 
