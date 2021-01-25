@@ -11,8 +11,7 @@ from interfaces import config, extension, roles
 from utils.helpers import role_helper
 
 
-class ConfigManager(commands.Cog, name=CogNames.ConfigManager.value):
-
+class ConfigManager(roles.IRoleProvider, commands.Cog, name=CogNames.ConfigManager.value):
     def __init__(self, client: commands.bot):
         self._client: commands.bot = client
         if self._client.is_ready:
