@@ -20,7 +20,7 @@ class CustomMessages(CogClass, name=utils.CogNames.CustomMessages.value):
 
     @commands.group(name="CustomMessage", invoke_without_command=True)
     async def custom_message(self, ctx: commands.Context, message_id: str = None):
-        guild: CustomMessagesConfig = self._guildDict[ctx.guild.id]
+        guild: CustomMessagesConfig = self.guildDict[ctx.guild.id]
         if not message_id:
             indexes = []
             for key in guild.messages:
@@ -49,7 +49,7 @@ class CustomMessages(CogClass, name=utils.CogNames.CustomMessages.value):
                              day: int, month: int, year: int,
                              hour: int, minute: int,
                              should_repeat: bool = False):
-        guild: CustomMessagesConfig = self._guildDict[ctx.guild.id]
+        guild: CustomMessagesConfig = self.guildDict[ctx.guild.id]
         if channel_id not in ctx.guild.channels:
             raise commands.BadArgument(f"There is not channel with the ID **{channel_id}** on your server.")
 
@@ -68,7 +68,7 @@ class CustomMessages(CogClass, name=utils.CogNames.CustomMessages.value):
 
     @custom_message.command()
     async def remove_message(self, ctx: commands.Context, message_id: str):
-        guild: CustomMessagesConfig = self._guildDict[ctx.guild.id]
+        guild: CustomMessagesConfig = self.guildDict[ctx.guild.id]
         if message_id in guild.messages.keys():
             guild.messages.pop(message_id)
         self.save_configs(ctx.guild.id)
@@ -79,7 +79,7 @@ class CustomMessages(CogClass, name=utils.CogNames.CustomMessages.value):
         await self._client.wait_until_ready()
         now: datetime = datetime.now()
 
-        for guild_id, guild in self._guildDict.items():
+        for guild_id, guild in self.guildDict.items():
             for index, message in guild.messages.items():
                 if message.date.hour == now.hour and message.date.minute == now.minute:
                     if message.date.year == now.year and message.date.month == now.month and message.date.day == now.day:
@@ -93,7 +93,7 @@ class CustomMessages(CogClass, name=utils.CogNames.CustomMessages.value):
         return ConfigurationDictionary()
 
     @property
-    def get_function_roles_reference(self) -> dict:
+    def role_list(self) -> dict:
         return {
             self.custom_message.name: None,
             self.create_message.name: None,
