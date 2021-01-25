@@ -1,7 +1,7 @@
 from pathlib import Path as _Path
 from typing import Union
 
-from configuration import ConfigurationDictionary, Configuration
+from objects import ConfigurationDictionary, Configuration
 from discord import TextChannel, Role, Member, Guild
 from discord.ext import commands
 from discord.ext.commands import Context

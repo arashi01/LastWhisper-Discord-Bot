@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from configuration import ConfigurationDictionary, Configuration
+from objects import ConfigurationDictionary, Configuration
 from discord import Message, RawReactionActionEvent, Member, Guild, Embed
 from discord.ext import commands
 

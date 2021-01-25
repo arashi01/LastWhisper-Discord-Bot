@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Union
 
-from configuration import Configuration, ConfigurationDictionary
+from objects import Configuration, ConfigurationDictionary
 from discord import Embed, HTTPException
 from discord.ext import commands, tasks
 

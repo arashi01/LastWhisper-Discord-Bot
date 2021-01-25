@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from configuration import ConfigurationDictionary, Configuration
+from objects import ConfigurationDictionary, Configuration
 from discord.ext import commands
 
 import utils

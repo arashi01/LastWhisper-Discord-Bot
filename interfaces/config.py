@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from configuration import ConfigurationDictionary
+from objects import ConfigurationDictionary
 from discord.ext.commands import Cog
 
 from interfaces import CogABCMeta, _HiddenGuildDictObjToEnsureThatSelfGuildDictIsAThing

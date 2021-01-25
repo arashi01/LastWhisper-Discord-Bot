@@ -76,6 +76,7 @@ def remove(config: CustomConfigObject, _, variable: str,
     Function used to remove a value to a configuration.
 
     :param config: The configuration object.
+    :param _: Not used but I have to keep it in docstring for some reason.
     :param variable: The variable that is gonna be changed.
     :param value: The value the variable will be changed to.
     :return: A potentially modified configuration object.

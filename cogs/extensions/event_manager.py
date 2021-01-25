@@ -5,7 +5,7 @@ from enum import Enum
 from pathlib import Path
 from time import strptime, mktime, strftime, asctime
 
-from configuration import ConfigurationDictionary, Configuration
+from objects import ConfigurationDictionary, Configuration
 from discord import Embed, Message, HTTPException
 from discord.ext import commands, tasks
 

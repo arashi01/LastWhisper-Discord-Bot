@@ -1,7 +1,7 @@
 from datetime import datetime
 from pathlib import Path
 
-from configuration import ConfigurationDictionary
+from objects import ConfigurationDictionary
 from discord import TextChannel, Embed
 from discord.ext import tasks, commands
 
