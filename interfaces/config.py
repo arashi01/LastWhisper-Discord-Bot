@@ -1,13 +1,9 @@
 from abc import ABC, abstractmethod
-from interfaces import CogABCMeta
 
-from configuration import ConfigurationDictionary
 from discord.ext.commands import Cog
 
-
-class _HiddenGuildDictObjToEnsureThatSelfGuildDictIsAThing(ABC, metaclass=CogABCMeta):
-    def __init__(self):
-        self._guildDict: dict = {}
+from configuration import ConfigurationDictionary
+from interfaces import CogABCMeta, _HiddenGuildDictObjToEnsureThatSelfGuildDictIsAThing
 
 
 class ILoader(_HiddenGuildDictObjToEnsureThatSelfGuildDictIsAThing, ABC, Cog, metaclass=CogABCMeta):
