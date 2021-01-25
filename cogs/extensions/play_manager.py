@@ -5,6 +5,7 @@ from discord.ext import commands
 import utils
 from objects import PlayConfig
 from configuration import ConfigurationDictionary
+from objects.role_object import RoleObject
 from utils.cog_class import CogClass
 
 
@@ -39,15 +40,15 @@ class PlayManager(CogClass, name=utils.CogNames.PlayManager.value):
         return ConfigurationDictionary()
 
     @property
-    def get_function_roles_reference(self) -> dict:
+    def role_list(self) -> dict:
         return {
-            self.join.name: None,
-            self.play.name: None,
-            self.stop.name: None,
-            self.leave.name: None
+            self.join.name: RoleObject("", "", True),
+            self.play.name: RoleObject("", "", True),
+            self.stop.name: RoleObject("", "", True),
+            self.leave.name: RoleObject("", "", True)
         }
 
 
 def setup(client: commands.bot):
     pass
-    client.add_cog(PlayManager(client))
+    # client.add_cog(PlayManager(client))
