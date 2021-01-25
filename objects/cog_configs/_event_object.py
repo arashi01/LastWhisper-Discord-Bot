@@ -94,8 +94,8 @@ class EventConfig(CustomConfigObject):
         self.trigger_edit_ids: list = trigger_edit_ids or []
         self.trigger_remove_ids: list = trigger_remove_ids or []
 
-        self.event_reminder_triggers: [EventReminderTrigger] = map(lambda a: EventReminderTrigger(**a), event_reminder_triggers) or[]
-        self.events: [Event] = list(map(lambda a: Event(**a), events)) or []
+        self.event_reminder_triggers: [EventReminderTrigger] = list(map(lambda a: EventReminderTrigger(**a), event_reminder_triggers or []))
+        self.events: [Event] = list(map(lambda a: Event(**a), events or []))
 
     @classmethod
     def from_json(cls, data):
