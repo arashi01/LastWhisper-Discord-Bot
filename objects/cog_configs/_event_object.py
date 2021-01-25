@@ -57,6 +57,8 @@ class EventConfig(CustomConfigObject):
     def __init__(self,
                  channel_id: TypeObjects.Channel = None, reminder_channel_id: TypeObjects.Channel = None,
                  name_tag: str = None, description_tag: str = None, datetime_tag: str = None,
+                 event_ids: list = None, event_edit_ids: list = None, event_cancel_ids: list = None,
+                 trigger_ids: list = None, trigger_edit_ids: list = None, trigger_remove_ids: list = None,
                  event_reminder_triggers: [EventReminderTrigger] = None, events: [Event] = None):
         """
         :param channel_id: The Discord channel id that is checked for event posts.
@@ -77,16 +79,16 @@ class EventConfig(CustomConfigObject):
         self.description_tag: str = description_tag
         self.datetime_tag: str = datetime_tag
 
-        self.event_ids: TypeList = TypeList(TypeObjects.Role)
-        self.event_edit_ids: TypeList = TypeList(TypeObjects.Role)
-        self.event_cancel_ids: TypeList = TypeList(TypeObjects.Role)
+        self.event_ids: list = event_ids or []
+        self.event_edit_ids: list = event_edit_ids or []
+        self.event_cancel_ids: list = event_cancel_ids or []
 
-        self.trigger_ids: TypeList = TypeList(TypeObjects.Role)
-        self.trigger_edit_ids: TypeList = TypeList(TypeObjects.Role)
-        self.trigger_remove_ids: TypeList = TypeList(TypeObjects.Role)
+        self.trigger_ids: list = trigger_ids or []
+        self.trigger_edit_ids: list = trigger_edit_ids or []
+        self.trigger_remove_ids: list = trigger_remove_ids or []
 
-        self.event_reminder_triggers: [EventReminderTrigger] = event_reminder_triggers if event_reminder_triggers else []
-        self.events: [Event] = [] if not events else events
+        self.event_reminder_triggers: [EventReminderTrigger] = event_reminder_triggers or []
+        self.events: [Event] = events or []
 
     @classmethod
     def from_json(cls, data):
