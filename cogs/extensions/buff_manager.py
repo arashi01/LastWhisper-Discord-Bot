@@ -8,6 +8,7 @@ from discord.ext import commands, tasks
 import utils
 from objects import Week, BuffManagerConfig, Buff
 from configuration import Configuration, ConfigurationDictionary
+from objects.role_object import RoleObject
 from utils.cog_class import CogClass
 
 
