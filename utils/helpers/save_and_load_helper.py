@@ -1,11 +1,10 @@
 """
 This file mainly provides helper functions for saving and loading configurations.
 """
-import json
 import os
-from ast import literal_eval as _literal_eval
 from pathlib import Path
 from typing import Union
+import datetime
 
 from utils import save_as_json, CustomConfigObject, logger, save_as_string, deprecated
 
@@ -89,16 +88,16 @@ def save_configs(guild_dict: dict, config_dir: Path, config_obj: CustomConfigObj
             save_as_string(Path(config_dir / (str(key) + extension)), str(value))
 
 
-def _try_get_obj(config_dir: Path, filename: str, config_obj: CustomConfigObject.__class__) -> Union[
-    CustomConfigObject, None]:
+def _try_get_obj(config_dir: Path, filename: str, config_obj: CustomConfigObject.__class__) -> Union[CustomConfigObject, None]:
     """Helper function to attempt to reduce some redundant code."""
     with open(config_dir / filename) as f:
         try:
-            obj = config_obj(**_literal_eval(f.read()))
+            hold = f.read()
         except NameError:
             logger.warning(
                 f"The config file {filename} under config dir {config_dir} is either not valid or corrupted and cannot be used.\nIt will be disabled until the file is either fixed or a new file is created.")
             os.rename(config_dir / filename, filename + default_disabled_extension)
             return None
         else:
+            obj = config_obj(**eval(hold))
             return obj
