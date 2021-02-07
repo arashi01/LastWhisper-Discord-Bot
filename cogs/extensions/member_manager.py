@@ -37,8 +37,9 @@ class MemberManager(CogClass, name=utils.CogNames.MemberManager.value):
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload: RawReactionActionEvent):
-        if not (config := self.guildDict[(guild_id := payload.guild_id)]):
+        if (guild_id := payload.guild_id) not in self.guildDict:
             return
+        config = self.guildDict[guild_id]
 
         if not ((channel := self._client.get_channel(config.welcome_channel_id)) and payload.channel_id == channel.id):
             return
