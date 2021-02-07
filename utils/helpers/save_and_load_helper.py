@@ -53,15 +53,8 @@ def load_configs(guild_dict: dict, config_dir: Path, config_obj: CustomConfigObj
 
         for filename in os.listdir(config_dir):
             if (flag := filename.endswith(extension)) or filename.endswith(extension + default_disabled_extension):
-                # This removes files that are not using valid naming conventions (file name = guild ID).
-                if filename[:len(_get_extension(flag)) * -1] not in [str(guild.id) for guild in guilds]:
-                    logger.warning(f"{filename} Not associated with any know guild. Removing!")
-                    os.remove(config_dir / filename)
-                    continue
-
-                hold = _try_get_obj(config_dir, filename + (default_disabled_extension if not flag else ""), config_obj)
-                if hold:
-                    guild_dict[int(filename[:len(_get_extension(flag)) * -1])] = hold
+                guild_dict[int(filename[:len(_get_extension(flag)) * -1])] = _try_get_obj(config_dir, filename + (
+                    default_disabled_extension if not flag else ""), config_obj)
             else:
                 logger.warning(f"{filename} Not a valid config file. Removing!")
                 os.remove(config_dir / filename)
