@@ -36,7 +36,7 @@ def load_as_dict(path: Path) -> dict:
 def save_as_string(path: Path, data: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "w") as f:
-        f.write(data)
+        f.write(str(data))
 
 
 def save_as_json(path: str, obj: object) -> None:
