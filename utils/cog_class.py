@@ -34,15 +34,12 @@ class CogClass(extension.IExtensionHandler, config.IConfigManager, ABC, commands
         self._config_object: CustomConfigObject.__class__
 
         self._config_object = config_object
+        self.load_configs()
         if self._client.is_ready():
             self._general_cog = self._client.get_cog(utils.CogNames.General.value)
-            self.load_configs()
 
     def cog_unload(self):
-        from os.path import isfile
-        for key, value in self.guildDict.items():
-            if not isfile(self._config_dir / (str(key) + save_and_load_helper.default_extension)):
-                self.save_configs(key)
+        self.save_configs()
 
     @commands.Cog.listener()
     async def on_ready(self) -> None:
@@ -84,12 +81,15 @@ class CogClass(extension.IExtensionHandler, config.IConfigManager, ABC, commands
     # endregion
 
     # region config interfaces
-    def load_configs(self, guild_id: int = None) -> None:
-        save_and_load_helper.load_configs_json(self.guildDict, str(self._config_dir), self._config_object, self._client.guilds, guild_id)
-        save_and_load_helper.load_configs(self.guildDict, self._config_dir, self._config_object, self._client.guilds, guild_id, clear_existing=False)
+    def load_configs(self, guild_id: int = None) -> bool:
+        return save_and_load_helper.load_configs(self.guildDict, self._config_dir, self._config_object, self._client.guilds, guild_id)
 
     def save_configs(self, guild_id: int = None) -> None:
-        save_and_load_helper.save_configs(self.guildDict, self._config_dir, self._config_object, guild_id)
+        if guild_id not in self.guildDict:
+            save_and_load_helper.save_configs(self.guildDict, self._config_dir, self._config_object, guild_id)
+            self.guildDict[guild_id] = self._config_object()
+        else:
+            save_and_load_helper.save_configs(self.guildDict, self._config_dir, self._config_object, guild_id)
 
     # endregion
 
@@ -99,7 +99,8 @@ class CogClass(extension.IExtensionHandler, config.IConfigManager, ABC, commands
             await ctx.reply("Already Enabled.", mention_author=False)
             return
 
-        self.load_configs(guild_id=ctx.guild.id)
+        if not self.load_configs(guild_id=ctx.guild.id):
+            self.save_configs(guild_id=ctx.guild.id)
         await ctx.reply("Done.", mention_author=False)
 
     async def disable(self, ctx: commands.Context) -> None:
