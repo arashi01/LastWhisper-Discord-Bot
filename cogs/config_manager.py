@@ -39,7 +39,7 @@ class ConfigManager(roles.IRoleProvider, commands.Cog, name=CogNames.ConfigManag
         else:
             if extension_name in self._client.cogs.keys():
                 if isinstance(cog := self._client.cogs[extension_name], config.IConfigDeliverer):
-                    if isinstance(variable_result := cog.config_settings.get_configurations_dict[variable], dict):
+                    if isinstance(variable_result := cog.get_configs.get_configurations_dict[variable], dict):
                         if action in ("set", "add", "remove"):
                             variable_result[action](ctx, variable_result["config_name"], value)
                         elif action == "":
