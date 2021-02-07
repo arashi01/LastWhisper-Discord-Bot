@@ -17,7 +17,7 @@ from utils.helpers import config_helper, save_and_load_helper, role_helper
 class General(extension.IEnabled, config.IConfigManager, roles.IRoleProvider, commands.Cog,
               name=utils.CogNames.General.value, metaclass=CogABCMeta):
     _config_dir: _Path
-    _config_object = GeneralConfig.__class__
+    _config_object = GeneralConfig
 
     def __init__(self, client: commands.bot):
         super().__init__()
@@ -31,6 +31,9 @@ class General(extension.IEnabled, config.IConfigManager, roles.IRoleProvider, co
 
             for guild in [guild.id for guild in self._client.guilds if guild.id not in self.guildDict]:
                 self.save_configs(guild)
+
+    def cog_unload(self):
+        self.save_configs()
 
     @commands.Cog.listener()
     async def on_ready(self) -> None:
@@ -97,11 +100,10 @@ class General(extension.IEnabled, config.IConfigManager, roles.IRoleProvider, co
         return ctx.guild.id in self.guildDict
 
     def load_configs(self, guild_id: int = None) -> None:
-        save_and_load_helper.load_configs_json(self.guildDict, str(self._config_dir), GeneralConfig, self._client.guilds, guild_id)
-        save_and_load_helper.load_configs(self.guildDict, self._config_dir, GeneralConfig, self._client.guilds, guild_id, clear_existing=False)
+        save_and_load_helper.load_configs(self.guildDict, self._config_dir, self._config_object, self._client.guilds, guild_id)
 
     def save_configs(self, guild_id: int = None) -> None:
-        save_and_load_helper.save_configs(self.guildDict, self._config_dir, GeneralConfig, guild_id)
+        save_and_load_helper.save_configs(self.guildDict, self._config_dir, self._config_object, guild_id)
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild: Guild) -> None:
