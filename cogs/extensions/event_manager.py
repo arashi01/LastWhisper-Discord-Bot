@@ -39,39 +39,43 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
         now = datetime.now()
 
         for guild_id, config in self.guildDict.items():
-            if not (len(config.events) and len(config.event_reminder_triggers)):
-                continue
+            try:
+                if not (len(config.events) and len(config.event_reminder_triggers)):
+                    continue
 
-            for event in config.events:
-                event_datetime = datetime.fromtimestamp(mktime(event.datetime))
+                for event in config.events:
+                    try:
+                        event_datetime: datetime = copy.deepcopy(event.datetime)
 
-                if event_datetime.date() == now.date():
-                    if not (channel := self._client.get_guild(guild_id).get_channel(config.reminder_channel_id)):
-                        continue
+                        if event_datetime.date() == now.date():
+                            if not (channel := self._client.get_guild(guild_id).get_channel(config.reminder_channel_id)):
+                                continue
 
-                    for reminder in config.event_reminder_triggers:
-                        if (now + timedelta(hours=reminder.hour_diff, minutes=reminder.minute_diff)).time().replace(
-                                second=0, microsecond=0) == event_datetime.time():
-                            def _add_s(number: int) -> str:
-                                return "s" if number > 1 else ""
+                            for reminder in config.event_reminder_triggers:
+                                if (now + timedelta(hours=reminder.hour_diff, minutes=reminder.minute_diff)).time().replace(second=0, microsecond=0) == event_datetime.time():
+                                    def _add_s(number: int) -> str:
+                                        return "s" if number > 1 else ""
 
-                            event_dict = {
-                                "everyone": "@everyone",
-                                "here": "@here",
-                                "event_name": event.name,
-                                "hours_remaining": f"{reminder.hour_diff} hour{_add_s(reminder.hour_diff)}" if reminder.hour_diff > 0 else "",
-                                "minutes_remaining": f"{reminder.minute_diff} minute{_add_s(reminder.minute_diff)}" if reminder.minute_diff > 0 else "",
-                                "and": " and " if reminder.hour_diff and reminder.minute_diff else ""
-                            }
+                                    event_dict = {
+                                        "everyone": "@everyone",
+                                        "here": "@here",
+                                        "event_name": event.name,
+                                        "hours_remaining": f"{reminder.hour_diff} hour{_add_s(reminder.hour_diff)}" if reminder.hour_diff > 0 else "",
+                                        "minutes_remaining": f"{reminder.minute_diff} minute{_add_s(reminder.minute_diff)}" if reminder.minute_diff > 0 else "",
+                                        "and": " and " if reminder.hour_diff and reminder.minute_diff else ""
+                                    }
 
-                            try:
-                                await channel.send(reminder.message % event_dict)
-                            except HTTPException as e:
-                                print(e)
+                                    try:
+                                        await channel.send(reminder.message % event_dict)
+                                    except HTTPException as e:
+                                        print(e)
+                    except Exception as e:
+                        print(e)
+            except Exception as e:
+                print(e)
 
             dif = len(config.events)
-            config.events = [_event for _event in config.events if
-                             datetime.fromtimestamp(mktime(_event.datetime)) > now]
+            config.events = [_event for _event in copy.deepcopy(config.events) if _event.datetime > now]
             if dif > len(config.events):
                 self.save_configs(guild_id)
 
@@ -92,11 +96,9 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
             event: Event = config.events[abs(index) - 1]
             embed = Embed(title=event.name, description=f"{event.description}")
 
-            embed.add_field(name="Date:", value=f"{strftime('%A %b %d', event.datetime)}", inline=False)
-            embed.add_field(name="Time:", value=f"{strftime('%H:%M', event.datetime)}", inline=False)
-            embed.add_field(name="Time Remaining:",
-                            value=f"{':'.join(str(datetime.fromtimestamp(mktime(event.datetime)) - datetime.now()).split(':')[:2])}",
-                            inline=False)
+            embed.add_field(name="Date:", value=f"{event.datetime.strftime('%A %b %d')}", inline=False)
+            embed.add_field(name="Time:", value=f"{event.datetime.strftime('%H:%M')}", inline=False)
+            embed.add_field(name="Time Remaining:", value=f"{':'.join(str(event.datetime - datetime.now()).split(':')[:2])}", inline=False)
 
             await ctx.reply(embed=embed, mention_author=False)
 
@@ -147,7 +149,8 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
                 continue
 
             if state is States.TIME:
-                event.datetime = strptime(line)
+                # Fri Feb 05 20:00:00 2021
+                event.datetime = datetime.strptime(line, "%a %b %d %H:%M:%S %Y")
                 state = States.NONE
                 continue
 
@@ -178,8 +181,7 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
         await ctx.reply("Done.", mention_author=False)
 
     @event.command(name="edit")
-    async def edit_event(self, ctx: commands.Context, index: int, name: str = "", time: str = "", *,
-                         description: str = ""):
+    async def edit_event(self, ctx: commands.Context, index: int, name: str = "", time: str = "", *, description: str = ""):
         config: EventConfig = self.guildDict[ctx.guild.id]
         if abs(index) - 1 >= len(config.events):
             raise commands.BadArgument(f"Index {index} out of range.")
@@ -246,7 +248,7 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
                                                                  timeout=60)
                         if text:
                             try:
-                                new_event.datetime = strptime(text)
+                                new_event.datetime = datetime.strptime(text, "%a %b %d %H:%M:%S %Y")
                                 break
                             except ValueError:
                                 await ctx.send("Invalid time format.", delete_after=3)
@@ -269,10 +271,8 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
         description = "Are you sure you want to change the **Old** event details into the **New** ones?"
 
         result: DialogReturn = await yes_no(ctx, title, description, [
-            ("Old:",
-             f"**Name:**\n> {old_event.name}\n**Description:**\n```\n{old_event.description}\n```\n**Time:**\n> {asctime(old_event.datetime)}"),
-            ("New:",
-             f"**Name:**\n> {new_event.name}\n**Description:**\n```\n{new_event.description}\n```\n**Time:**\n> {asctime(new_event.datetime)}")
+            ("Old:",f"**Name:**\n> {old_event.name}\n**Description:**\n```\n{old_event.description}\n```\n**Time:**\n> {str(old_event.datetime)}"),
+            ("New:",f"**Name:**\n> {new_event.name}\n**Description:**\n```\n{new_event.description}\n```\n**Time:**\n> {str(new_event.datetime)}")
         ], timeout=60.0)
 
         if result in (DialogReturn.NO, DialogReturn.FAILED, DialogReturn.ERROR):

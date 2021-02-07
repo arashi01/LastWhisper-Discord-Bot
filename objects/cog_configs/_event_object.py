@@ -1,4 +1,4 @@
-from time import struct_time
+from datetime import datetime as _datetime
 
 from objects import CustomConfigObject, TypeObjects
 
@@ -9,7 +9,7 @@ class Event(CustomConfigObject):
     This object purely holds information and does not do any form of validation.
     """
 
-    def __init__(self, name: str = "", description: str = "", datetime: struct_time = None):
+    def __init__(self, name: str = "", description: str = "", datetime: _datetime = None):
         """
         :param name: The name of the event.
         :param description: The description of the event.
@@ -18,23 +18,10 @@ class Event(CustomConfigObject):
 
         self.name: str = name
         self.description: str = description
-        try:
-            self.datetime: struct_time = struct_time(datetime)
-        except Exception:
-            self.datetime: struct_time = datetime
+        self.datetime: _datetime = datetime
 
     def __repr__(self):
-        self.datetime = list(self.datetime)
         return str(self.__dict__)
-
-    @classmethod
-    def from_json(cls, data):
-        obj = cls()
-        obj.__dict__ = data
-
-        obj.datetime = struct_time(obj.datetime)
-
-        return obj
 
 
 class EventReminderTrigger(CustomConfigObject):
