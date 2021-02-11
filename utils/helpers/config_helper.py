@@ -5,7 +5,6 @@ from typing import Union
 
 from discord import TextChannel, Role, Member
 from discord.ext.commands import Context, BadArgument
-from sphinx.util.typing import NoneType
 
 from objects import TypeObjects, CustomConfigObject
 
@@ -14,7 +13,7 @@ _TypeConditionCheck = {
     TypeObjects.Channel: lambda ctx, x: x in ctx.guild.channels,
     TypeObjects.Member: lambda ctx, x: x in ctx.guild.members,
     TypeObjects.Role: lambda ctx, x: x in ctx.guild.roles,
-    NoneType: lambda _, _v: True,
+    None: lambda _, _v: True,
     bool: lambda _, _v: True,
     int: lambda _, _v: True
 }
