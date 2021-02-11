@@ -35,24 +35,37 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
 
     @tasks.loop(minutes=1)
     async def loop(self):
+        # Todo: Rework.
         await self._client.wait_until_ready()
-        now = datetime.now()
+        now: datetime = datetime.now()
+        now = now.replace(second=0, microsecond=0)
+        save_flag = False
 
+        # goes through each config registered.
         for guild_id, config in self.guildDict.items():
+            # Preventing it from error out and breaking the fore loop.
             try:
+                # Checks if there is an event and a event reminder trigger else skips.
                 if not (len(config.events) and len(config.event_reminder_triggers)):
                     continue
 
+                # Goes through each event.
                 for event in config.events:
+                    # Try catch to keep loop running.
                     try:
-                        event_datetime: datetime = copy.deepcopy(event.datetime)
+                        event_datetime: datetime = event.datetime
 
                         if event_datetime.date() == now.date():
-                            if not (channel := self._client.get_guild(guild_id).get_channel(config.reminder_channel_id)):
+                            # checks to see if the trigger reminder channel is set.
+                            if not (trigger_reminder_channel_id := self._client.get_guild(guild_id).get_channel(config.reminder_channel_id)):
                                 continue
 
+                            # Goes through each reminder.
                             for reminder in config.event_reminder_triggers:
-                                if (now + timedelta(hours=reminder.hour_diff, minutes=reminder.minute_diff)).time().replace(second=0, microsecond=0) == event_datetime.time():
+                                hour_dif, min_dif = reminder.hour_diff, reminder.minute_diff
+                                # Possible cause of issues
+                                if (now + timedelta(hours=hour_dif, minutes=min_dif)).time() == event_datetime.time():
+                                    # function to generate a s.
                                     def _add_s(number: int) -> str:
                                         return "s" if number > 1 else ""
 
@@ -60,24 +73,25 @@ class EventManager(CogClass, name=utils.CogNames.EventManager.value):
                                         "everyone": "@everyone",
                                         "here": "@here",
                                         "event_name": event.name,
-                                        "hours_remaining": f"{reminder.hour_diff} hour{_add_s(reminder.hour_diff)}" if reminder.hour_diff > 0 else "",
-                                        "minutes_remaining": f"{reminder.minute_diff} minute{_add_s(reminder.minute_diff)}" if reminder.minute_diff > 0 else "",
-                                        "and": " and " if reminder.hour_diff and reminder.minute_diff else ""
+                                        "hours_remaining": f"{hour_dif} hour{_add_s(hour_dif)}",
+                                        "minutes_remaining": f"{min_dif} minute{_add_s(min_dif)}"
                                     }
 
                                     try:
-                                        await channel.send(reminder.message % event_dict)
+                                        await trigger_reminder_channel_id.send(reminder.message % event_dict)
                                     except HTTPException as e:
                                         print(e)
                     except Exception as e:
                         print(e)
+                    else:
+                        if event.datetime <= now:
+                            config.events.pop(config.events.index(event))
+                            save_flag = True
             except Exception as e:
                 print(e)
-
-            dif = len(config.events)
-            config.events = [_event for _event in copy.deepcopy(config.events) if _event.datetime > now]
-            if dif > len(config.events):
-                self.save_configs(guild_id)
+            else:
+                if save_flag:
+                    self.save_configs(guild_id)
 
     # region Events
     @commands.group(name="Event", invoke_without_command=True)
