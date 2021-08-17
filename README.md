@@ -1,6 +1,6 @@
 # LastWhisper-Discord-Bot
 
-The is the code for the discord bot of the The Last Whisper Free Company in the game Final Fantasy XIV.
+This is the code for the discord bot of The Last Whisper Free Company in the game Final Fantasy XIV.
 
 Features of the Discord bot:
 
@@ -16,12 +16,12 @@ Features of the Discord bot:
 Features the Discord bot does not have:
 
 - Log specific server information except for config information.
-- Music bot (Yes it is there but I am not gonna finish it due to complexity)
-- Web based dash board (I do plan on creating one in the future but have no idea where to start. Any information would
-  be appriciated.)
-- Console dash board (Still working on plans.)
+- Music bot (Yes it is there, but I am not going to finish it due to complexity)
+- Web based dashboard (I do plan on creating one in the future but have no idea where to start. Any information would
+  be appreciated.)
+- Console dashboard (Still working on plans.)
 
 Prerequisite:
 
-- Python 3.8 and above (I am using the ":=" operation which requires a modern version)
+- Python 3.8 and above (I am using the ":=" operation which requires a modern version).
 - discord.py 1.5 or above (I use Intents in the code.)
