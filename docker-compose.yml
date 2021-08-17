@@ -1,0 +1,19 @@
+version: '3.5'
+
+services:
+  nano:
+    container_name: bot
+    build: .
+    command: python bot/client.py
+    volumes:
+      - ./bot:/app/bot
+    ports:
+      - "8000:8000"
+    environment:
+      DISCORD_BOT_TOKEN: /var/run/secrets/discord_bot_token
+    secrets:
+      - discord_bot_token
+
+secrets:
+  discord_bot_token:
+    file: ./secrets/discord_bot_token

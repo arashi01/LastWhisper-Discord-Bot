@@ -129,9 +129,4 @@ dmypy.json
 .pyre/
 
 # Custom Ignores
-/files/
-/config/
-/token
-/.idea/
-/bot_starting_script.sh
-/.temp
+secrets
