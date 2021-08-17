@@ -1,6 +1,0 @@
-{
-  "clear": {
-    "brief": "Clears a channel of messages.",
-    "help": "This command will clear a channel of specified messages. Giving all will cause the entire channel to be purged of those filthy messages.\nUse with caution. If you fear that you might clear the wrong channel add it to the exclusion list in the configurations."
-  }
-}

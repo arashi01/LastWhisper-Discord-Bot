@@ -1,6 +1,0 @@
-{
-  "reload_help_docs": {
-    "brief": "Reloads the Help Docs",
-    "help": "This command will cause the bot to reload the help documentation used in the command and sets the relevant commands.\nNote: This does not overwrite pre-existing help documentation unless specified to do so."
-  }
-}
