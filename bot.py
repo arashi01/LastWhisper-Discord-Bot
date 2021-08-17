@@ -20,7 +20,6 @@ client = commands.Bot(command_prefix=general.General.get_prefix, intents=intents
 async def on_ready():
     logger.info("Ready")
 
-
 if __name__ == "__main__":
     for extension in get_cog_list("./cogs"):
         client.load_extension(extension)
