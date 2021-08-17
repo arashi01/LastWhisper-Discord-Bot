@@ -1,7 +1,7 @@
 version: '3.5'
 
 services:
-  nano:
+  last_whisper_bot:
     container_name: bot
     build: .
     command: python bot/client.py
@@ -10,10 +10,11 @@ services:
     ports:
       - "8000:8000"
     environment:
-      DISCORD_BOT_TOKEN: /var/run/secrets/token
+      RUNNING_DOCKER_COMPOSE: 1
+      DISCORD_BOT_TOKEN: /var/run/secrets/discord_bot_token
     secrets:
       - discord_bot_token
 
 secrets:
   discord_bot_token:
-    file: ./secrets/discord_bot_token
+    file: ./secrets/token
