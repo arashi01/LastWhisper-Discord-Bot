@@ -131,3 +131,5 @@ dmypy.json
 # Custom Ignores
 
 .idea
+/bot/configs.json
+/bot/extensionConfigs.json
