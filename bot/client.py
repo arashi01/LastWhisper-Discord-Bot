@@ -1,5 +1,4 @@
-# noinspection PyPackageRequirements
-import discord
+from discord.ext.commands import Bot
 import os
 import logging
 
@@ -17,24 +16,11 @@ else:
 logging.basicConfig(level=logging.INFO)
 
 # client creation
-_client = discord.Client()
-
-
-@_client.event
-async def on_ready():
-    print("Ready")
-
-
-@_client.event
-async def on_message(message):
-    if message.author == _client.user:
-        return
-
-    if message.content.startswith("$hello"):
-        await message.channel.send("Hello")
+_client = Bot(command_prefix="|")
 
 
 def main():
+    _client.load_extension("extensions.extensionManager")
     logging.log(logging.INFO, "Bot starting up")
     _client.run(TOKEN)
 
