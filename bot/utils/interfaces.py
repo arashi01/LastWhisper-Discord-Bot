@@ -1,0 +1,2 @@
+class ExtensionConfig:
+    pass
