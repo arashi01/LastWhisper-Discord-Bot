@@ -2,15 +2,14 @@ from discord.ext.commands import Bot
 import os
 import logging
 
-# dev mode check.
-DEV_MODE: bool = bool(os.environ.get("RUNNING_DOCKER_COMPOSE", False))
-
-if DEV_MODE:
+# container check.
+if os.getenv("IS_RUNNING_IN_DOCKER"):
     token_file_path: str = str(os.environ.get("DISCORD_BOT_TOKEN"))
     with open(token_file_path, "r") as token_file:
         TOKEN = token_file.read()
 else:
-    TOKEN = os.environ.get("DISCORD_BOT_TOKEN")
+    with open("../secrets/token") as token_file:
+        TOKEN = token_file.read()
 
 # logging
 logging.basicConfig(level=logging.INFO)
