@@ -1,21 +1,21 @@
-from discord.ext.commands import Bot, Cog, command, Context
+from discord.ext.commands import Bot, Cog, command, group, Context, ExtensionNotFound, ExtensionNotLoaded
 from discord import Embed
 from pathlib import Path
+from utils import saveLoad, interfaces
 import os
 
 
-class Config:
+class Config(interfaces.ExtensionConfig):
     def __init__(self, extension_dir: str = "extensions", extension_states: dict[str, bool] = {}):
         self.extension_dir: str = extension_dir
         self.extension_states: dict[str, bool] = extension_states
 
 
 class ExtensionManager(Cog):
-    _config: Config = Config()
-
     def __init__(self, bot: Bot, config: Config = Config()):
-        self.bot = bot
-        self._config = config
+        self._bot = bot
+        self._config: Config = config
+        self.merge_configs(self.qualified_name, config)
 
         # Ensures that this is only ran when the bot first stats up
         if bot.is_ready():
@@ -38,45 +38,8 @@ class ExtensionManager(Cog):
                 except Exception as e:
                     print(e)
 
-    @command()
-    async def load_extension(self, ctx: Context, name: str):
-        _Path: Path = Path(self._config.extension_dir, name + ".py")
-        if not _Path.is_file():
-            await ctx.send("Not a valid File.")
-            return
-
-        file_path: str = str(_Path).replace("/", ".")
-        try:
-            self.bot.load_extension(file_path[:file_path.rindex(".")])
-        except Exception as e:
-            print(e)
-            await ctx.send(str(e))
-
-    @command()
-    async def unload_extension(self, ctx: Context, name: str):
-        if self._config.extension_dir + "." + name not in self.bot.extensions.keys():
-            await ctx.send(f"There is no extension with the name {name}")
-            return
-
-        try:
-            self.bot.unload_extension(self._config.extension_dir + "." + name)
-        except Exception as e:
-            print(e)
-            await ctx.send(str(e))
-
-    @command()
-    async def reload_extension(self, ctx: Context, name: str):
-        if self._config.extension_dir + "." + name not in self.bot.extensions.keys():
-            await ctx.send(f"There is no extension with the name {name}")
-            return
-
-        try:
-            self.bot.reload_extension(self._config.extension_dir + "." + name)
-        except Exception as e:
-            print(e)
-            await ctx.send(str(e))
-
-    @command()
+    # region Extension Management
+    @group(name="Extensions", invoke_without_command=True)
     async def list_extensions(self, ctx: Context, name: str = None):
         embed: Embed = Embed()
 
@@ -88,17 +51,89 @@ class ExtensionManager(Cog):
                 await ctx.send(f"{name} is not a valid extension name")
                 return
 
-            embed.add_field(name=name, value=":green_circle:" if file_path in self.bot.extensions.keys() else ":red_circle:")
+            embed.add_field(name=name,
+                            value=":green_circle:" if file_path in self._bot.extensions.keys() else ":red_circle:")
         else:
-            loaded_extensions = self.bot.extensions.keys()
+            embed.title = "Loaded Extensions"
+            embed.description = "Extensions found and state."
+            loaded_extensions = self._bot.extensions.keys()
             for f in os.listdir(self._config.extension_dir):
                 path = Path(self._config.extension_dir, f)
                 if path.is_file():
                     file_path: str = self._config.extension_dir + "." + f[:f.rindex(".")]
-                    embed.add_field(name=f[:f.rindex(".")], value=":green_circle:" if file_path in loaded_extensions else ":red_circle:")
+                    embed.add_field(name=f[:f.rindex(".")],
+                                    value=":green_circle:" if file_path in loaded_extensions else ":red_circle:")
 
         await ctx.reply(embed=embed, mention_author=False)
 
+    @list_extensions.command()
+    async def load_extension(self, ctx: Context, name: str):
+        try:
+            self._bot.load_extension(self._config.extension_dir + "." + name)
+            await ctx.reply("Extension Loaded.", mention_author=False)
+        except ExtensionNotFound as e:
+            await ctx.reply(f"There is no extension with the name {name}.", mention_author=False)
+        except ExtensionNotLoaded as e:
+            await ctx.reply(f"The extension {name} could not be loaded. There may be errors within.",
+                            mention_author=False)
+        except Exception as e:
+            print(e)
+            await ctx.reply(f"Critical error unloading extension {name} please contact bot admin.",
+                            mention_author=False)
+
+    @list_extensions.command()
+    async def unload_extension(self, ctx: Context, name: str):
+        try:
+            self._bot.unload_extension(self._config.extension_dir + "." + name)
+            await ctx.reply("Extension Unloaded.", mention_author=False)
+        except ExtensionNotFound as e:
+            await ctx.reply(f"There is no extension with the name {name} loaded.", mention_author=False)
+        except ExtensionNotLoaded as e:
+            await ctx.reply(f"The extension {name} could not be unloaded. There may be errors within.",
+                            mention_author=False)
+        except Exception as e:
+            print(e)
+            await ctx.reply(f"Critical error unloading extension {name} please contact bot admin.",
+                            mention_author=False)
+
+    @list_extensions.command()
+    async def reload_extension(self, ctx: Context, name: str):
+        try:
+            self._bot.reload_extension(self._config.extension_dir + "." + name)
+            await ctx.reply(f"Extension {name} reloaded.", mention_author=False)
+        except ExtensionNotFound as e:
+            await ctx.reply(f"There is no extension with the name {name}.", mention_author=False)
+        except ExtensionNotLoaded as e:
+            await ctx.reply(f"The extension {name} could not be loaded. There may be errors within.",
+                            mention_author=False)
+        except Exception as e:
+            print(e)
+            await ctx.reply(f"Critical error unloading extension {name} please contact bot admin.",
+                            mention_author=False)
+
+    # endregion
+
+    # region ExtensionConfigs
+    _configs: dict[str, dict] = {}
+
+    @classmethod
+    def load_configs(cls):
+        flag: bool
+        configs: dict[str, dict]
+        flag, configs = saveLoad.load_from_json("extensionConfigs.json")
+
+        if flag:
+            cls._configs = configs
+
+    @classmethod
+    def merge_configs(cls, key: str, obj: interfaces.ExtensionConfig):
+        if key in cls._configs:
+            for k, v in cls._configs[key].items():
+                obj.__dict__[k] = v
+
+    # endregion
+
 
 def setup(bot: Bot):
+    ExtensionManager.load_configs()
     bot.add_cog(ExtensionManager(bot))
