@@ -1,6 +1,16 @@
 # LastWhisper-Discord-Bot
-
 This is the code for the discord bot of The Last Whisper Free Company in the game Final Fantasy XIV.
+
+# Table of contents:
+- [Features of the Discord bot](#features-of-the-discord-bot)
+- [Prerequisites](#prerequisites)
+  - [Docker](#docker)
+  - [Manual](#manual)
+- [Installation](#installation)
+  - [Step 1](#step-1)
+  - [Step 2](#step-2)
+  - [Step 3](#step-3)
+  - [Step 4](#step-4)
 
 ## Features of the Discord bot:
 * Periodically post a message about the buff for the day.
@@ -20,15 +30,20 @@ Assuming you have the docker setup correctly on your machine this should be the 
 
 ## Installation
 
-Step 1:
+###Step 1:
 Create a bot application in the Discord Development Page.
 
-Step 2:
+###Step 2:
 Get the key for the bot (found under bot section of the developer page) and create a fill called `token` (no extension) in the `secrets` folder.
 
-Step 3: Clone the project to your desired location.
+###Step 3:
+Clone the project to your desired location.
+```shell
+git clone --recurse-submodules https://github.com/ShadowKing345/LastWhisper-Discord-Bot.git
+```
 
-Step 4: The fork in the road.
+###Step 4:
+####The fork in the road.
 
 Assuming you are using docker-compose.
 Run docker compose up in the root directory of the project.
@@ -76,3 +91,5 @@ If you are having issues finding the libraries when attempting to run the bot tr
 python3.9.2 -m pip install discord.py
 ```
 ya if you think version management is a shot in the dark for python, lua is worse sadly.
+
+[Back to top](#lastwhisper-discord-bot)
