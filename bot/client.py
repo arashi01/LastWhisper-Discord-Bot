@@ -1,4 +1,5 @@
 from discord.ext.commands import Bot
+from discord import Intents
 import os
 import logging
 
@@ -15,7 +16,7 @@ else:
 logging.basicConfig(level=logging.INFO)
 
 # client creation
-_client = Bot(command_prefix="|")
+_client = Bot(command_prefix="|", intents=Intents.all())
 
 
 def main():
