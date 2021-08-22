@@ -2,26 +2,77 @@
 
 This is the code for the discord bot of The Last Whisper Free Company in the game Final Fantasy XIV.
 
-Features of the Discord bot:
+## Features of the Discord bot:
+* Periodically post a message about the buff for the day.
+* Config manager that allows for changing of setting from Discord.
+* Config framework allowing for 3RD party Cogs to utilize the Config Manager Cog.
+* Extension Manager Cog that allows for managing of extension files (WIP).
 
-- The ability to set a buff rotation for a user defined number of weeks and how the bot post the buff on a specified
-  channel.
-- The ability to change members roles based on reactions.
-- The ability to post a custom message to a channel on a set time.
-- The ability for the bot to record FFXIV guild or Discord server events and post reminders to events (still
-  experimental).
-- Some management tools such as clear channel of messages.
-- The ability to create cogs and extensions and have the bot load, unload and reload them (Bot admin specific).
+## Prerequisites
 
-Features the Discord bot does not have:
+### Docker
+A docker file has been provided along with a docker composer file.
+Assuming you have the docker setup correctly on your machine this should be the simplest method of setting up.
 
-- Log specific server information except for config information.
-- Music bot (Yes it is there, but I am not going to finish it due to complexity)
-- Web based dashboard (I do plan on creating one in the future but have no idea where to start. Any information would
-  be appreciated.)
-- Console dashboard (Still working on plans.)
+### Manual
+* Python 3.8 or above (3.6 might work, but it is untested).
+* discord.py Python libraries.
 
-Prerequisite:
+## Installation
 
-- Python 3.8 and above (I am using the ":=" operation which requires a modern version).
-- discord.py 1.5 or above (I use Intents in the code.)
+Step 1:
+Create a bot application in the Discord Development Page.
+
+Step 2:
+Get the key for the bot (found under bot section of the developer page) and create a fill called `token` (no extension) in the `secrets` folder.
+
+Step 3: Clone the project to your desired location.
+
+Step 4: The fork in the road.
+
+Assuming you are using docker-compose.
+Run docker compose up in the root directory of the project.
+```shell
+docker-compose up
+```
+
+However, if you are not going to use docker then there are a few more steps to take.
+Firstly make sure you are in the bot dir.
+```shell
+cd ./bot
+```
+This is because if you attempt to run the bot from the project root directory it will result in the working directory being set to that folder which the bot was not designed around. So to avoid many errors simply cd to the correct directory.
+
+Now then get your version of python installed.
+```shell
+python --version
+```
+For Window's it may be py (I find references to both, but I primarily use linux so.... sorry).
+
+Install the libraries needed for to run the bot.
+```shell
+python3 -m pip install -U discord.py
+# provided by discord.py docs
+```
+For Windows:
+```shell
+py -3 -m pip install -U discord.py
+# provided by discord.py docs
+```
+Global installations will require administration privileges.
+
+Finally, simply run
+```shell
+python[version number] client.py
+#eg:
+python3.9.2 client.py
+#or:
+python3 client.py
+```
+The reason for this is that sometimes you may have multiple versions of python that are installed. While running python by itself may result in the latest version, when you run it without any version it can and sometimes will just use the lowest version you have installed. Since some versions have syntax changes such as 3.8 introducing the `:=` operator it can break compatability and prevent the bot from running to begin with. So force the correct python version to be used would be the safest option.
+
+If you are having issues finding the libraries when attempting to run the bot try to install discord.py with the same trick.
+```shell
+python3.9.2 -m pip install discord.py
+```
+ya if you think version management is a shot in the dark for python, lua is worse sadly.
