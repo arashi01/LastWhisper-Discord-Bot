@@ -1,11 +1,11 @@
 from discord import Embed, Colour
-from objects.buffManager import Day, Week
+from objects.buffManager import Buff, Week
 from datetime import datetime
 
 _days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
 
-def buff_embed(day: Day, date: datetime) -> Embed:
+def buff_embed(day: Buff, date: datetime) -> Embed:
     embed: Embed = Embed(title="Today's Buff Shall Be:", description=day.buff, colour=Colour.random())
 
     embed.set_thumbnail(url=day.image_url)
@@ -14,7 +14,7 @@ def buff_embed(day: Day, date: datetime) -> Embed:
     return embed
 
 
-def week_buff_embed(week: Week, days: list[Day], date: datetime) -> Embed:
+def week_buff_embed(week: Week, days: list[Buff], date: datetime) -> Embed:
     embed: Embed = Embed(title="The buffs for the week are:", description=week.message, colour=Colour.random())
     days: dict = dict([(x.uuid, x) for x in days])
 
