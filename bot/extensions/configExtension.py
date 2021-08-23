@@ -3,6 +3,7 @@ from typing import Union
 from discord import Guild, Member, Role, Emoji, TextChannel, VoiceChannel
 from discord.ext.commands import Bot, Cog, command, Context
 
+from extensions.permissionsExtension import PermissionsManager
 from utils import saveLoad
 
 
@@ -78,6 +79,17 @@ class ConfigMethodHelpers:
             if not type(arg) is value_type:
                 raise TypeError(f"value {arg} does not match type {type(value_type)}")
 
+        if "range" in settings and type(arg) == int:
+            _range: dict = settings["range"]
+            if (min_inclusive := _range.get("min_inclusive", None)) and not arg >= min_inclusive:
+                raise TypeError(f"value {arg} is outsize of min range {min_inclusive}")
+            if (max_inclusive := _range.get("max_inclusive", None)) and not arg <= max_inclusive:
+                raise TypeError(f"value {arg} is outsize of max range {max_inclusive}")
+            if (min_exclusive := _range.get("min_exclusive", None)) and not arg > min_exclusive:
+                raise TypeError(f"value {arg} is not in min range {min_exclusive}")
+            if (max_exclusive := _range.get("max_exclusive", None)) and not arg < max_exclusive:
+                raise TypeError(f"value {arg} is not in max range {max_exclusive}")
+
         if isinstance(arg, (Member, Role, TextChannel, VoiceChannel)):
             return str(arg.id)
 
@@ -96,10 +108,19 @@ class ConfigManager(Cog):
     Name = "ConfigManager"
 
     def __init__(self, bot: Bot):
+        self._permission_manager: PermissionsManager
         self._bot: bot = bot
+        self.permissions = [self.config, self.reload_configs, self.save_configs]
 
         flag, obj = saveLoad.load_from_json("configs.json")
         self._configs: dict[str, dict[str, dict]] = obj if flag else {}
+
+        if self._bot.is_ready():
+            self._permission_manager = self._bot.get_cog(PermissionsManager.Name)
+
+    @Cog.listener()
+    async def on_ready(self):
+        self._permission_manager = self._bot.get_cog(PermissionsManager.Name)
 
     def cog_unload(self):
         saveLoad.save_to_json("configs.json", self._configs)
@@ -223,6 +244,23 @@ class ConfigManager(Cog):
         if cog_name not in self._configs[server_id]:
             self._configs[server_id][cog_name] = obj
 
+    def get_cog_configs(self, cog_name: str) -> dict[str, dict]:
+        """
+        Returns all the configs for a cog.
+
+        :param cog_name: Name of Cog to get configs for.
+        :type cog_name: str
+        :return: dictionary of configs with server / guild ID.
+        :rtype: dict[str, dict]
+        """
+        result: dict = {}
+
+        for k, v in self._configs.items():
+            if cog_name in v:
+                result[k] = v[cog_name]
+
+        return result
+
     def has_config(self, cog_name: str, server_id: str) -> bool:
         """
         Checks if config exists for Cog in server.
@@ -243,13 +281,20 @@ class ConfigManager(Cog):
         return True
 
     # Listeners
-    @Cog.listener()
-    async def on_guild_join(self, guild: Guild):
-        self._configs[str(guild.id)] = {}
 
     @Cog.listener()
     async def on_guild_leave(self, guild: Guild):
         self._configs.pop(str(guild.id))
+
+    # region Checks
+
+    def cog_check(self, ctx: Context) -> bool:
+        if not self._permission_manager:
+            return True
+
+        return self._permission_manager.has_permission(self.qualified_name, ctx.command, ctx.author)
+
+    # endregion
 
 
 def setup(bot: Bot):
