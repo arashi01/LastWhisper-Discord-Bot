@@ -6,8 +6,7 @@ from pathlib import Path
 class ComplexEncoder(json.JSONEncoder):
     def default(self, o):
         if hasattr(o, "to_json"):
-            print(o.to_json())
-            return o.to_json()
+            return o.to_json
         else:
             return json.JSONEncoder.default(self, o)
 
