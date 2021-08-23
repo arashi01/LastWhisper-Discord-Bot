@@ -5,7 +5,7 @@ from utils import saveLoad, interfaces
 import os
 
 
-class Config(interfaces.ExtensionConfig):
+class Config(interfaces.JsonSerializable):
     def __init__(self, extension_dir: str = "extensions", extension_states: dict[str, bool] = {}):
         self.extension_dir: str = extension_dir
         self.extension_states: dict[str, bool] = extension_states
@@ -126,10 +126,14 @@ class ExtensionManager(Cog):
             cls._configs = configs
 
     @classmethod
-    def merge_configs(cls, key: str, obj: interfaces.ExtensionConfig):
+    def merge_configs(cls, key: str, obj: interfaces.JsonSerializable):
         if key in cls._configs:
             for k, v in cls._configs[key].items():
                 obj.__dict__[k] = v
+
+    @classmethod
+    def set_config(cls, key: str, obj: interfaces.JsonSerializable):
+        cls._configs[key] = obj.to_json
 
     # endregion
 
