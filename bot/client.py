@@ -20,7 +20,7 @@ _client = Bot(command_prefix="|", intents=Intents.all())
 
 
 def main():
-    _client.load_extension("extensions.extensionManager")
+    _client.load_extension("extensions.extensionExtension")
     logging.log(logging.INFO, "Bot starting up")
     _client.run(TOKEN)
 
