@@ -7,10 +7,14 @@ This is the code for the discord bot of The Last Whisper Free Company in the gam
   - [Docker](#docker)
   - [Manual](#manual)
 - [Installation](#installation)
-  - [Step 1](#step-1)
-  - [Step 2](#step-2)
-  - [Step 3](#step-3)
-  - [Step 4](#step-4)
+  - [Step 1](#step-1-bot-application-setup)
+  - [Step 2](#step-2-clone-the-repo)
+  - [Step 3](#step-3-token-setup)
+  - [Step 4](#step-4-system-setup-and-running)
+    - [Docker Compose](#docker-compose) 
+    - [Manual Launch](#manual-launch)
+      - [Step 4.1](#step-41-python-environment)
+      - [Step 4.2](#step-42-running-the-bot)
 
 ## Features of the Discord bot:
 * Periodically post a message about the buff for the day.
@@ -24,72 +28,93 @@ This is the code for the discord bot of The Last Whisper Free Company in the gam
 A docker file has been provided along with a docker composer file.
 Assuming you have the docker setup correctly on your machine this should be the simplest method of setting up.
 
+Prerequisites:
+* Docker Compose (docker-compose), Version 3.5
+
 ### Manual
-* Python 3.8 or above (3.6 might work, but it is untested).
+* Python 3.8 or above.
 * discord.py Python libraries.
 
 ## Installation
+### Step 1: Bot Application Setup.
+Create the bot application from the [Discord Developer Page](https://discord.com/developers/applications) and have it be setup as a bot application.
+If you have don't it correctly you be able to copy something specifically referred to as a Token.
+If not the [discord.py](https://discordpy.readthedocs.io/en/stable/discord.html) provides a better set of instructions for setting up the bot and inviting it to the server.
 
-###Step 1:
-Create a bot application in the Discord Development Page.
-
-###Step 2:
-Get the key for the bot (found under bot section of the developer page) and create a fill called `token` (no extension) in the `secrets` folder.
-
-###Step 3:
-Clone the project to your desired location.
+### Step 2: Clone The Repo.
+Clone the repo into the desired location.
 ```shell
-git clone --recurse-submodules https://github.com/ShadowKing345/LastWhisper-Discord-Bot.git
+git clone https://github.com/ShadowKing345/LastWhisper-Discord-Bot.git
 ```
+Downloading the Zip file would be an equivalent option.
 
-###Step 4:
-####The fork in the road.
+### Step 3: Token Setup.
+`Small note about security:`
+The token is one of the requirements needed to communicate with Discord. Think of it as a password or the remote control of the bot. Once someone has it they can do whatever with the bot. Therefore, the system you have it in should be well protected to what you find reasonable. Sadly while encrypting it might be a solution the default bot does support decryption.
 
-Assuming you are using docker-compose.
-Run docker compose up in the root directory of the project.
+Create a file called `token` inside the `secrets` directory. Copy the token from the website and simply paste it inside the `token` file.
+
+### Step 4: System Setup And Running.
+#### Docker Compose
+If you are planning on running a docker image and have both docker and docker-compose correctly set up then all you have to do is simply run `docker-compose up` at the root of the cloned project.
 ```shell
 docker-compose up
 ```
+The docker image and container will simply set up and the bot will begin to run. To which case you are most likely done unless you have errors.
 
-However, if you are not going to use docker then there are a few more steps to take.
-Firstly make sure you are in the bot dir.
-```shell
-cd ./bot
-```
-This is because if you attempt to run the bot from the project root directory it will result in the working directory being set to that folder which the bot was not designed around. So to avoid many errors simply cd to the correct directory.
+#### Manual Launch.
+Manual setup is a different beast to deal with.
+To begin with lets set up the python environment and prerequisites.
 
-Now then get your version of python installed.
+##### Step 4.1: Python environment.
+`Small warning for Windows users.` All the python commands may be referred to as `py` instead of `python`. I can see reference of both being used however as this guide was created with a linux OS in mind most of the following commands are expected to run in a Linux command line environment.
+
+First ensure you have a version of python that is or above 3.8.
+Simply doing:
 ```shell
 python --version
 ```
-For Window's it may be py (I find references to both, but I primarily use linux so.... sorry).
+Will return the python version.
 
-Install the libraries needed for to run the bot.
+Next download the libraries needed to run the bot.
+These can be found [here](https://github.com/ShadowKing345/LastWhisper-Discord-Bot/blob/docker/requirements.txt) and manually installed (Granted the all at one go file does sound pretty nice.)
 ```shell
-python3 -m pip install -U discord.py
-# provided by discord.py docs
+pip install -r requirements.txt
+# Or use the full python module call (cause I always have issues seeing pip)
+python -m pip install -r requirements.txt
 ```
-For Windows:
-```shell
-py -3 -m pip install -U discord.py
-# provided by discord.py docs
-```
-Global installations will require administration privileges.
 
-Finally, simply run
-```shell
-python[version number] client.py
-#eg:
-python3.9.2 client.py
-#or:
-python3 client.py
-```
-The reason for this is that sometimes you may have multiple versions of python that are installed. While running python by itself may result in the latest version, when you run it without any version it can and sometimes will just use the lowest version you have installed. Since some versions have syntax changes such as 3.8 introducing the `:=` operator it can break compatability and prevent the bot from running to begin with. So force the correct python version to be used would be the safest option.
+#### Step 4.2: Running the bot.
+To begin with, you need to ensure you are inside the correct directory when you execute the bot. This is because manually running python scripts will set the current directory as the working directory instead of the one were the file actually exists.
 
-If you are having issues finding the libraries when attempting to run the bot try to install discord.py with the same trick.
+So from the git project root simply change directory into the bot directory.
 ```shell
-python3.9.2 -m pip install discord.py
+cd ./bot
 ```
-ya if you think version management is a shot in the dark for python, lua is worse sadly.
+From here simply just tell python to begin executing the script.
+```shell
+python client.py
+```
+Assuming everything is fine it should simply run without errors.
+
+[Back to top](#lastwhisper-discord-bot)
+## Troubleshooting.
+- `Bot complaining about token`: This means that either the token is invalid or no longer in use. Ensure that the correct current version of the token is pasted in the `token` file in `secrets`. Without any spaces as that will be considered as altering the token.
+- `Token file not found`: This means that the `token` file could simply not be found. So just create the `token` file with the bot token in the `secrets` directory.
+- `Module not found: x, y, z`: It means that one of the modules that the bot uses was not installed. The default libraries and modules used can be found in the requirements.txt file however if you have 3rd party extensions added you may want to check them to see if their modules has not been installed. Just install them manually or modify the requirements.txt to have pip do it for you. (You will have to call pip manually if you do not use docker.)
+- `Python syntax error`: This is most likely because you have multiple different versions of python installed, and it is selecting the lowest numbered version which may not have the correct syntax used. To ensure you are using the correct version simply get the version number and add it to the end of the python call. E.g. python3.9 will force run with python version 3.9. This may also be needed to be done for pip install as well.
+- `extension_config.json not found`: This is an ignorable error. The extension module allows for different Cogs to load Cog specific configs and overwrites to those settings are inside this file. If the file is not there and the extension is written with this in mind the bot will run without further issues. If an issue does occur, and you have confirmed that it is cause of this file not loaded contact the extension developer and report the issue.
+- `An exception has occurd and I dont know what to do`: Okay calm down. Simply get the full exception traceback and file an issue. Remember to include what you were doing at the time as in some cases context is needed. Otherwise, there is nothing to be worried about. Unless a major issue occurs the bot should remain functional.
+
+[Back to top](#lastwhisper-discord-bot)
+## I want to develop my own Extension to use, What do I do?.
+Set up the bot as per the steps provided with the notable exception of performing a manual installation. Afterwards, set up a standard python development environment in the directory, making sure to make the folder bot as the source directory, and begin creating the extension as per the normal discord py api (I tried to not create my own framework fully for easy of use sakes).
+
+The extension file should be placed in extensions unless you changed it in the extension_configs.json file.
+
+You can look through the source code of the preexisting extensions to get a better understanding of how they work as well as a guide to using any cross extension feature they may provide.
+
+Also read through the documentation for the [discord.py](https://discordpy.readthedocs.io/en/stable/index.html) libraries.
+At this point you should be all set and more or less all on your own.
 
 [Back to top](#lastwhisper-discord-bot)
