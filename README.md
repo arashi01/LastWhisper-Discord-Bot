@@ -1,7 +1,7 @@
 # LastWhisper-Discord-Bot
 This is the code for the discord bot of The Last Whisper Free Company in the game Final Fantasy XIV.
 
-# Table of contents:
+## Table of contents:
 - [Features of the Discord bot](#features-of-the-discord-bot)
 - [Prerequisites](#prerequisites)
   - [Docker](#docker)
