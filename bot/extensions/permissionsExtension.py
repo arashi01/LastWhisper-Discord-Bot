@@ -2,16 +2,36 @@ from typing import Union
 
 from discord.ext.commands import Bot, Cog, Command, Context, command
 from discord import Member, Guild, Role
-from extensions.configExtension import ConfigManager, ConfigMethodHelpers
+from utils.helpers.configManager import ConfigMethodHelpers
 from objects.permissionsManager import ServerConfig
 
 
-# todo: document this.
 class PermissionsManager(Cog):
+    """
+    This cog managed permissions of commands.
+    It is a purely opt in action where the cog that wishes to use it will setup a variable called permissions which
+    will contain a list of commands that permissions will be set for.
+
+    The cog will scan them and get the necessary name for the config file.
+    Afterwords cogs can call has_permission in their check methods which will return a True if the user has permission or False if they do not.
+    If the user is the server owner or no roles / users were set then it will default return True.
+
+    WIP: Permission settings were the command will not work based or certain conditions.
+    - User is not owner of server.
+    - User is not owner of bot.
+    - If empty return false.
+    """
     Name: str = "PermissionsManager"
 
     def __init__(self, bot: Bot):
+        """
+        Cog that manages the permissions for commands.
+
+        :param bot: The client.
+        :type bot: Bot
+        """
         self._bot = bot
+        # Since it uses the config manager to add and remove permissions the config settings are added.
         self.config_settings = {
             "add": {
                 "permissions": PermissionsManager.add_permission,
@@ -25,15 +45,17 @@ class PermissionsManager(Cog):
         if not self._bot.is_ready():
             return
 
-        self.setup_configs()
+        self._setup_configs()
 
     @Cog.listener()
     async def on_ready(self):
-        self.setup_configs()
+        self._setup_configs()
 
-    def setup_configs(self):
+    def _setup_configs(self):
+        """
+        Scans the cogs for permissions and adds them to the settings.
+        """
         configs: dict = {}
-        command: Command
 
         for k, v in self._bot.cogs.items():
             if k == self.qualified_name:
@@ -44,16 +66,29 @@ class PermissionsManager(Cog):
 
             configs[k] = [c.qualified_name for c in v.permissions]
 
+        # Due to the way the config manager is set this is how it is done.
         self.config_settings["settings"]["permission"] = configs
 
     def has_permission(self, cog_name: str, _command: Command, member: Member) -> bool:
-        # if member.guild.owner_id == member.id:
-        #     return True
+        """
+        Checks if the user has permission to use this command.
+
+        :param cog_name: Name of the Cog to tell apart two commands from different Cogs.
+        :type cog_name: str
+        :param _command: The command being executed.
+        :type _command: Command
+        :param member: The member who invoked this command.
+        :type member: Member
+        :return: If the person has permission to use the command.
+        :rtype: bool
+        """
+        if member.guild.owner_id == member.id:
+            return True
 
         if not self._bot.is_ready():
             return False
 
-        config: ServerConfig = ServerConfig.from_json(self._bot.get_cog(ConfigManager.Name).get_config(self.qualified_name, str(member.guild.id)))
+        config: ServerConfig = ServerConfig.from_json(self._bot.get_cog("ConfigManager").get_config(self.qualified_name, str(member.guild.id)))
 
         if not hasattr(config, "permissions"):
             return True
@@ -80,6 +115,14 @@ class PermissionsManager(Cog):
 
     @command(name="Get_Command_Name")
     async def get_name(self, ctx: Context, command_name: str):
+        """
+        Gets the true name of the command or aliases. In order to configure the permissions.
+
+        :param ctx: Context.
+        :type ctx: Context
+        :param command_name: Name of command.
+        :type command_name: str
+        """
         _command: Command = self._bot.get_command(command_name)
         if not _command:
             await ctx.reply(f"No command with name or aliases {command_name} could be found", mention_author=False)

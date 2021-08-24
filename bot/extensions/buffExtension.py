@@ -2,9 +2,10 @@ import datetime
 from discord.ext.commands import Bot, Cog, command, Context
 from discord.ext import tasks
 from discord import TextChannel, Guild
-from extensions.configExtension import ConfigManager, ConfigMethodHelpers
+from extensions.configExtension import ConfigManager
 from extensions.permissionsExtension import PermissionsManager
 from utils.helpers.buffManager import buff_embed, week_buff_embed
+from utils.helpers.configManager import ConfigMethodHelpers
 from objects.buffManager import ServerConfig, Week, Buff
 from datetime import datetime, timedelta
 import json
@@ -243,7 +244,6 @@ class BuffManager(Cog):
 
     @tasks.loop(minutes=1)
     async def loop(self):
-        await self._bot.wait_until_ready()
         now: datetime = datetime.now()
 
         for k, v in self._configs.items():
@@ -266,6 +266,11 @@ class BuffManager(Cog):
                     if config.message_weekday:
                         if now.isoweekday() == config.message_weekday:
                             await channel.send(embed=week_buff_embed(self._get_week(now, config), config.buffs, now))
+
+    @loop.before_loop
+    async def before_loop(self):
+        # If i understood the logic here this will wait first before the loop is began that way the first minute is not lost.
+        await self._bot.wait_until_ready()
 
     # endregion
 
