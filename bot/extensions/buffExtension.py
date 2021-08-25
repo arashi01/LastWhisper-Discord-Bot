@@ -180,7 +180,7 @@ class BuffManager(Cog):
 
     @staticmethod
     async def list_obj(ctx: Context, key: str, config, args):
-        config: ServerConfig = ServerConfig.from_dict(config)
+        config: ServerConfig = ServerConfig.from_json(config)
         value = args[0] if len(args) > 0 else None
 
         if type(value) is int:
@@ -202,7 +202,7 @@ class BuffManager(Cog):
     # region helper methods
     def _get_configs(self, ctx: Context) -> ServerConfig:
         config_cog: ConfigManager = self._bot.get_cog(ConfigManager.Name)
-        return ServerConfig.from_dict(config_cog.get_config(self.qualified_name, str(ctx.guild.id)))
+        return ServerConfig.from_json(config_cog.get_config(self.qualified_name, str(ctx.guild.id)))
 
     @staticmethod
     def _get_day(date: datetime, config: ServerConfig) -> Buff:
@@ -247,7 +247,7 @@ class BuffManager(Cog):
         now: datetime = datetime.now()
 
         for k, v in self._configs.items():
-            config: ServerConfig = ServerConfig.from_dict(v)
+            config: ServerConfig = ServerConfig.from_json(v)
             # check if message channel was set.
             if not config.message_channel_id:
                 continue

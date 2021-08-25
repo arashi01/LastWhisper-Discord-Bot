@@ -36,7 +36,7 @@ class ServerConfig:
         self.weeks = weeks if weeks else []
 
     @classmethod
-    def from_dict(cls, data: dict):
+    def from_json(cls, data: dict):
         obj: ServerConfig = cls(**data)
 
         buffs: list[Buff] = []
