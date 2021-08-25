@@ -19,9 +19,14 @@ logging.basicConfig(level=logging.INFO)
 _client = Bot(command_prefix="|", intents=Intents.all())
 
 
+@_client.event
+async def on_ready():
+    logging.info("Im ready.")
+
+
 def main():
     _client.load_extension("extensions.extensionExtension")
-    logging.log(logging.INFO, "Bot starting up")
+    logging.info("Bot starting up")
     _client.run(TOKEN)
 
 
