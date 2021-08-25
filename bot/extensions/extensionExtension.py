@@ -214,11 +214,18 @@ class ExtensionManager(Cog):
 
     # endregion
 
+    def cog_check(self, ctx) -> bool:
+        """
+        Check to ensure that only the bot owner can mess with this cog not any of the users.
+
+        :param ctx: Context.
+        :type ctx: Context
+        :return: if is owner.
+        :rtype: bool
+        """
+        return ctx.author.id in self._bot.owner_ids
+
 
 def setup(bot: Bot):
     ExtensionManager.load_configs()
     bot.add_cog(ExtensionManager(bot))
-
-
-def teardown(_):
-    ...
