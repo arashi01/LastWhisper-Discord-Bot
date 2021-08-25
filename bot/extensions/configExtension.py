@@ -90,7 +90,7 @@ class ConfigManager(Cog):
 
             # in case settings are missing completely a new one default one is created.
             obj = settings["default_config"]()
-            config: dict = obj.to_json() if hasattr(obj, "to_json") else obj.__dict__
+            config: dict = obj.to_json if hasattr(obj, "to_json") else obj.__dict__
             self.set_config(cog_name, str(ctx.guild.id), config)
 
         existing_value = config[key] if key in config else None
