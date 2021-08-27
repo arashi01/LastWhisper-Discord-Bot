@@ -1,7 +1,7 @@
-from typing import Union
+from typing import Union, Any
 
-from discord import Guild, Member, Role, Emoji, TextChannel, VoiceChannel
-from discord.ext.commands import Bot, Cog, command, Context
+from discord import Guild, Member, Role, Emoji, TextChannel, VoiceChannel, Message
+from discord.ext.commands import Bot, Cog, command, Context, when_mentioned
 
 from extensions.permissionsExtension import PermissionsManager
 from utils import saveLoad
@@ -133,6 +133,7 @@ class ConfigManager(Cog):
     def get_config(self, cog_name: str, server_id: str) -> dict:
         """
         Returns the config dictionary for a Cog in a server.
+        Tries to return the default config if none was found. Else just returns an empty dict.
 
         :param cog_name: Name of Cog used.
         :type cog_name: str
@@ -141,7 +142,16 @@ class ConfigManager(Cog):
         :return: config dictionary.
         :rtype: dict
         """
-        return self._configs[server_id][cog_name] if self.has_config(cog_name, server_id) else {}
+        if self.has_config(cog_name, server_id):
+            return self._configs[server_id][cog_name]
+
+        cog: Cog = self._bot.get_cog(cog_name)
+        if cog and hasattr(cog, "config_settings"):
+            if "settings" in cog.config_settings and "default_config" in cog.config_settings["settings"]:
+                obj = cog.config_settings["settings"]["default_config"]()
+                return obj.to_json if hasattr(obj, "to_json") else obj.__dict__
+
+        return {}
 
     def set_config(self, cog_name: str, server_id: str, obj: dict) -> None:
         """
