@@ -92,5 +92,9 @@ class ConfigMethodHelpers:
         if isinstance(arg, Emoji):
             return f"<:{arg.name}:{arg.id}>"
 
+        if "convert_to" in settings:
+            # will attempt to convert it to a new form by passing the argument into the forms caller.
+            return settings["convert_to"](arg)
+
         return arg
 
