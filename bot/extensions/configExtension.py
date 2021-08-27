@@ -18,10 +18,10 @@ class ConfigManager(Cog):
     def __init__(self, bot: Bot):
         self._permission_manager: PermissionsManager
         self._bot: bot = bot
-        self.permissions = [self.config, self.reload_configs, self.save_configs]
+        self.permissions = [self.config, self.reload_configs, self.save_configs, self.set_prefixes]
 
         flag, obj = saveLoad.load_from_json("configs.json")
-        self._configs: dict[str, dict[str, dict]] = obj if flag else {}
+        self._configs: dict[str, Any] = obj if flag else {}
 
         if self._bot.is_ready():
             self._permission_manager = self._bot.get_cog(PermissionsManager.Name)
@@ -34,6 +34,15 @@ class ConfigManager(Cog):
         saveLoad.save_to_json("configs.json", self._configs)
 
     # commands
+    @command("SetPrefixes")
+    async def set_prefixes(self, ctx: Context, *args):
+        if str(ctx.guild.id) not in self._configs:
+            self._configs[str(ctx.guild.id)] = {"prefixes": list(args)}
+        else:
+            self._configs[str(ctx.guild.id)]["prefixes"] = list(args)
+
+        await ctx.reply(f"Prefixes set to " + " ".join(["'" + x + "'" for x in list(args)]) + ".", mention_author=False)
+
     @command(name="Config")
     async def config(self, ctx: Context, cog_name: str = None, action: str = None, key: str = None,
                      *args: Union[Member, Role, TextChannel, VoiceChannel, Emoji, int, bool, dict, str]) -> None:
@@ -147,7 +156,7 @@ class ConfigManager(Cog):
         :type obj: dict
         """
         if server_id not in self._configs:
-            self._configs[server_id] = {}
+            self._configs[server_id] = {"prefix": "|"}
 
         if cog_name not in self._configs[server_id]:
             self._configs[server_id][cog_name] = obj
@@ -201,6 +210,22 @@ class ConfigManager(Cog):
             return True
 
         return self._permission_manager.has_permission(self.qualified_name, ctx.command, ctx.author)
+
+    # endregion
+
+    # region Prefixes
+
+    @staticmethod
+    def get_prefix(*prefixes):
+        def inner(bot: Bot, message: Message):
+            config_manager: ConfigManager = bot.get_cog(ConfigManager.Name)
+            if not config_manager:
+                return list(prefixes)
+
+            _prefixes: list = list(config_manager.get_config("prefixes", str(message.guild.id)))
+            return when_mentioned(bot, message) + _prefixes
+
+        return inner
 
     # endregion
 
