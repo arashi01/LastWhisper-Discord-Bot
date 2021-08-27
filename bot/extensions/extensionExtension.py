@@ -1,4 +1,4 @@
-from discord.ext.commands import Bot, Cog, command, group, Context, ExtensionNotFound, ExtensionNotLoaded
+from discord.ext.commands import Bot, Cog, command, group, Context, ExtensionNotFound, ExtensionNotLoaded, is_owner
 from discord import Embed
 from pathlib import Path
 from utils import saveLoad, interfaces
@@ -60,6 +60,7 @@ class ExtensionManager(Cog):
                     print(e)
 
     # region Extension Management
+    @is_owner()
     @group(name="Extensions", invoke_without_command=True)
     async def list_extensions(self, ctx: Context, extension_name: str = None):
         """
@@ -213,17 +214,6 @@ class ExtensionManager(Cog):
         cls._configs[key] = obj.to_json
 
     # endregion
-
-    def cog_check(self, ctx) -> bool:
-        """
-        Check to ensure that only the bot owner can mess with this cog not any of the users.
-
-        :param ctx: Context.
-        :type ctx: Context
-        :return: if is owner.
-        :rtype: bool
-        """
-        return ctx.author.id in self._bot.owner_ids
 
 
 def setup(bot: Bot):
