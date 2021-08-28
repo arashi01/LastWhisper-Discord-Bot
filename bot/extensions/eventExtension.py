@@ -100,7 +100,8 @@ class EventManager(Cog):
                     continue
 
                 for reminder in config.reminders:
-                    reminder_time_delta: timedelta = timedelta(**next(({"hours": x.hour, "minutes": x.minute} for x in [datetime.strptime(reminder.time_delta, "%H:%M")])))
+                    reminder_time: datetime = datetime.strptime(reminder.time_delta, "%H:%M")
+                    reminder_time_delta: timedelta = timedelta(hours=reminder_time.hour, minutes=reminder_time.minute)
                     for event in config.events:
                         event_time: datetime = datetime.strptime(event.datetime, self.save_time_format)
 
@@ -108,7 +109,13 @@ class EventManager(Cog):
                             continue
 
                         if reminder_time_delta <= (event_time - now) < (reminder_time_delta + timedelta(minutes=1)):
-                            await posting_channel.send(reminder.message)
+                            message_values: dict = {
+                                "event_name": event.name,
+                                "hours_diff": str(reminder_time.hour),
+                                "minutes_diff": str(reminder_time.minute)
+                            }
+
+                            await posting_channel.send(reminder.message.format_map(message_values))
 
                 config.events = [event for event in config.events if (datetime.strptime(event.datetime, self.save_time_format) - now).total_seconds() > 0]
             except Exception as e:
